@@ -6,7 +6,7 @@ import sys
 import os
 # add parent directory to path so I can import my scripts from a subfolder
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from mathutils import *
+import mathutils as mu
 import tree_sim
 
 class Grow(tree_sim.Simulation):
@@ -32,7 +32,7 @@ class Grow(tree_sim.Simulation):
         self.current_size = round(self.current_size, 1)
         print(self.current_size)
         for i in range(self.num_points):
-            active_color = [channel * (1 - normalize(clamp(abs(math.dist(self.points[i], self.random_point)), 0, self.current_size), 0, self.current_size)) for channel in self.active_color]
+            active_color = [channel * (1 - mu.normalize(mu.clamp(abs(math.dist(self.points[i], self.random_point)), 0, self.current_size), 0, self.current_size)) for channel in self.active_color]
             self.colors[i] = active_color  # Update specific point's color
 
         self.update_colors()

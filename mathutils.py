@@ -1,10 +1,22 @@
 import numpy as np
 import math
 
-def lerp(a, b, t):
-    return (1 - t) * a + t * b
+def lerp(start, end, t):
+    """
+    Linear interpolation between two values.
+    a - start value
+    b - end value
+    t - interpolation factor (0.0 - 1.0)
+    """
+    return (1 - t) * start + t * end
 
 def normalize(value, old_min, old_max):
+    """
+    Normalize a value from a given range to a 0-1 range.
+    value - the value to normalize
+    old_min - the minimum value of the range
+    old_max - the maximum value of the range
+    """
     if old_min == old_max:
         raise ValueError("old_min and old_max cannot be the same.")
     return (value - old_min) / (old_max - old_min)
@@ -32,6 +44,10 @@ def wrap(value, min_value, max_value):
     return min_value + (value - min_value) % (max_value - min_value)
 
 def rotate_direction(direction, degrees):
+    """
+    Rotates a 2D vector by a given angle in degrees.
+    I don't know if it actually works lmao
+    """
     # Convert degrees to radians
     radians = math.radians(degrees)
     

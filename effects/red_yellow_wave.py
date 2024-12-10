@@ -5,7 +5,7 @@ import sys
 import os
 # add parent directory to path so I can import my scripts from a subfolder
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from mathutils import *
+import mathutils as mu
 import tree_sim
 
 class RedYellowWave(tree_sim.Simulation):
@@ -24,7 +24,7 @@ class RedYellowWave(tree_sim.Simulation):
             # Example: Assign random color to each point
             new_color = [255, 0, 0]
             # new_color[1] -> Z position same as current_z = 0; Z distance from current_z same as height = 125
-            new_color[1] = lerp(0, 255, normalize(clamp(abs(self.points[i][2] - self.current_z), 0, self.height), 0, self.height))
+            new_color[1] = mu.lerp(0, 255, mu.normalize(mu.clamp(abs(self.points[i][2] - self.current_z), 0, self.height), 0, self.height))
             self.colors[i] = new_color  # Update specific point's color
 
         self.update_colors()

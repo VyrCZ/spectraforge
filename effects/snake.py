@@ -6,10 +6,13 @@ import sys
 import os
 # add parent directory to path so I can import my scripts from a subfolder
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from mathutils import *
+import mathutils as mu
 import tree_sim
 
 class SnakeLight(tree_sim.Simulation):
+    """
+    This one is ass because it was made by gpt lol
+    """
     def __init__(self, snake_length):
         super().__init__()
         self.snake_length = snake_length
