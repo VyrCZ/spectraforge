@@ -1,6 +1,6 @@
 # Tree Simulator documentation
 
-look at effects/flashy.py for a simple example.
+look at effects/flashy.py for a simple example
 
 ## class Simulation
 
