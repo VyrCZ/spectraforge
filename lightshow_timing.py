@@ -8,7 +8,7 @@ pygame.mixer.music.play()
 
 def on_press(key):
     print(f"{pygame.mixer.music.get_pos() / 1000:.3f}: {key}")
-
+    #1v1v1v111v1v1v1v1v1v1v1v56048pva
 def on_release(key):
     if key == Key.esc:
         # Stop listener
