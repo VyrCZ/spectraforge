@@ -9,7 +9,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import mathutils as mu
 import tree_sim
 
-class RedWave(tree_sim.Simulation):
+class Rainbow(tree_sim.Simulation):
     def __init__(self):
         super().__init__()
         self.current_z = 0
@@ -25,7 +25,7 @@ class RedWave(tree_sim.Simulation):
             self.colors[i] = [int(channel * 255) for channel in normalized_rgb]
         self.update_colors()
 
-lights = RedWave()
+lights = Rainbow()
 while True:
     lights.update()
     time.sleep(0.1)  # Pause for a short time to visualize changes

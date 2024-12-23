@@ -1,4 +1,4 @@
-import numpy as np
+#import numpy as np
 import math
 
 def lerp(start, end, t):
@@ -24,16 +24,16 @@ def normalize(value, old_min, old_max):
 def clamp(value, min_value, max_value):
     return max(min(value, max_value), min_value)
 
-def mix_colors(color1, color2):
-    """
-    Blends two colors using the screen blending mode.
+# def mix_colors(color1, color2):
+#     """
+#     Blends two colors using the screen blending mode.
     
-    Formula: Result = 1 - (1 - A) * (1 - B)
-    """
-    c1 = np.array(color1) / 255.0
-    c2 = np.array(color2) / 255.0
-    blended = 1 - (1 - c1) * (1 - c2)
-    return tuple((blended * 255).astype(int))
+#     Formula: Result = 1 - (1 - A) * (1 - B)
+#     """
+#     c1 = np.array(color1) / 255.0
+#     c2 = np.array(color2) / 255.0
+#     blended = 1 - (1 - c1) * (1 - c2)
+#     return tuple((blended * 255).astype(int))
 
 def wrap(value, min_value, max_value):
     """

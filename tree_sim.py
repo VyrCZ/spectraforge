@@ -2,6 +2,7 @@ import pyvista as pv
 import numpy as np
 import time
 import math
+from scipy.spatial import distance
 
 class Simulation:
     def get_points(self, n, height, diameter):
@@ -27,6 +28,34 @@ class Simulation:
             points.append((float(x), float(y), float(z)))
 
         return points
+        return self.find_shortest_path(points)
+    
+    def path_length(path):
+        return sum(distance.euclidean(path[i], path[i + 1]) for i in range(len(path) - 1))
+
+    # Define the function to find the shortest path
+    def find_shortest_path(self, points):
+        # Find the point with the lowest Z coordinate
+        start_index = min(range(len(points)), key=lambda i: points[i][2])
+        remaining = set(range(len(points)))
+        remaining.remove(start_index)
+        
+        # Start the path with the lowest Z point
+        path_indices = [start_index]
+        
+        # Nearest neighbor greedy approach
+        while remaining:
+            last = path_indices[-1]
+            next_index = min(remaining, key=lambda i: distance.euclidean(points[last], points[i]))
+            path_indices.append(next_index)
+            remaining.remove(next_index)
+        
+        # Create the ordered list of points
+        ordered_points = [points[i] for i in path_indices]
+        ordered_points.append(points[start_index])  # Return to start
+        
+        return ordered_points
+
 
     def __init__(self):
         self.height = 2.4

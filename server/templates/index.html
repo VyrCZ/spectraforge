@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LED Effect Controller</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        form, #parameters {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input[type="text"], input[type="range"], input[type="color"] {
+            margin-bottom: 15px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>LED Effect Controller</h1>
+
+    <form id="effectForm">
+        <label for="effect">Select an Effect:</label>
+        <select id="effect" name="effect" onchange="changeEffect()">
+            {% for effect in effects %}
+            <option value="{{ effect }}">{{ effect }}</option>
+            {% endfor %}
+        </select>
+    </form>
+
+    <h2>Parameters</h2>
+    <div id="parameters"></div>
+
+    <script>
+        // Load parameters for the selected effect
+        function changeEffect() {
+            const effect = document.getElementById("effect").value;
+            fetch(`/get_parameters/${effect}`)
+                .then(response => response.json())
+                .then(data => {
+                    const parametersDiv = document.getElementById("parameters");
+                    parametersDiv.innerHTML = ""; // Clear existing parameters
+
+                    // Iterate over parameters and create inputs dynamically
+                    for (const [name, param] of Object.entries(data)) {
+                        const label = document.createElement("label");
+                        label.textContent = `${name}: `;
+
+                        let input;
+                        if (param.param_type === "slider") {
+                            input = document.createElement("input");
+                            input.type = "range";
+                            input.min = param.options.min;
+                            input.max = param.options.max;
+                            input.step = param.options.step;
+                        } else if (param.param_type === "color") {
+                            input = document.createElement("input");
+                            input.type = "color";
+                        } else if (param.param_type === "checkbox") {
+                            input = document.createElement("input");
+                            input.type = "checkbox";
+                            input.checked = param.value;
+                        } else {
+                            input = document.createElement("input");
+                            input.type = "text";
+                        }
+
+                        input.value = param.value;
+                        input.onchange = () => updateParameter(name, input.value, param.param_type);
+
+                        parametersDiv.appendChild(label);
+                        parametersDiv.appendChild(input);
+                        parametersDiv.appendChild(document.createElement("br"));
+                    }
+                });
+            fetch(`/set_effect`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ effect }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(`Effect set to ${effect}`);
+                })
+                .catch(error => console.error("Error setting effect:", error));
+        }
+
+        // Update a specific parameter on the server
+        function updateParameter(name, value, type) {
+            if (type === "checkbox") {
+                value = document.querySelector(`input[name="${name}"]`).checked;
+            }
+            fetch("/set_parameter", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, value }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(`Parameter ${name} updated to ${value}`);
+                })
+                .catch(error => console.error("Error updating parameter:", error));
+        }
+
+        // Load initial parameters for the default effect on page load
+        document.addEventListener("DOMContentLoaded", changeEffect);
+    </script>
+</body>
+</html>
