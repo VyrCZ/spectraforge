@@ -1,6 +1,6 @@
 import os
 import importlib
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_from_directory
 from threading import Thread
 from neopixel import NeoPixel
 import board
@@ -47,7 +47,9 @@ def save_data():
     json.dump(data, open("server_data.json", "w"))
 
 def get_effect_name(effect):
-    return list(effects.keys())[list(effects.values()).index(effect)]
+    for name, eff in effects.items():
+        if isinstance(effect, eff):
+            return name
 
 def load_effects(folder="effects"):
     """Dynamically load all effect scripts."""
@@ -75,6 +77,10 @@ def effect_runner():
 @app.route("/")
 def index():
     return render_template("index.html", effects=list(effects.keys()))
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 @app.route("/get_state", methods=["GET"])
 def get_state():
@@ -117,14 +123,24 @@ def get_parameters(effect_name):
 @app.route("/set_parameter", methods=["POST"])
 def set_parameter():
     """Set a specific parameter for the current effect."""
-    global current_effect
-    data = request.json
-    param_name = data.get("name")
-    value = data.get("value")
+    global current_effect, data
+    request_data = request.json
+    param_name = request_data.get("name")
+    value = request_data.get("value")
 
     if current_effect and param_name in current_effect.parameters:
+        # Ensure "parameters" dictionary exists
+        if "parameters" not in data:
+            data["parameters"] = {}
+
+        # Ensure the current effect's parameters dictionary exists
+        effect_name = get_effect_name(current_effect)
+        if effect_name not in data["parameters"]:
+            data["parameters"][effect_name] = {}
+
+        # Update the parameter value
         current_effect.parameters[param_name].set(value)
-        data["parameters"][get_effect_name(current_effect)][param_name] = value
+        data["parameters"][effect_name][param_name] = value
         save_data()
         return jsonify({"status": "success"})
     return jsonify({"status": "error", "message": "Invalid parameter"}), 400
@@ -142,7 +158,8 @@ if __name__ == "__main__":
         current_effect = effects[data.get("current_effect")](pixels, coords)
         for param in current_effect.parameters.values():
             if data["parameters"].get(data["current_effect"], {}).get(param.name, None) is not None:
-                param.set(data["parameters"]["current_effect"][param.name])
+                print(f"(Effect {get_effect_name(current_effect)}) Got last value for {param.name}: {data['parameters'][data['current_effect']][param.name]}")
+                param.set(data["parameters"][data["current_effect"]][param.name])
     if not current_effect:
         current_effect = list(effects.values())[0](pixels, coords)
         data["current_effect"] = list(effects.keys())[0]
