@@ -1,8 +1,8 @@
 from effects.base_effect import LightEffect
 
 class EffectTwo(LightEffect):
-    def __init__(self, pixels):
-        super().__init__(pixels)
+    def __init__(self, pixels, coords):
+        super().__init__(pixels, coords)
         self.brightness = self.add_parameter("Brightness", "slider", 0.5, min=0, max=1, step=0.1)
 
     def update(self):

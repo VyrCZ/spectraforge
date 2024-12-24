@@ -10,6 +10,12 @@ class Parameter:
         self.value = value
 
     def get(self):
+        if self.param_type == "color":
+            return tuple(int(self.value[i : i + 2], 16) for i in (1, 3, 5))
+        elif self.param_type == "slider":
+            return float(self.value)
+        elif self.param_type == "bool":
+            return self.value == "true"
         return self.value
 
 

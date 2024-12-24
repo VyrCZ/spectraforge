@@ -24,16 +24,17 @@ def normalize(value, old_min, old_max):
 def clamp(value, min_value, max_value):
     return max(min(value, max_value), min_value)
 
-# def mix_colors(color1, color2):
-#     """
-#     Blends two colors using the screen blending mode.
+def mix_colors(color1, color2):
+    """
+    Blends two colors using the screen blending mode.
     
-#     Formula: Result = 1 - (1 - A) * (1 - B)
-#     """
-#     c1 = np.array(color1) / 255.0
-#     c2 = np.array(color2) / 255.0
-#     blended = 1 - (1 - c1) * (1 - c2)
-#     return tuple((blended * 255).astype(int))
+    Formula: Result = 1 - (1 - A) * (1 - B)
+    """
+    blended = []
+    for c1, c2 in zip(color1, color2):
+        result = 1 - (1 - c1 / 255.0) * (1 - c2 / 255.0)
+        blended.append(int(result * 255))
+    return tuple(blended)
 
 def wrap(value, min_value, max_value):
     """
@@ -56,3 +57,42 @@ def rotate_direction(direction, degrees):
     rotated_y = direction[0] * math.sin(radians) + direction[1] * math.cos(radians)
     
     return [rotated_x, rotated_y]
+
+def combine_rgb_colors(color1, color2, ratio):
+    """
+    Combine two RGB colors with a specific ratio using gamma-corrected blending.
+
+    Parameters:
+    color1 (tuple): The first color as an (R, G, B) tuple, where each value is in the range [0, 255].
+    color2 (tuple): The second color as an (R, G, B) tuple, where each value is in the range [0, 255].
+    ratio (float): The blend ratio of the second color (0 means all color1, 1 means all color2).
+
+    Returns:
+    tuple: The blended color as an (R, G, B) tuple.
+    """
+    if not (0 <= ratio <= 1):
+        raise ValueError("Ratio must be between 0 and 1.")
+
+    # Gamma correction constant (2.2 is a common value)
+    gamma = 2.2
+
+    def to_linear(c):
+        return [(v / 255.0) ** gamma for v in c]
+
+    def to_srgb(c):
+        return [int((v ** (1 / gamma)) * 255) for v in c]
+
+    # Convert colors to linear space
+    linear1 = to_linear(color1)
+    linear2 = to_linear(color2)
+
+    # Interpolate in linear space
+    blended_linear = [
+        (1 - ratio) * l1 + ratio * l2
+        for l1, l2 in zip(linear1, linear2)
+    ]
+
+    # Convert back to sRGB space
+    blended_srgb = to_srgb(blended_linear)
+
+    return tuple(blended_srgb)

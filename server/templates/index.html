@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LED Effect Controller</title>
+    <title>Světýlka Omegalul</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -24,6 +25,7 @@
             display: block;
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/@jaames/iro@5"></script>
 </head>
 <body>
     <h1>LED Effect Controller</h1>
@@ -63,8 +65,14 @@
                             input.max = param.options.max;
                             input.step = param.options.step;
                         } else if (param.param_type === "color") {
-                            input = document.createElement("input");
-                            input.type = "color";
+                            input = document.createElement("div");
+                            const colorPicker = new iro.ColorPicker(input, {
+                                width: 200,
+                                color: param.value,
+                                borderWidth: 1,
+                                borderColor: "#ccc",
+                            });
+                            colorPicker.on("input:end", color => updateParameter(name, color.hexString, param.param_type));
                         } else if (param.param_type === "checkbox") {
                             input = document.createElement("input");
                             input.type = "checkbox";
@@ -111,8 +119,30 @@
                 .catch(error => console.error("Error updating parameter:", error));
         }
 
+        function getState(){
+            // get data and set UI to match
+            // fetch("/get_state")
+            // return {effect: "effect_name", parameters: {param1: value1, param2: value2}}
+            fetch("/get_state")
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("effect").value = data.effect;
+                    for (const [name, value] of Object.entries(data.parameters)) {
+                        const input = document.querySelector(`input[name="${name}"]`);
+                        if (input) {
+                            if (input.type === "checkbox") {
+                                input.checked = value;
+                            } else {
+                                input.value = value;
+                            }
+                        }
+                    }
+                })
+                .catch(error => console.error("Error getting effect:", error));
+        }
+
         // Load initial parameters for the default effect on page load
-        document.addEventListener("DOMContentLoaded", changeEffect);
+        document.addEventListener("DOMContentLoaded", getState);
     </script>
 </body>
 </html>

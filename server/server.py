@@ -4,6 +4,10 @@ from flask import Flask, render_template, request, jsonify
 from threading import Thread
 from neopixel import NeoPixel
 import board
+import json
+
+# set working directory to the directory of this file
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 class DummyNeoPixel():
     def __init__(self, pin, num_leds, auto_write):
@@ -33,7 +37,17 @@ app = Flask(__name__)
 effects = {}
 current_effect = None
 running = True
+data = {}
 
+data = json.load(open("server_data.json"))
+print(data)
+
+def save_data():
+    print(f"Saving data: {data}")
+    json.dump(data, open("server_data.json", "w"))
+
+def get_effect_name(effect):
+    return list(effects.keys())[list(effects.values()).index(effect)]
 
 def load_effects(folder="effects"):
     """Dynamically load all effect scripts."""
@@ -55,13 +69,21 @@ def effect_runner():
     global current_effect, running
     while running:
         if current_effect:
-            print(f"Running effect {current_effect.__class__.__name__}")
+            #print(f"Running effect {current_effect.__class__.__name__}")
             current_effect.update()
 
 @app.route("/")
 def index():
     return render_template("index.html", effects=list(effects.keys()))
 
+@app.route("/get_state", methods=["GET"])
+def get_state():
+    """Return the current state of the LED strip."""
+    # return current effect and current values of all parameters
+    return jsonify({
+        "current_effect": get_effect_name(current_effect) if current_effect else list(effects.keys())[0],
+        "parameters": {name: param.get() for name, param in current_effect.parameters.items()} if current_effect else None
+    })
 
 @app.route("/set_effect", methods=["POST"])
 def set_effect():
@@ -70,7 +92,13 @@ def set_effect():
     effect_name = request.json.get("effect")
     print("Setting effect to", effect_name)
     if effect_name in effects:
-        current_effect = effects[effect_name](pixels)
+        current_effect = effects[effect_name](pixels, coords)
+        data["current_effect"] = effect_name
+        for param in current_effect.parameters.values():
+            last_value = data["parameters"].get(effect_name, {}).get(param.name, None)
+            if last_value is not None:
+                param.set(last_value)    
+        save_data()
         print(f"Set effect to {effect_name}")
         return jsonify({"status": "success", "current_effect": effect_name})
     return jsonify({"status": "error", "message": "Effect not found"}), 404
@@ -81,7 +109,7 @@ def get_parameters(effect_name):
     """Get parameters for a specific effect."""
     if effect_name in effects:
         effect_class = effects[effect_name]
-        parameters = effect_class(pixels).get_parameters()
+        parameters = effect_class(pixels, coords).get_parameters()
         return jsonify(parameters)
     return jsonify({"error": "Effect not found"}), 404
 
@@ -96,6 +124,8 @@ def set_parameter():
 
     if current_effect and param_name in current_effect.parameters:
         current_effect.parameters[param_name].set(value)
+        data["parameters"][get_effect_name(current_effect)][param_name] = value
+        save_data()
         return jsonify({"status": "success"})
     return jsonify({"status": "error", "message": "Invalid parameter"}), 400
 
@@ -106,6 +136,17 @@ if __name__ == "__main__":
         for coord in f.readlines():
             coords.append([int(value) for value in coord.strip().split(',')])
     load_effects()
+    # set current effect to the effect with the name stored in data
+    current_effect = None
+    if data.get("current_effect") in effects:
+        current_effect = effects[data.get("current_effect")](pixels, coords)
+        for param in current_effect.parameters.values():
+            if data["parameters"].get(data["current_effect"], {}).get(param.name, None) is not None:
+                param.set(data["parameters"]["current_effect"][param.name])
+    if not current_effect:
+        current_effect = list(effects.values())[0](pixels, coords)
+        data["current_effect"] = list(effects.keys())[0]
+        save_data()
     runner_thread = Thread(target=effect_runner, daemon=True)
     runner_thread.start()
 
@@ -113,5 +154,6 @@ if __name__ == "__main__":
         app.run(host="0.0.0.0", port=5000)
     finally:
         running = False
+        save_data()
         pixels.fill((0, 0, 0))
         pixels.show()
