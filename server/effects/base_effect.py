@@ -14,7 +14,7 @@ class Parameter:
             return tuple(int(self.value[i : i + 2], 16) for i in (1, 3, 5))
         elif self.param_type == ParamType.SLIDER:
             return float(self.value)
-        elif self.param_type == ParamType.BOOL:
+        elif self.param_type == ParamType.CHECKBOX:
             return self.value == "true"
         return self.value
     
@@ -26,7 +26,8 @@ class ParamType:
     """
     COLOR = "color"
     SLIDER = "slider"
-    BOOL = "bool"
+    CHECKBOX = "checkbox"
+    INPUT = "input"
 
 
 class LightEffect:

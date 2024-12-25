@@ -1,6 +1,4 @@
 from effects.base_effect import LightEffect, ParamType
-import mathutils as mu
-import time
 
 class StaticColor(LightEffect):
     def __init__(self, pixels, coords):

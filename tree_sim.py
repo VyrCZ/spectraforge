@@ -28,6 +28,7 @@ class Simulation:
             points.append((float(x), float(y), float(z)))
 
         return points
+        # shortest path function is not used atm, it's not very good
         return self.find_shortest_path(points)
     
     def path_length(path):
