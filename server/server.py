@@ -43,7 +43,7 @@ data = json.load(open("server_data.json"))
 print(data)
 
 def save_data():
-    print(f"Saving data: {data}")
+    #print(f"Saving data: {data}")
     json.dump(data, open("server_data.json", "w"))
 
 def get_effect_name(effect):

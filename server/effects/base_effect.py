@@ -10,13 +10,23 @@ class Parameter:
         self.value = value
 
     def get(self):
-        if self.param_type == "color":
+        if self.param_type == ParamType.COLOR:
             return tuple(int(self.value[i : i + 2], 16) for i in (1, 3, 5))
-        elif self.param_type == "slider":
+        elif self.param_type == ParamType.SLIDER:
             return float(self.value)
-        elif self.param_type == "bool":
+        elif self.param_type == ParamType.BOOL:
             return self.value == "true"
         return self.value
+    
+class ParamType:
+    """Define parameter types
+    COLOR: Color picker, returns RGB tuple.
+    SLIDER: Slider - returns float. Additional values: min, max, step
+    BOOL: Checkbox - returns a boolean.
+    """
+    COLOR = "color"
+    SLIDER = "slider"
+    BOOL = "bool"
 
 
 class LightEffect:

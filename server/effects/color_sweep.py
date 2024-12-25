@@ -1,13 +1,13 @@
-from effects.base_effect import LightEffect
+from effects.base_effect import LightEffect, ParamType
 import mathutils as mu
 
 class ColorSweep(LightEffect):
     def __init__(self, pixels, coords):
         super().__init__(pixels, coords)
-        self.speed = self.add_parameter("Speed", "slider", 20, min=5, max=100, step=1)
-        self.active_color = self.add_parameter("Active Color", "color", "#FF0000")
-        self.background_color = self.add_parameter("Background Color", "color", "#000000")
-        self.blend_factor = self.add_parameter("Blend Factor", "slider", 0.5, min=0, max=1, step=0.01)
+        self.speed = self.add_parameter("Speed", ParamType.SLIDER, 20, min=5, max=100, step=1)
+        self.active_color = self.add_parameter("Active Color", ParamType.COLOR, "#FF0000")
+        self.background_color = self.add_parameter("Background Color", ParamType.COLOR, "#000000")
+        self.blend_factor = self.add_parameter("Blend Factor", ParamType.SLIDER, 0.5, min=0, max=1, step=0.01)
         self.current_z = 0
         self.current_dir = 1
         self.blend_range = self.height / 2

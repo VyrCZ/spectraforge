@@ -1,13 +1,13 @@
-from effects.base_effect import LightEffect
+from effects.base_effect import LightEffect, ParamType
 import mathutils as mu
 import time
 
 class ColorSweep(LightEffect):
     def __init__(self, pixels, coords):
         super().__init__(pixels, coords)
-        self.speed = self.add_parameter("Speed", "slider", 40, min=1, max=100, step=1)
-        self.color = self.add_parameter("Color", "color", "#FF0000")
-        self.falloff = self.add_parameter("Falloff", "slider", 10, min=1, max=50, step=1)
+        self.speed = self.add_parameter("Speed", ParamType.SLIDER, 40, min=1, max=100, step=1)
+        self.color = self.add_parameter("Color", ParamType.COLOR, "#FF0000")
+        self.falloff = self.add_parameter("Falloff", ParamType.SLIDER, 10, min=1, max=50, step=1)
         self.current_pixel = self.falloff.get()
 
     def update(self):
