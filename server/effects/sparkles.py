@@ -1,6 +1,4 @@
 from effects.base_effect import LightEffect, ParamType
-import mathutils as mu
-import time
 import random
 
 class Sparkles(LightEffect):
@@ -29,6 +27,4 @@ class Sparkles(LightEffect):
             if self.states[i] < 0:
                 self.states[i] = 0
             self.pixels[i] = [int(channel) * self.states[i] for channel in self.color[0].get()]
-        self.pixels.show()
-        
-            
+        self.pixels.show()    

@@ -6,7 +6,7 @@ import colorsys
 class Rainbow(LightEffect):
     def __init__(self, pixels, coords):
         super().__init__(pixels, coords)
-        self.speed = self.add_parameter("Speed", ParamType.SLIDER, 0.1, min=0.5, max=100, step=0.1)
+        self.speed = self.add_parameter("Speed", ParamType.SLIDER, 0.1, min=0.5, max=50, step=0.1)
         self.reverse = self.add_parameter("Reverse", ParamType.CHECKBOX, False)
         self.current_z = 0
 
