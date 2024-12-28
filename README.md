@@ -8,7 +8,7 @@ This repository will show you everything you need to know and contains all scrip
 # Hardware - My setup
 I used 4x [addressable 50 LED WS2811B strings I got from Amazon](https://www.amazon.co.uk/dp/B08LKPF2PX) and a Raspberry Pi Zero 2W to control the lights and to run the server. The Raspberry Pi is powered with my old 5V 2A phone charger, and connected to the lights with GRD and GPIO18 for data. The lights are powered with my fast phone charger, delivering up to 6A. The lights are connected in series, with the first string connected to the Raspberry Pi and the power supply being connected to the first and third string. (This is necessary, as the last light string would be dimmer.)
 
-(Show my wiring diagram)
+[Wiring diagram](docs/wiring.png)
 
 The wiring diagram shown on their store page is also showing a 5V connection to the pi, but it's not necessary here.
 

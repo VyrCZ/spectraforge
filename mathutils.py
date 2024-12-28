@@ -1,5 +1,6 @@
 #import numpy as np
 import math
+import colorsys
 
 def lerp(start, end, t):
     """
@@ -96,3 +97,15 @@ def combine_rgb_colors(color1, color2, ratio):
     blended_srgb = to_srgb(blended_linear)
 
     return tuple(blended_srgb)
+
+def color_lerp(color1, color2, blend_factor):
+    """
+    Linearly interpolates between two colors through RGB space.
+    
+    color1 - the first color as an (R, G, B) tuple
+    color2 - the second color as an (R, G, B) tuple
+    blend_factor - the interpolation factor (0.0 - 1.0)
+    """
+    return tuple(
+        int(lerp(c1, c2, blend_factor)) for c1, c2 in zip(color1, color2)
+    )

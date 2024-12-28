@@ -40,7 +40,7 @@ running = True
 data = {}
 
 data = json.load(open("server_data.json"))
-print(data)
+#print(data)
 
 def save_data():
     #print(f"Saving data: {data}")

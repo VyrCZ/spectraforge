@@ -17,11 +17,11 @@ class Grow(LightEffect):
         if self.growing:
             self.active_color = tuple([int(channel * 255) for channel in colorsys.hsv_to_rgb(random.random(), 1, 1)])
         self.random_point = random.choice(self.coords)
-        self.current_size = 0 if self.growing else 600
+        self.current_size = 0 if self.growing else 800
 
     def update(self):
         self.current_size += self.speed.get() / 30 if self.growing else -self.speed.get() / 30
-        if self.current_size >= 600 or self.current_size <= 0:
+        if self.current_size >= 800 or self.current_size <= 0:
             self.reset()
         if self.current_size <= 0:
             self.current_size = 0.1
