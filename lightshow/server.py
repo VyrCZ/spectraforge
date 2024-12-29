@@ -5,13 +5,31 @@ import os
 import time
 from neopixel import NeoPixel
 import board
+pixels = NeoPixel(board.D18, 200, auto_write=False)
 import colorsys
 import random
 import mathutils as mu
 
-app = Flask(__name__)
-socketio = SocketIO(app)
-pixels = NeoPixel(board.D18, 200, auto_write=False)
+#os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+class DummyNeoPixel():
+    def __init__(self, pin, num_leds, auto_write):
+        self.num_leds = num_leds
+        self.pixels = [(0, 0, 0)] * num_leds
+        self.auto_write = auto_write
+
+    def __setitem__(self, key, value):
+        self.pixels[key] = value
+
+    def fill(self, color):
+        for i in range(self.num_leds):
+            self.pixels[i] = color
+
+    def show(self):
+        print(self.pixels)
+
+
+#pixels = DummyNeoPixel("yes", 200, False)
 coords = []
 with open('coordinates.txt', 'r') as f:
     for coord in f.readlines():
@@ -38,7 +56,8 @@ next_beat_time = 0
 click_file = os.path.abspath(os.path.join("lightshow", AUDIO_FILE_PATH, "click.wav"))
 hue = 0
 
-
+app = Flask(__name__)
+socketio = SocketIO(app)
 # Function scheduling
 def schedule_effect(time_in_seconds, function, *args, **kwargs):
     """Add a function to be executed at a specific time in the song."""
@@ -46,9 +65,26 @@ def schedule_effect(time_in_seconds, function, *args, **kwargs):
     scheduled_events.sort(key=lambda x: x[0])  # Keep events sorted by time
 
 def parse_labels(file_path):
+    def parse_arg(arg):
+        """Converts a string argument into its appropriate type."""
+        arg = arg.strip()
+        # Check if the argument is a tuple
+        if arg.startswith("(") and arg.endswith(")"):
+            return tuple(parse_arg(x) for x in arg[1:-1].split(","))
+        # Try to convert to float or int
+        if arg in ["True", "False"]:
+            return arg == "True"
+        try:
+            if "." in arg:
+                return float(arg)
+            return int(arg)
+        except ValueError:
+            # If conversion fails, return as a string
+            return arg
+
     with open(file_path, 'r') as file:
         for line in file:
-            line = line.strip()
+            line = line.strip().replace(", ", ",").replace("; ", ";")
             if not line:
                 continue  # Skip empty lines
 
@@ -60,18 +96,20 @@ def parse_labels(file_path):
             # Parse the function and its arguments
             func_parts = func_args.split(';')
             func_name = func_parts[0].strip()
-            args = [arg.strip() for arg in func_parts[1:]]
+            args = [parse_arg(arg) for arg in func_parts[1:]]
 
             # Compute the duration
             duration = end_time - start_time
 
             # Convert func_name to actual function
-            func = globals().get(func_name)  # Look for the function in the global namespace
+            func = globals().get(func_name)
             if func is None:
                 raise ValueError(f"Function '{func_name}' not found!")
 
             # Schedule the effect
+            print(f"Scheduling {func_name} at {start_time:.2f}s with args {args}")
             schedule_effect(start_time, func, duration, *args)
+
 
 def event_runner():
     """Handles the metronome and execution of scheduled events."""
@@ -154,6 +192,7 @@ def solid_color(duration, color):
     pixels.show()
 
 def fade(duration, color1, color2, steps=0):
+    
     if(steps <= 0):
         steps = int(duration * 20) # Default to 20 steps per second
 
@@ -206,7 +245,17 @@ def flash2(duration, color1, color2, frequency=20):
         pixels.show()
         time.sleep(1 / frequency)
 
-def swipe_up(duration, color, width=50, no_clear = False, steps=0):
+def flash_times(duration, color1, color2, times):
+    """Same as flash but instead of frequency, you enter exact number of flashes."""
+    frequency = duration / times
+    flash(duration, color1, color2, frequency)
+
+def flash2_times(duration, color1, color2, times):
+    """Same as flash2 but instead of frequency, you enter exact number of flashes."""
+    frequency = duration / times
+    flash2(duration, color1, color2, frequency)
+
+def swipe_up(duration, color, width=50, steps=0, no_clear = False):
     """[SPACIAL] Passes a wave of color up the tree."""
     if steps <= 0:
         steps = int(duration * 20)
@@ -226,7 +275,7 @@ def swipe_up(duration, color, width=50, no_clear = False, steps=0):
         pixels.show()
         time.sleep(duration / steps)
 
-def swipe_down(duration, color, width=50, no_clear = False, steps=0):
+def swipe_down(duration, color, width=50, steps=0, no_clear = False):
     """[SPACIAL] Passes a wave of color down the tree."""
     if steps <= 0:
         steps = int(duration * 20)
@@ -317,14 +366,20 @@ def rainbow(duration, speed=10, steps=0):
             pixels[i] = tuple([int(channel * 255) for channel in normalized_rgb])
         pixels.show()
 
-def string_up(duration, color, trail_length=25, steps=0):
+def gradient(duration, color1, color2, steps=0):
+    """[SPACIAL] Creates a vertical gradient, which is travelling up the tree, much like rainbow."""
+    # fill this space with rainbow for now
+    rainbow(duration, 10, steps)
+
+def string_up(duration, color, trail_length=25, steps=0, no_clear = False):
     """Travels up the string of lights."""
     if steps <= 0:
         steps = int(duration * 5)
     current_pixel = -trail_length
     for step in range(steps):
         current_pixel += int((len(pixels) + 2 * trail_length) / steps)
-        pixels.fill((0, 0, 0))
+        if not no_clear:
+            pixels.fill((0, 0, 0))
         for i in range(trail_length):
             pos = current_pixel + i
             if pos < len(pixels) and pos >= 0:
@@ -332,14 +387,15 @@ def string_up(duration, color, trail_length=25, steps=0):
         pixels.show()
         time.sleep(duration / steps)
 
-def string_down(duration, color, trail_length=25, steps=0):
+def string_down(duration, color, trail_length=25, steps=0, no_clear = False):
     """Travels down the string of lights."""
     if steps <= 0:
         steps = int(duration * 5)
     current_pixel = len(pixels) + trail_length
     for step in range(steps):
         current_pixel -= int((len(pixels) + 2 * trail_length) / steps)
-        pixels.fill((0, 0, 0))
+        if not no_clear:
+            pixels.fill((0, 0, 0))
         for i in range(trail_length):
             pos = current_pixel - i
             if pos < len(pixels) and pos >= 0:
@@ -347,52 +403,56 @@ def string_down(duration, color, trail_length=25, steps=0):
         pixels.show()
         time.sleep(duration / steps)
 
+def split_vertical(duration, color1, color2, steps=0):
+    """[SPACIAL] Makes two swipes from the middle to the top and bottom. Color1 is the top color, color2 is the bottom color."""
+    # fill this place with swipe_up for now
+    swipe_up(duration, color1, 50, steps)
 
 
 if __name__ == "__main__":
     # Schedule some example events
-    """Schedule_event(0.5, solid_color, (127, 127, 127))
-    schedule_event(0.6, solid_color, (0, 0, 0))
-    schedule_event(0.7, solid_color, (127, 127, 127))
-    schedule_event(0.8, solid_color, (0, 0, 0))
-    schedule_event(0.866, fade, (255, 0, 0), (0, 0, 0), 0.3)
-    schedule_event(1.259, fade, (255, 0, 0), (0, 0, 0), 0.3)
-    schedule_event(1.704, fade, (255, 0, 0), (0, 0, 0), 0.3)
-    schedule_event(2.150, fade, (255, 0, 0), (0, 0, 0), 0.3)
-    schedule_event(2.557, fade, (255, 0, 0), (0, 0, 0), 0.3)
-    schedule_event(2.987, fade, (255, 0, 0), (0, 0, 0), 0.3)
-    schedule_event(3.406, fade, (255, 0, 0), (0, 0, 0), 0.3)
-    schedule_event(3.850, fade, (255, 0, 0), (0, 0, 0), 0.3)
-    schedule_event(4.270, fade, (180, 255, 0), (0, 0, 0), 0.3)
-    schedule_event(4.705, fade, (255, 0, 0), (0, 0, 0), 0.3)
-    schedule_event(5.137, fade, (255, 0, 0), (0, 0, 0), 0.3)
-    schedule_event(5.555, fade, (255, 0, 0), (0, 0, 0), 0.3)
-    schedule_event(6.000, fade, (255, 0, 0), (0, 0, 0), 0.3)
-    schedule_event(6.421, fade, (255, 0, 0), (0, 0, 0), 0.3)
-    schedule_event(6.852, fade, (255, 0, 0), (0, 0, 0), 0.3)
-    schedule_event(7.258, fade, (255, 0, 0), (0, 0, 0), 0.3)
-    schedule_event(7.677, fade, (180, 255, 0), (0, 0, 0), 0.3)
-    schedule_event(8.110, fade, (255, 0, 0), (0, 0, 0), 0.3)
-    schedule_event(8.541, fade, (255, 0, 0), (0, 0, 0), 0.3)
-    schedule_event(8.989, fade, (255, 0, 0), (0, 0, 0), 0.3)
-    schedule_event(9.407, fade, (255, 0, 0), (0, 0, 0), 0.3)
-    schedule_event(9.838, fade, (255, 0, 0), (0, 0, 0), 0.3)
-    schedule_event(10.255, fade, (255, 0, 0), (0, 0, 0), 0.3)
-    schedule_event(10.705, fade, (255, 0, 0), (0, 0, 0), 0.3)
-    schedule_event(11.135, fade, (180, 0, 255), (0, 0, 0), 1.5, 20)
-    schedule_event(12.844, solid_color, (0, 255, 0))
-    schedule_event(13.722, solid_color, (0, 0, 255))"""
+    """schedule_effect(0.5, solid_color, 0, (127, 127, 127))
+    schedule_effect(0.6, solid_color, 0, (0, 0, 0))
+    schedule_effect(0.7, solid_color, 0, (127, 127, 127))
+    schedule_effect(0.8, solid_color, 0, (0, 0, 0))
+    schedule_effect(0.866, fade, 0.3, (255, 0, 0), (0, 0, 0))
+    schedule_effect(1.259, fade, 0.3, (255, 0, 0), (0, 0, 0))
+    schedule_effect(1.704, fade, 0.3, (255, 0, 0), (0, 0, 0))
+    schedule_effect(2.150, fade, 0.3, (255, 0, 0), (0, 0, 0))
+    schedule_effect(2.557, fade, 0.3, (255, 0, 0), (0, 0, 0))
+    schedule_effect(2.987, fade, 0.3, (255, 0, 0), (0, 0, 0))
+    schedule_effect(3.406, fade, 0.3, (255, 0, 0), (0, 0, 0))
+    schedule_effect(3.850, fade, 0.3, (255, 0, 0), (0, 0, 0))
+    schedule_effect(4.270, fade, 0.3, (180, 255, 0), (0, 0, 0))
+    schedule_effect(4.705, fade, 0.3, (255, 0, 0), (0, 0, 0))
+    schedule_effect(5.137, fade, 0.3, (255, 0, 0), (0, 0, 0))
+    schedule_effect(5.555, fade, 0.3, (255, 0, 0), (0, 0, 0))
+    schedule_effect(6.000, fade, 0.3, (255, 0, 0), (0, 0, 0))
+    schedule_effect(6.421, fade, 0.3, (255, 0, 0), (0, 0, 0))
+    schedule_effect(6.852, fade, 0.3, (255, 0, 0), (0, 0, 0))
+    schedule_effect(7.258, fade, 0.3, (255, 0, 0), (0, 0, 0))
+    schedule_effect(7.677, fade, 0.3, (180, 255, 0), (0, 0, 0))
+    schedule_effect(8.110, fade, 0.3, (255, 0, 0), (0, 0, 0))
+    schedule_effect(8.541, fade, 0.3, (255, 0, 0), (0, 0, 0))
+    schedule_effect(8.989, fade, 0.3, (255, 0, 0), (0, 0, 0))
+    schedule_effect(9.407, fade, 0.3, (255, 0, 0), (0, 0, 0))
+    schedule_effect(9.838, fade, 0.3, (255, 0, 0), (0, 0, 0))
+    schedule_effect(10.255, fade, 0.3, (255, 0, 0), (0, 0, 0))
+    schedule_effect(10.705, fade, 0.3, (255, 0, 0), (0, 0, 0))
+    schedule_effect(11.135, fade, 1.5, (180, 0, 255), (0, 0, 0), 20)
+    schedule_effect(12.844, solid_color, 0, (0, 255, 0))
+    schedule_effect(13.722, solid_color, 0, (0, 0, 255))"""
     # test every effect, for duration 3 seconds, with different colors each"""
-    """schedule_event(0, solid_color, (255, 0, 0))
-    schedule_event(3, fade, (0, 255, 0), (0, 0, 0), 2.5)
-    schedule_event(6, flash, (0, 0, 255), (255, 255, 255), 2.5, 2)
-    schedule_event(9, flash2, (255, 0, 255), (0, 255, 255), 2.5, 4)
-    schedule_event(12, swipe_up, (127, 127, 127), 2.5, 100)
-    schedule_event(15, swipe_down, (127, 127, 127), 2.5, 100)
-    schedule_event(18, swipe_right, (127, 127, 127), 2.5, 50)
-    schedule_event(21, swipe_left, (127, 127, 127), 2.5, 50)
-    schedule_event(24, swipe_forward, (127, 127, 127), 2.5, 50)
-    schedule_event(27, swipe_backward, (127, 127, 127), 2.5, 50)
-    schedule_event(30, rainbow, 3, 10)"""
+    """schedule_effect(0, solid_color, (255, 0, 0))
+    schedule_effect(3, fade, (0, 255, 0), (0, 0, 0), 2.5)
+    schedule_effect(6, flash, (0, 0, 255), (255, 255, 255), 2.5, 2)
+    schedule_effect(9, flash2, (255, 0, 255), (0, 255, 255), 2.5, 4)
+    schedule_effect(12, swipe_up, (127, 127, 127), 2.5, 100)
+    schedule_effect(15, swipe_down, (127, 127, 127), 2.5, 100)
+    schedule_effect(18, swipe_right, (127, 127, 127), 2.5, 50)
+    schedule_effect(21, swipe_left, (127, 127, 127), 2.5, 50)
+    schedule_effect(24, swipe_forward, (127, 127, 127), 2.5, 50)
+    schedule_effect(27, swipe_backward, (127, 127, 127), 2.5, 50)
+    schedule_effect(30, rainbow, 3, 10)"""
     parse_labels("labels/overkill.txt")
     app.run(host="0.0.0.0", port=5000, debug=True)
