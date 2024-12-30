@@ -65,6 +65,18 @@ def parse_labels(file_path):
             print(f"Scheduling {func_name} at {start_time:.2f}s with args {args}")
             func(start_time, duration, *args)
 
+def finalize_transparent():
+    """Replace all None values in the color states with the color of last frame."""
+    for idx, timestamp in enumerate(sorted(color_states.keys())):
+        if idx == 0:
+            for i in range(LED_COUNT):
+                if color_states[timestamp][i] is None:
+                    color_states[timestamp][i] = (0, 0, 0)
+        else:
+            for i in range(LED_COUNT):
+                if color_states[timestamp][i] is None:
+                    color_states[timestamp][i] = color_states[idx-1][i]
+
 # COLOR STATE FUNCTIONS
 
 def update_color_state(timestamp, colors):
@@ -94,7 +106,7 @@ def solid_color(start_time, duration, color):
 
 def fade(start_time, duration, color1, color2, steps=0):
     if steps <= 0:
-        steps = int(duration * 20)
+        steps = int(duration * 24)
 
     step_r = (color2[0] - color1[0]) / steps
     step_g = (color2[1] - color1[1]) / steps
@@ -133,90 +145,108 @@ def flash2_times(start_time, duration, color1, color2, times):
     frequency = times / duration
     flash2(start_time, duration, color1, color2, frequency)
 
-def swipe_up(start_time, duration, color, width=50, steps=0, no_clear=False):
+def swipe_up(start_time, duration, color, width=100, steps=0, no_clear=False):
     if steps <= 0:
-        steps = int(duration * 20)
+        steps = int(duration * 24)
 
     current_z = 0 - width
     for step in range(steps):
         current_z += (tree_height + 2 * width) / steps
         timestamp = start_time + step * (duration / steps)
-        colors = [(0, 0, 0)] * LED_COUNT
+        if no_clear:
+            colors = [None] * LED_COUNT
+        else:
+            colors = [(0, 0, 0)] * LED_COUNT
         for i in range(LED_COUNT):
             dist = abs(coords[i][2] - current_z)
             if dist < width / 2:
                 colors[i] = mu.color_lerp((0, 0, 0), color, mu.normalize(dist, 0, width / 2))
         update_color_state(timestamp, colors)
 
-def swipe_down(start_time, duration, color, width=50, steps=0, no_clear=False):
+def swipe_down(start_time, duration, color, width=100, steps=0, no_clear=False):
     if steps <= 0:
-        steps = int(duration * 20)
+        steps = int(duration * 24)
 
     current_z = tree_height + width
     for step in range(steps):
         current_z -= (tree_height + 2 * width) / steps
         timestamp = start_time + step * (duration / steps)
-        colors = [(0, 0, 0)] * LED_COUNT
+        if no_clear:
+            colors = [None] * LED_COUNT
+        else:
+            colors = [(0, 0, 0)] * LED_COUNT
         for i in range(LED_COUNT):
             dist = abs(coords[i][2] - current_z)
             if dist < width / 2:
                 colors[i] = mu.color_lerp(color, (0, 0, 0), mu.normalize(dist, 0, width / 2))
         update_color_state(timestamp, colors)
 
-def swipe_right(start_time, duration, color, width=25, steps=0):
+def swipe_right(start_time, duration, color, width=50, steps=0, no_clear=False):
     if steps <= 0:
-        steps = int(duration * 20)
+        steps = int(duration * 24)
 
     current_x = limits_x[0] - width
     for step in range(steps):
         current_x += (x_width + 2 * width) / steps
         timestamp = start_time + step * (duration / steps)
-        colors = [(0, 0, 0)] * LED_COUNT
+        if no_clear:
+            colors = [None] * LED_COUNT
+        else:
+            colors = [(0, 0, 0)] * LED_COUNT
         for i in range(LED_COUNT):
             dist = abs(coords[i][0] - current_x)
             if dist < width / 2:
                 colors[i] = mu.color_lerp(color, (0, 0, 0), mu.normalize(dist, 0, width / 2))
         update_color_state(timestamp, colors)
 
-def swipe_left(start_time, duration, color, width=25, steps=0):
+def swipe_left(start_time, duration, color, width=50, steps=0, no_clear=False):
     if steps <= 0:
-        steps = int(duration * 20)
+        steps = int(duration * 24)
 
     current_x = limits_x[1] + width
     for step in range(steps):
         current_x -= (x_width + 2 * width) / steps
         timestamp = start_time + step * (duration / steps)
-        colors = [(0, 0, 0)] * LED_COUNT
+        if no_clear:
+            colors = [None] * LED_COUNT
+        else:
+            colors = [(0, 0, 0)] * LED_COUNT
         for i in range(LED_COUNT):
             dist = abs(coords[i][0] - current_x)
             if dist < width / 2:
                 colors[i] = mu.color_lerp(color, (0, 0, 0), mu.normalize(dist, 0, width / 2))
         update_color_state(timestamp, colors)
 
-def swipe_forward(start_time, duration, color, width=25, steps=0):
+def swipe_forward(start_time, duration, color, width=50, steps=0, no_clear=False):
     if steps <= 0:
-        steps = int(duration * 20)
+        steps = int(duration * 24)
 
     current_y = limits_y[0] - width
     for step in range(steps):
         current_y += (y_width + 2 * width) / steps
         timestamp = start_time + step * (duration / steps)
-        colors = [(0, 0, 0)] * LED_COUNT
+        if no_clear:
+            colors = [None] * LED_COUNT
+        else:
+            colors = [(0, 0, 0)] * LED_COUNT
         for i in range(LED_COUNT):
             dist = abs(coords[i][1] - current_y)
             if dist < width / 2:
                 colors[i] = mu.color_lerp(color, (0, 0, 0), mu.normalize(dist, 0, width / 2))
         update_color_state(timestamp, colors)
 
-def swipe_backward(start_time, duration, color, width=25, steps=0):
+def swipe_backward(start_time, duration, color, width=50, steps=0, no_clear=False):
     if steps <= 0:
-        steps = int(duration * 20)
+        steps = int(duration * 24)
 
     current_y = limits_y[1] + width
     for step in range(steps):
         current_y -= (y_width + 2 * width) / steps
         timestamp = start_time + step * (duration / steps)
-        colors = [(0, 0, 0)] * LED_COUNT
+        if no_clear:
+            colors = [None] * LED_COUNT
+        else:
+            colors = [(0, 0, 0)] * LED_COUNT
         for i in range(LED_COUNT):
             dist = abs(coords[i][1] - current_y)
             if dist < width / 2:
@@ -226,7 +256,7 @@ def swipe_backward(start_time, duration, color, width=25, steps=0):
 def rainbow(start_time, duration, speed=10, steps=0):
     current_z = 0
     if steps <= 0:
-        steps = int(duration * 20)
+        steps = int(duration * 24)
 
     for step in range(steps):
         current_z += speed
@@ -239,18 +269,34 @@ def rainbow(start_time, duration, speed=10, steps=0):
             colors[i] = tuple([int(channel * 255) for channel in normalized_rgb])
         update_color_state(timestamp, colors)
 
-def gradient(start_time, duration, color1, color2, speed, steps=0):
-    rainbow(start_time, duration, speed, steps)
+def gradient(start_time, duration, color1, color2, speed=10, steps=0):
+    current_z = 0
+    if steps <= 0:
+        steps = int(duration * 24)
+
+    for step in range(steps):
+        current_z += speed
+        if current_z > tree_height:
+            current_z = 0
+        timestamp = start_time + step * (duration / steps)
+        colors = [(0, 0, 0)] * LED_COUNT
+        for i in range(LED_COUNT):
+            normalized_rgb = mu.color_lerp(color1, color2, mu.normalize(mu.wrap(coords[i][2] - current_z, 0, tree_height), 0, tree_height))
+            colors[i] = normalized_rgb
+        update_color_state(timestamp, colors)
 
 def string_up(start_time, duration, color, trail_length=25, steps=0, no_clear=False):
     if steps <= 0:
-        steps = int(duration * 20)
+        steps = int(duration * 24)
 
     current_pixel = -trail_length
     for step in range(steps):
         current_pixel += int((LED_COUNT + 2 * trail_length) / steps)
         timestamp = start_time + step * (duration / steps)
-        colors = [(0, 0, 0)] * LED_COUNT
+        if no_clear:
+            colors = [None] * LED_COUNT
+        else:
+            colors = [(0, 0, 0)] * LED_COUNT
         for i in range(trail_length):
             pos = current_pixel + i
             if pos < LED_COUNT and pos >= 0:
@@ -259,27 +305,33 @@ def string_up(start_time, duration, color, trail_length=25, steps=0, no_clear=Fa
 
 def string_down(start_time, duration, color, trail_length=25, steps=0, no_clear=False):
     if steps <= 0:
-        steps = int(duration * 20)
+        steps = int(duration * 24)
 
     current_pixel = LED_COUNT + trail_length
     for step in range(steps):
         current_pixel -= int((LED_COUNT + 2 * trail_length) / steps)
         timestamp = start_time + step * (duration / steps)
-        colors = [(0, 0, 0)] * LED_COUNT
+        if no_clear:
+            colors = [None] * LED_COUNT
+        else:
+            colors = [(0, 0, 0)] * LED_COUNT
         for i in range(trail_length):
             pos = current_pixel - i
             if pos < LED_COUNT and pos >= 0:
                 colors[pos] = mu.color_lerp((0, 0, 0), color, mu.normalize(i, 0, trail_length))
         update_color_state(timestamp, colors)
 
-def split_vertical(start_time, duration, color1, color2, steps=0):
+def split_vertical(start_time, duration, color1, color2, steps=0, no_clear=False):
     if steps <= 0:
-        steps = int(duration * 20)
+        steps = int(duration * 24)
 
     mid_x = (limits_x[0] + limits_x[1]) / 2
     for step in range(steps):
         timestamp = start_time + step * (duration / steps)
-        colors = [(0, 0, 0)] * LED_COUNT
+        if no_clear:
+            colors = [None] * LED_COUNT
+        else:
+            colors = [(0, 0, 0)] * LED_COUNT
         for i in range(LED_COUNT):
             if coords[i][0] < mid_x:
                 colors[i] = color1

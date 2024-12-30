@@ -57,10 +57,15 @@ This effect is a simple sparkles effect, where a random amount of lights are tur
 For more information on how to write effects, see the [effect library documentation](docs/server_effect.md).
 
 ## Mathutils
-I made a few handy mathematical functions for limiting values, linear interpolation and so on. For more information, see the [mathutils documentation](docs/mathutils.md).
+I made a few handy math functions for limiting values, linear interpolation, color gradients and so on. For more information, see the [mathutils documentation](docs/mathutils.md).
 
 ## Tree simulator
 I also made a tree simulator using pyvista, which can be used to test effects without the lights. It places random points in a cone shape and passes the coordinates. The tree simulator runs the effects standalone and don't work with the server and thus, doesn't have parameters. For more information, see the [tree simulator documentation](docs/tree_simulator.md).
 
 # 3D space calculation
 I took an image of each individual LED from all four sides and wrote a script that found **the brightest pixel in the image** and converted it to 3D space. I got the XZ axis from from the front or back view, and the Y axis from one of the side views. The script picked the view with brighter brightest pixel. **This approach wasn't very effective** and I had to manually correct most of the points. If you are going to do this, **you might get better results using red or blue RGB channels of the image, not the brightness.**
+
+# Lightshow
+As the feature creep was intensifying, I decided to make another app that could allow to make a lightshow synced to a song. The app has a start button, which will play the song from the phone and will start the lightshow on the server. The lightshow is made with labels in Audacity, which are then saved into a .txt file with their start and end times, the effect and the arguments. I made about 9 effects, [which can be found here](lightshow/generate_lightshows.py). The labels are parsed, and the lightshow is stored into a pickle file as a dictionary, where the keys are the timestamps and values are arrays of colors corresponding to each LED. The lightshow is then played by the server, which will load the color states and play them at the right time.
+
+[Audacity labels](docs/audacity_labels.png)

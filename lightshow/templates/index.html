@@ -19,6 +19,7 @@
         const audioPlayer = document.getElementById('audio-player');
         audioPlayer.volume = 1;
         let tracking = false;
+        let progressInterval;
     
         startButton.addEventListener('click', () => {
             audioPlayer.style.display = 'block';
@@ -26,21 +27,20 @@
             tracking = true;
             socket.emit('start_audio'); // Notify the server to start the metronome
     
-            // Start sending playback progress
-            const sendProgress = () => {
+            // Start sending playback progress every minute
+            progressInterval = setInterval(() => {
                 if (tracking) {
                     socket.emit('playback_progress', { seconds: audioPlayer.currentTime });
-                    requestAnimationFrame(sendProgress);
                 }
-            };
-    
-            sendProgress();
+            }, 60000); // 60 seconds
         });
     
         audioPlayer.addEventListener('ended', () => {
             tracking = false;
+            clearInterval(progressInterval); // Stop the interval when audio ends
             socket.emit('stop_audio'); // Notify the server to stop the metronome
         });
-    </script>    
+    </script>
+    
 </body>
 </html>
