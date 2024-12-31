@@ -1,7 +1,8 @@
 # Addresable Christmas Lights mapped in 3D space, controllable with an app
 This project is a fun way to spice up your Christmas tree with dynamic effects. 3D Coordinates of all LEDs were calculated, allowing for effects to not only use the string, but each individual LED position in space. All effects are written in python and stored on a server, where they are automatically loaded and can be switched in an app. Each effect can easily set its own parameters, which are changable in the app and are remembered for the next time the effect is loaded.
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/lzU8-Y6aO1Q?si=VccYeiQuKVHG6sh5" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+## Video
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/lzU8-Y6aO1Q/0.jpg)](https://www.youtube.com/watch?v=lzU8-Y6aO1Q)
 
 This repository will show you everything you need to know and contains all scripts I used to make these lights, **including effect library, a tree simulator for testing, 3D space calculation and lightshow parsing scripts.**
 
