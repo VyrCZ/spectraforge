@@ -1,14 +1,14 @@
 # Addresable Christmas Lights mapped in 3D space, controllable with an app
-This project is a fun way to spice up your Christmas tree with dynamic effects. 3D Coordinates of all LEDs were calculated, allowing for effects not only using the string, but their actual position. All effects are written in python and stored on a server, where they are automatically loaded and can be switched in an app. Each effect can easily set its own parameters, which are changable in the app and are remembered for the next time the effect is loaded.
+This project is a fun way to spice up your Christmas tree with dynamic effects. 3D Coordinates of all LEDs were calculated, allowing for effects to not only use the string, but each individual LED position in space. All effects are written in python and stored on a server, where they are automatically loaded and can be switched in an app. Each effect can easily set its own parameters, which are changable in the app and are remembered for the next time the effect is loaded.
 
-(embed for a youtube video)
+<iframe width="560" height="315" src="https://www.youtube.com/embed/lzU8-Y6aO1Q?si=VccYeiQuKVHG6sh5" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
-This repository will show you everything you need to know and contains all scripts I used to make these lights, **including effect library, a tree simulator for testing and 3D space calculation scripts.**
+This repository will show you everything you need to know and contains all scripts I used to make these lights, **including effect library, a tree simulator for testing, 3D space calculation and lightshow parsing scripts.**
 
 # Hardware - My setup
 I used 4x [addressable 50 LED WS2811B strings I got from Amazon](https://www.amazon.co.uk/dp/B08LKPF2PX) and a Raspberry Pi Zero 2W to control the lights and to run the server. The Raspberry Pi is powered with my old 5V 2A phone charger, and connected to the lights with GRD and GPIO18 for data. The lights are powered with my fast phone charger, delivering up to 6A. The lights are connected in series, with the first string connected to the Raspberry Pi and the power supply being connected to the first and third string. (This is necessary, as the last light string would be dimmer.)
 
-[Wiring diagram](docs/wiring.png)
+<img src="docs/wiring.png" alt="my wiring setup" width="800"/>
 
 The wiring diagram shown on their store page is also showing a 5V connection to the pi, but it's not necessary here.
 
@@ -68,4 +68,4 @@ I took an image of each individual LED from all four sides and wrote a script th
 # Lightshow
 As the feature creep was intensifying, I decided to make another app that could allow to make a lightshow synced to a song. The app has a start button, which will play the song from the phone and will start the lightshow on the server. The lightshow is made with labels in Audacity, which are then saved into a .txt file with their start and end times, the effect and the arguments. I made about 9 effects, [which can be found here](lightshow/generate_lightshows.py). The labels are parsed, and the lightshow is stored into a pickle file as a dictionary, where the keys are the timestamps and values are arrays of colors corresponding to each LED. The lightshow is then played by the server, which will load the color states and play them at the right time.
 
-[Audacity labels](docs/audacity_labels.png)
+<img src="docs/audacity_labels.png" alt="audacity labels screenshot" width="1000"/>

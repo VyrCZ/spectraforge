@@ -67,6 +67,7 @@ def parse_labels(file_path):
 
 def finalize_transparent():
     """Replace all None values in the color states with the color of last frame."""
+    last_timestamp = None
     for idx, timestamp in enumerate(sorted(color_states.keys())):
         if idx == 0:
             for i in range(LED_COUNT):
@@ -75,7 +76,8 @@ def finalize_transparent():
         else:
             for i in range(LED_COUNT):
                 if color_states[timestamp][i] is None:
-                    color_states[timestamp][i] = color_states[idx-1][i]
+                    color_states[timestamp][i] = color_states[last_timestamp][i]
+        last_timestamp = timestamp
 
 # COLOR STATE FUNCTIONS
 
@@ -342,6 +344,7 @@ def split_vertical(start_time, duration, color1, color2, steps=0, no_clear=False
 if __name__ == "__main__":
     song_name = "overkill"
     parse_labels(f"lightshow/labels/{song_name}.txt")
+    finalize_transparent()
     print(f"Color states: {color_states}")
     with open(f"lightshow/performances/{song_name}.pkl", "wb") as f:
         pickle.dump(color_states, f)
