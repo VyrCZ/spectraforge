@@ -43,65 +43,6 @@
     <div id="parameters"></div>
 
     <script>
-        // Load parameters for the selected effect
-        /*function changeEffect() {
-            const effect = document.getElementById("effect").value;
-            fetch(`/get_parameters/${effect}`)
-                .then(response => response.json())
-                .then(data => {
-                    const parametersDiv = document.getElementById("parameters");
-                    parametersDiv.innerHTML = ""; // Clear existing parameters
-
-                    // Iterate over parameters and create inputs dynamically
-                    for (const [name, param] of Object.entries(data)) {
-                        const label = document.createElement("label");
-                        label.textContent = `${name}: `;
-
-                        let input;
-                        if (param.param_type === "slider") {
-                            input = document.createElement("input");
-                            input.type = "range";
-                            input.min = param.options.min;
-                            input.max = param.options.max;
-                            input.step = param.options.step;
-                        } else if (param.param_type === "color") {
-                            input = document.createElement("div");
-                            const colorPicker = new iro.ColorPicker(input, {
-                                width: 200,
-                                color: param.value,
-                                borderWidth: 1,
-                                borderColor: "#ccc",
-                            });
-                            colorPicker.on("input:end", color => updateParameter(name, color.hexString, param.param_type));
-                        } else if (param.param_type === "checkbox") {
-                            input = document.createElement("input");
-                            input.type = "checkbox";
-                            input.checked = param.value;
-                        } else {
-                            input = document.createElement("input");
-                            input.type = "text";
-                        }
-
-                        input.value = param.value;
-                        input.onchange = () => updateParameter(name, input.value, param.param_type);
-
-                        parametersDiv.appendChild(label);
-                        parametersDiv.appendChild(input);
-                        parametersDiv.appendChild(document.createElement("br"));
-                    }
-                });
-            fetch(`/set_effect`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ effect }),
-            })
-                .then(response => response.json())
-                .then(data => {
-                    console.log(`Effect set to ${effect}`);
-                })
-                .catch(error => console.error("Error setting effect:", error));
-        }*/
-
         function changeEffect() {
             const effect = document.getElementById("effect").value;
 
