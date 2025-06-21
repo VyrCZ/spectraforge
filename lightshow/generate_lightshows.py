@@ -342,7 +342,7 @@ def split_vertical(start_time, duration, color1, color2, steps=0, no_clear=False
         update_color_state(timestamp, colors)
 
 if __name__ == "__main__":
-    song_name = "overkill"
+    song_name = "cascade"
     parse_labels(f"lightshow/labels/{song_name}.txt")
     finalize_transparent()
     print(f"Color states: {color_states}")

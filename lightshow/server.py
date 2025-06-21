@@ -32,7 +32,7 @@ class DummyNeoPixel():
 
 # Server configuration
 AUDIO_FILE_PATH = "static/audio"
-song_name = "overkill"
+song_name = "cascade"
 BPM = 174  # Beats per minute
 offset = 0.2
 beat_interval = 60 / BPM  # Time between beats in seconds
