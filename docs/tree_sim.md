@@ -1,6 +1,6 @@
 # Tree Simulator documentation
 
-look at effects/flashy.py for a simple example
+The tree simulator is built as a replacement for the Effect class, which all effects have to inherit from. This new class handles the simulation, displaying and generating sample coordinates for the tree. Note that these coordinates are completely random and will look different than physical placement of lights in a ring formation. They are also not ordered like the physical lights, so any effects that rely on running along the line of lights will not work as expected.
 
 ## class Simulation
 

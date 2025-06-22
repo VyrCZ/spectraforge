@@ -4,3 +4,5 @@ __pycache__/
 .idea/
 images/*
 server/server_data.json
+calibration/images/*
+!calibration/images/structure.md

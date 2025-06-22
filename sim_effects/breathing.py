@@ -7,8 +7,8 @@ import os
 import asyncio
 # add parent directory to python path so I can import my scripts from inside of a subfolder
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-import mathutils as mu
-import tree_sim
+import modules.mathutils as mu
+import modules.tree_sim as tree_sim
 
 class Breathing(tree_sim.Simulation):
     """

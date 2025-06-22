@@ -1,6 +1,6 @@
 import time
 import colorsys
-import mathutils as mu
+import modules.mathutils as mu
 from bisect import bisect_right
 import pickle
 # CONSTANTS, GLOBAL VARIABLES

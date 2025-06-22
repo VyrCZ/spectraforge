@@ -1,3 +1,5 @@
+# script made to flip the y and z coordinates in a file named "coordinates.txt"
+
 # Open the file in read mode
 with open("coordinates.txt", "r") as file:
     # Read each line of the file

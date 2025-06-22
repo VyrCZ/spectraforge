@@ -1,5 +1,5 @@
 from effects.base_effect import LightEffect, ParamType
-import mathutils as mu
+import modules.mathutils as mu
 import time
 
 class Breathing(LightEffect):
