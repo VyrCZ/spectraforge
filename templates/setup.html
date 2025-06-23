@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>LED Control</title>
+    <script src="https://cdn.jsdelivr.net/npm/@jaames/iro@5"></script>
+    <script src="static/js/main.js"></script>
+    <script src="static/js/setup.js"></script>
+    <link rel="icon" href="static/icons/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+    <img src="static/icons/menu.svg" id="menu_icon" onclick="toggleMenu()">
+    <div id="menu_container">
+        {% include 'sidebar_menu.html' %}
+    </div>
+    <div id="effect_header">
+        <h1>Setup</h1>
+    </div>
+    <div id="setup_center">
+        <label for="setup">Setups:</label>
+        <select id="setup" name="setup">
+            {% for setup in setups %}
+            <option value="{{ setup }}">{{ setup }}</option>
+            {% endfor %}
+        </select>
+        <button id="new_setup_button" class="square" onclick="createNewSetup()"><img src="static/icons/plus.svg"></button>
+    </div>
+</body>
+</html>

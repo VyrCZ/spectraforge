@@ -31,6 +31,32 @@ class DummyNeoPixel():
 
     def __len__(self):
         return self.num_leds
+    
+class SetupType:
+    TWO_DIMENSIONAL = "2D"
+    THREE_DIMENSIONAL = "3D"
+    
+class Setup:
+    """
+    A class holding calibration data for the current setup of the LED strip.
+    """
+    def __init__(self, name: str, type: SetupType, coords: list[list[int]], creation_date: str | None = None):
+        self.name = name
+        self.creation_date = creation_date
+        self.type = type
+        self.coords = coords
+
+    @classmethod
+    def from_json(cls, name, data: dict):
+        """
+        Create a Setup instance from a JSON dictionary.
+        """
+        return cls(
+            name=name, # name is not stored in the JSON, it's the file name
+            type=data["type"],
+            coords=data["coordinates"],
+            creation_date=data.get("creation_date", None)
+        )
 
 # determine if running on windows to run debug instead
 if os.name == 'nt':
@@ -47,22 +73,26 @@ else:
     pixels = NeoPixel(PIN, LED_COUNT, auto_write=False)
     app = Flask(__name__)
 
-
-
-
-
 # Globals for effect management
 effects = {}
 current_effect = None
 running = True
-data = {}
+CONFIG_PATH = "config/server_config.json"
+SETUP_FOLDER = "config/setups"
 
-data = json.load(open("server_data.json"))
+# file storing current effect, parameters and current setup
+config = {}
+
+config = json.load(open(CONFIG_PATH))
+# load current setup
+setup_dir = json.load(open(os.path.join(SETUP_FOLDER, config.get("current_setup")+".json")))
+setup = Setup.from_json(config.get("current_setup"), setup_dir)
+
 #print(data)
 
 def save_data():
     #print(f"Saving data: {data}")
-    json.dump(data, open("server_data.json", "w"))
+    json.dump(config, open(CONFIG_PATH, "w"))
 
 def get_effect_name(effect):
     for name, eff in effects.items():
@@ -100,6 +130,20 @@ def page_index():
 def page_effects():
     return render_template("effects.html", effects=list(effects.keys()))
 
+
+# setup and calibration pages
+@app.route("/setup")
+def page_setup():
+    setups = []
+    if os.path.exists(SETUP_FOLDER):
+        setups = [f[:-5] for f in os.listdir(SETUP_FOLDER) if f.endswith(".json")]
+    # TODO: Handle case where no setups are available
+    return render_template("setup.html", current_setup=config.get("current_setup"), setups=setups)
+
+@app.route("/setup/new")
+def page_setup_new():
+    return render_template("setup_new.html")
+
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
@@ -121,9 +165,9 @@ def set_effect():
     print("Setting effect to", effect_name)
     if effect_name in effects:
         current_effect = effects[effect_name](pixels, coords)
-        data["current_effect"] = effect_name
+        config["current_effect"] = effect_name
         for param in current_effect.parameters.values():
-            last_value = data["parameters"].get(effect_name, {}).get(param.name, None)
+            last_value = config["parameters"].get(effect_name, {}).get(param.name, None)
             if last_value is not None:
                 param.set(last_value)    
         save_data()
@@ -145,46 +189,43 @@ def get_parameters(effect_name):
 @app.route("/set_parameter", methods=["POST"])
 def set_parameter():
     """Set a specific parameter for the current effect."""
-    global current_effect, data
+    global current_effect, config
     request_data = request.json
     param_name = request_data.get("name")
     value = request_data.get("value")
 
     if current_effect and param_name in current_effect.parameters:
         # Ensure "parameters" dictionary exists
-        if "parameters" not in data:
-            data["parameters"] = {}
+        if "parameters" not in config:
+            config["parameters"] = {}
 
         # Ensure the current effect's parameters dictionary exists
         effect_name = get_effect_name(current_effect)
-        if effect_name not in data["parameters"]:
-            data["parameters"][effect_name] = {}
+        if effect_name not in config["parameters"]:
+            config["parameters"][effect_name] = {}
 
         # Update the parameter value
         current_effect.parameters[param_name].set(value)
-        data["parameters"][effect_name][param_name] = value
+        config["parameters"][effect_name][param_name] = value
         save_data()
         return jsonify({"status": "success"})
     return jsonify({"status": "error", "message": "Invalid parameter"}), 400
 
 coords = []
 if __name__ == "__main__":
-    # load coordinates.txt
-    with open('coordinates.txt', 'r') as f:
-        for coord in f.readlines():
-            coords.append([int(value) for value in coord.strip().split(',')])
+    coords = setup.coords
     load_effects()
     # set current effect to the effect with the name stored in data
     current_effect = None
-    if data.get("current_effect") in effects:
-        current_effect = effects[data.get("current_effect")](pixels, coords)
+    if config.get("current_effect") in effects:
+        current_effect = effects[config.get("current_effect")](pixels, coords)
         for param in current_effect.parameters.values():
-            if data["parameters"].get(data["current_effect"], {}).get(param.name, None) is not None:
-                print(f"(Effect {get_effect_name(current_effect)}) Got last value for {param.name}: {data['parameters'][data['current_effect']][param.name]}")
-                param.set(data["parameters"][data["current_effect"]][param.name])
+            if config["parameters"].get(config["current_effect"], {}).get(param.name, None) is not None:
+                print(f"(Effect {get_effect_name(current_effect)}) Got last value for {param.name}: {config['parameters'][config['current_effect']][param.name]}")
+                param.set(config["parameters"][config["current_effect"]][param.name])
     if not current_effect:
         current_effect = list(effects.values())[0](pixels, coords)
-        data["current_effect"] = list(effects.keys())[0]
+        config["current_effect"] = list(effects.keys())[0]
         save_data()
     runner_thread = Thread(target=effect_runner, daemon=True)
     runner_thread.start()

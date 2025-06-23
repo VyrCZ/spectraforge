@@ -4,20 +4,20 @@
 <div id="menu_items">
     <a href="/">
         <div class="menu_item">
-            <img src="static/icons/home.svg" class="menu_icon">
+            <img src="{{ url_for('static', filename='icons/home.svg') }}" class="menu_icon">
             <p>Home</p>
         </div>
     </a>
     <a href="/effects">
         <div class="menu_item">
-            <img src="static/icons/lightbulb.svg" class="menu_icon">
+            <img src="{{ url_for('static', filename='icons/lightbulb.svg') }}" class="menu_icon">
             <p>Effects</p>
         </div>
     </a>
-    <a href="/status">
+    <a href="/setup">
         <div class="menu_item">
-            <img src="static/icons/info.svg" class="menu_icon">
-            <p>Status</p>
+            <img src="{{ url_for('static', filename='icons/wrench.svg') }}" class="menu_icon">
+            <p>Setup</p>
         </div>
     </a>
 </div>

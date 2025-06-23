@@ -1,4 +1,4 @@
-from effects.base_effect import LightEffect
+from modules.effect import LightEffect
 import time
 
 class Lightshow(LightEffect):

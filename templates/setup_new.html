@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>LED Control</title>
+    <script src="https://cdn.jsdelivr.net/npm/@jaames/iro@5"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/setup.js') }}"></script>
+    <link rel="icon" href="{{ url_for('static', filename='icons/favicon.ico') }}" type="image/x-icon">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <img src="{{ url_for('static', filename='icons/menu.svg') }}" id="menu_icon" onclick="toggleMenu()">
+    <div id="menu_container">
+        {% include 'sidebar_menu.html' %}
+    </div>
+    <div id="effect_header">
+        <h1>New Setup</h1>
+    </div>
+    <div class="setup_step" id="setup_step_1">
+        <form id="setup_form">
+            <label for="setup_name">Setup Name (no spaces):</label>
+            <input type="text" id="setup_name" name="setup_name" required>
+            <label for="setup_type">Setup Type:</label>
+            <select id="setup_type" name="setup_type" required>
+                <option value="2D">2D</option>
+                <option value="3D">3D</option>
+            </select>
+            <button type="button" id="next_step_button" class="square" onclick="nextStep()">
+                Next
+            </button>
+        </form>
+        <p>Welcome to the setup wizard! Here you can calibrate your lights and create a new setup.
+            <br>Make sure go through this wizard on a computer! 
+            <br>This process will take about 20-30 minutes and you need a webcam in front of the lights.
+            <br>In case you don't have a webcam, you can use a phone app like DroidCam to use your phone as a webcam.
+            <br>Click next to start the setup process.
+        </p>
+    </div>
+    <div class="setup_step" id="setup_step_2" style="display: none;">
+        <h2>Setup Instructions</h2>
+        <p>Follow these steps to set up your lights:</p>
+        <ol>
+            <li>Place the lights in the desired position.</li>
+            <li>Ensure the webcam is securely mounted in a position to capture all lights.</li>
+            <li class="instruction_3d">For a 3D setup, make sure to mark the position of the object you mount the lights on, so you don't move sideways it while rotating.</li>
+            <li>Click "Start Calibration" to begin the calibration process.</li>
+        </ol>
+        <button type="button" id="start_calibration_button" class="square" onclick="startCalibration()">
+            Start Calibration
+        </button>
+    </div>
+</body>
+</html>

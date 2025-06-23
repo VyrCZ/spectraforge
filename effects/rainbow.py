@@ -1,4 +1,4 @@
-from effects.base_effect import LightEffect, ParamType
+from modules.effect import LightEffect, ParamType
 import modules.mathutils as mu
 import time
 import colorsys
