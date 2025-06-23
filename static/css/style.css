@@ -35,7 +35,6 @@ body {
     left: 12px;
     width: 40px;
     height: 40px;
-    background-image: url('/static/images/menu_icon.png');
     background-size: cover;
     cursor: pointer;
     z-index: 20;
@@ -128,16 +127,19 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border: 1px solid #ddd;
+    border: 1px solid #999;
+    background-color: #202020;
     border-radius: 10px;
     padding-left:10px;
     padding-right:10px;
     margin-top: 20px;
+    cursor: pointer;
 }
 
 .effect_container.active{
     width: 60%;
     margin-bottom: 20px;
+    cursor: default;
 }
 
 #active_effect_container #effect_name{
@@ -151,5 +153,21 @@ body {
     padding: 2px 8px; /* Inner spacing */
     font-size: 14px;
     display: inline-block;
+}
+
+#parameters{
+    padding-left: 5vh;
+    padding-right: 5vh;
+}
+
+.parameter_container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.parameter_container label {
+    font-size: 1em;
 }
 

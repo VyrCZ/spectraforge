@@ -1,17 +1,15 @@
-function changeEffect() {
-    const effect = document.getElementById("effect").value;
-
+function changeEffect(effectName) {
     // Update the server about the selected effect
     fetch(`/set_effect`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ effect }),
+        body: JSON.stringify({ effect: effectName }),
     })
         .then(response => response.json())
         .then(data => {
-            console.log(`Effect set to ${effect}`);
+            console.log(`Effect set to ${effectName}`);
             // go back to the main page
-            window.location.href = "/index";
+            window.location.href = "/";
         })
         .catch(error => console.error("Error setting effect:", error));
 }
@@ -39,9 +37,10 @@ function getState(handleParams = true) {
     .then(data => {
         const { current_effect, parameters } = data;
         // set the name of the current effect
-        const effectText = document.getElementsByClassName("active effect_container").item(0);
+        const effectText = document.querySelector(".active.effect_container").querySelector("p");
         if (effectText) {
             effectText.textContent = current_effect;
+            console.log(`Setting current effect to: ${current_effect}`);
         } else {
             console.error("No active effect container found.");
         }
@@ -57,6 +56,8 @@ function getState(handleParams = true) {
 
                 // Update parameters dynamically
                 for (const [name, param] of Object.entries(parameterData)) {
+                    const container = document.createElement("div");
+                    container.className = "parameter_container";
                     const label = document.createElement("label");
                     label.textContent = `${name}: `;
 
@@ -88,10 +89,10 @@ function getState(handleParams = true) {
                     }
 
                     input.onchange = () => updateParameter(name, input.value, param.param_type);
-
-                    parametersDiv.appendChild(label);
-                    parametersDiv.appendChild(input);
-                    parametersDiv.appendChild(document.createElement("br"));
+                    parametersDiv.appendChild(container);
+                    container.appendChild(label);
+                    container.appendChild(input);
+                    //parametersDiv.appendChild(document.createElement("br"));
                 }
             })
             .catch(error => console.error("Error fetching parameters:", error));[]
@@ -99,5 +100,13 @@ function getState(handleParams = true) {
         .catch(error => console.error("Error fetching current effect:", error));
 }
 
-// Load initial parameters for the default effect on page load
-document.addEventListener("DOMContentLoaded", getState);
+function toggleMenu() {
+    const menu = document.getElementById("menu_container");
+    if (menu.style.display === "block") {
+        menu.style.display = "none";
+    } else {
+        menu.style.display = "block";
+    }
+}
+
+// Functions are called straight from the HTML

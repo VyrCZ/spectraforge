@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>LED Control</title>
+    <script src="https://cdn.jsdelivr.net/npm/@jaames/iro@5"></script>
+    <script src="static/js/main.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", getState);
+    </script>
+    <link rel="icon" href="static/icons/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+    <img src="static/icons/menu.svg" id="menu_icon" onclick="toggleMenu()">
+    <div id="menu_container">
+        {% include 'sidebar_menu.html' %}
+    </div>
+    <div id="center_container">
+        <img src="static/icons/favicon.ico" id="center_image">
+        <p style="font-size: 2em">Lights are active!</p>
+        <div class="active effect_container" style="cursor: pointer;" onclick="document.location.href='/effects'">
+            <p>Active Effect Name</p>
+            <div class="effect_tag">
+                Universal
+            </div>
+        </div>
+		<h2>Parameters</h2>
+    </div>
+    <div id="parameters"></div>
+</body>
+</html>

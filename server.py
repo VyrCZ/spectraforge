@@ -2,18 +2,21 @@ import os
 import importlib
 from flask import Flask, render_template, request, jsonify, send_from_directory
 from threading import Thread
-from neopixel import NeoPixel
-import board
 import json
 
 # set working directory to the directory of this file
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 class DummyNeoPixel():
-    def __init__(self, pin, num_leds, auto_write):
+    """
+    A replacement for the NeoPixel class when running on Windows or for debugging purposes.
+    This class simulates the behavior of NeoPixel without actual hardware interaction.
+    """
+    def __init__(self, pin, num_leds, auto_write, print_pixels=True):
         self.num_leds = num_leds
         self.pixels = [(0, 0, 0)] * num_leds
         self.auto_write = auto_write
+        self.print_pixels = print_pixels
 
     def __setitem__(self, key, value):
         self.pixels[key] = value
@@ -23,15 +26,30 @@ class DummyNeoPixel():
             self.pixels[i] = color
 
     def show(self):
-        print(self.pixels)
+        if self.print_pixels:
+            print(self.pixels)
 
-# LED Configuration
-LED_COUNT = 200  # Adjust to your LED strip
-PIN = board.D18
-pixels = NeoPixel(PIN, LED_COUNT, auto_write=False)
+    def __len__(self):
+        return self.num_leds
 
-# Flask app
-app = Flask(__name__)
+# determine if running on windows to run debug instead
+if os.name == 'nt':
+    #import sys
+    LED_COUNT = 200
+    pixels = DummyNeoPixel(18, LED_COUNT, auto_write=False, print_pixels=False)
+    app = Flask(__name__)
+else:
+    from neopixel import NeoPixel
+    import board
+    # LED Configuration
+    LED_COUNT = 200
+    PIN = board.D18
+    pixels = NeoPixel(PIN, LED_COUNT, auto_write=False)
+    app = Flask(__name__)
+
+
+
+
 
 # Globals for effect management
 effects = {}

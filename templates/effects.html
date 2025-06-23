@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>LED Control</title>
+    <script src="https://cdn.jsdelivr.net/npm/@jaames/iro@5"></script>
+    <script src="static/js/main.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            getState(false);
+        });
+    </script>
+    <link rel="icon" href="static/icons/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+    <img src="static/icons/menu.svg" id="menu_icon" onclick="toggleMenu()">
+    <div id="menu_container">
+        {% include 'sidebar_menu.html' %}
+    </div>
+    <div id="effect_header">
+        <h1>Effects</h1>
+        <div class="active effect_container">
+            <p>Active Effect Name</p>
+            <div class="effect_tag debug_border">
+                Universal
+            </div>
+        </div>
+    </div>
+    <div id="effects_container">
+        {% for effect in effects %}
+        <div class="effect_container" onclick="changeEffect('{{ effect }}')">
+            <p>{{ effect }}</p>
+            <div class="effect_tag debug_border">
+                Universal
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
