@@ -3,6 +3,7 @@
 <head>
     <title>LED Control</title>
     <script src="https://cdn.jsdelivr.net/npm/@jaames/iro@5"></script>
+    <script src="https://cdn.socket.io/4.8.1/socket.io.js"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script src="{{ url_for('static', filename='js/setup.js') }}"></script>
     <link rel="icon" href="{{ url_for('static', filename='icons/favicon.ico') }}" type="image/x-icon">
@@ -45,9 +46,22 @@
             <li class="instruction_3d">For a 3D setup, make sure to mark the position of the object you mount the lights on, so you don't move sideways it while rotating.</li>
             <li>Click "Start Calibration" to begin the calibration process.</li>
         </ol>
-        <button type="button" id="start_calibration_button" class="square" onclick="startCalibration()">
+        <button type="button" id="start_calibration_button" class="square" onclick="nextStep()">
             Start Calibration
         </button>
+    </div>
+    <div class="setup_step" id="setup_step_3" style="display: none;">
+        <div id="webcam_container">
+            <video id="webcam_video" autoplay></video>
+            <canvas id="webcam_canvas"></canvas>
+        <button type="button" id="capture_button" class="square" onclick="takePhoto()">
+            Debug Capture
+        </button>
+        </div>
+    </div>
+    <div class="setup_step" id="setup_step_4" style="display: none;">
+        <canvas id="led_pos_canvas"></canvas>
+        <button type="button" id="send_led_position_button" onclick="sendLedPosition()">Confirm</button>
     </div>
 </body>
 </html>

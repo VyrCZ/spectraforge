@@ -1,6 +1,6 @@
 function changeEffect(effectName) {
     // Update the server about the selected effect
-    fetch(`/set_effect`, {
+    fetch(`/api/set_effect`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ effect: effectName }),
@@ -20,7 +20,7 @@ function updateParameter(name, value, type) {
     if (type === "checkbox") {
         value = value === "on" || value === true; // Convert checkbox value to boolean
     }
-    fetch("/set_parameter", {
+    fetch("/api/set_parameter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, value }),
@@ -33,7 +33,7 @@ function updateParameter(name, value, type) {
 }
 
 function getState(handleParams = true) {
-    fetch('/get_state')
+    fetch('/api/get_state')
     .then(response => response.json())
     .then(data => {
         const { current_effect, parameters } = data;
@@ -49,7 +49,7 @@ function getState(handleParams = true) {
             return; // Exit if we are not handling parameters
         }
         // Fetch and display parameters for the current effect
-        fetch(`/get_parameters/${current_effect}`)
+        fetch(`/api/get_parameters/${current_effect}`)
             .then(response => response.json())
             .then(parameterData => {
                 const parametersDiv = document.getElementById('parameters');

@@ -17,13 +17,16 @@
         <h1>Setup</h1>
     </div>
     <div id="setup_center">
-        <label for="setup">Setups:</label>
-        <select id="setup" name="setup">
-            {% for setup in setups %}
-            <option value="{{ setup }}">{{ setup }}</option>
-            {% endfor %}
-        </select>
-        <button id="new_setup_button" class="square" onclick="createNewSetup()"><img src="static/icons/plus.svg"></button>
+        <h2 for="setup">Setups:</label>
+        <br>
+        <div style="display: flex; align-items: center; flex-direction: row;">
+            <select id="setup_select" name="setup">
+                {% for setup in setups %}
+                <option value="{{ setup }}">{{ setup }}</option>
+                {% endfor %}
+            </select>
+            <button id="new_setup_button" class="icon" onclick="createNewSetup()"><img src="static/icons/plus.svg"></button>
+        </div>
     </div>
 </body>
 </html>

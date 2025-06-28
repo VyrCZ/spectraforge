@@ -23,3 +23,9 @@ class Setup:
             coords=data["coordinates"],
             creation_date=data.get("creation_date", None)
         )
+    
+    def get_formatted_name(self):
+        """
+        Get the name of the setup in a file-safe format.
+        """
+        return self.name.replace(" ", "_").replace("/", "_").replace("\\", "_").lower()

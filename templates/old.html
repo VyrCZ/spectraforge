@@ -47,7 +47,7 @@
             const effect = document.getElementById("effect").value;
 
             // Update the server about the selected effect
-            fetch(`/set_effect`, {
+            fetch(`/api/set_effect`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ effect }),
@@ -66,7 +66,7 @@
             if (type === "checkbox") {
                 value = document.querySelector(`input[name="${name}"]`).checked;
             }
-            fetch("/set_parameter", {
+            fetch("/api/set_parameter", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ name, value }),
@@ -79,7 +79,7 @@
         }
 
         function getState() {
-            fetch('/get_state')
+            fetch('/api/get_state')
                 .then(response => response.json())
                 .then(data => {
                     const { current_effect, parameters } = data;
@@ -89,7 +89,7 @@
                     effectDropdown.value = current_effect;
 
                     // Fetch and display parameters for the current effect
-                    fetch(`/get_parameters/${current_effect}`)
+                    fetch(`/api/get_parameters/${current_effect}`)
                         .then(response => response.json())
                         .then(parameterData => {
                             const parametersDiv = document.getElementById('parameters');
