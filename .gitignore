@@ -7,3 +7,6 @@ server/server_data.json
 calibration/images/*
 !calibration/images/structure.md
 config/**/*.json
+**.jpg
+**.jpeg
+**.png

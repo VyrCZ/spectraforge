@@ -6,16 +6,16 @@ from threading import Thread
 from modules.engine import Engine
 from modules.engine_manager import EngineManager
 from modules.setup import Setup
+from modules.config_manager import Config
 
 class EffectsEngine(Engine):
     """
     The star of the show, the EffectsEngine is responsible for managing effect scripts and their execution.
     """
 
-    CONFIG_PATH = "config/server_config.json"
     SETUP_FOLDER = "config/setups"
 
-    def __init__(self, pixels):
+    def __init__(self, pixels, init_setup):
         self.pixels = pixels
         self.current_effect = None
         self.effects = {}
@@ -23,22 +23,20 @@ class EffectsEngine(Engine):
         self.runner_thread = None
 
         # file storing current effect, parameters and current setup
-        self.config = json.load(open(self.CONFIG_PATH))
         # load current setup
-        setup_dir = json.load(open(os.path.join(self.SETUP_FOLDER, self.config.get("current_setup")+".json")))
-        self.setup = Setup.from_json(self.config.get("current_setup"), setup_dir)
-        self.coords = self.setup.coords
+        #self.setup = init_setup
+        #self.coords = self.setup.coords
 
     def on_enable(self):
         print("EffectsEngine enabled.")
         self.load_effects()
         
-        effect_name = self.config.get("current_effect")
+        effect_name = Config().get("current_effect")
         if effect_name in self.effects:
             self.current_effect = self.effects[effect_name](self.pixels, self.coords)
             # load parameters
             for param in self.current_effect.parameters.values():
-                last_value = self.config.get("parameters", {}).get(effect_name, {}).get(param.name)
+                last_value = Config().get("parameters", {}).get(effect_name, {}).get(param.name)
                 if last_value is not None:
                     param.set(last_value)
         else:
@@ -46,8 +44,7 @@ class EffectsEngine(Engine):
             if self.effects:
                 effect_name = list(self.effects.keys())[0]
                 self.current_effect = list(self.effects.values())[0](self.pixels, self.coords)
-                self.config["current_effect"] = effect_name
-                self.save_data()
+                Config()["current_effect"] = effect_name
 
         self.running = True
         self.runner_thread = Thread(target=self.effect_runner, daemon=True)
@@ -58,12 +55,12 @@ class EffectsEngine(Engine):
         self.running = False
         if self.runner_thread:
             self.runner_thread.join()
-        self.save_data()
         self.pixels.fill((0, 0, 0))
         self.pixels.show()
-        
-    def save_data(self):
-        json.dump(self.config, open(self.CONFIG_PATH, "w"))
+
+    def on_setup_changed(self, setup):
+        self.setup = setup
+        self.coords = setup.coords
 
     def get_effect_name(self, effect):
         for name, eff_class in self.effects.items():
@@ -91,7 +88,6 @@ class EffectsEngine(Engine):
                 #print(f"Running effect {self.current_effect.__class__.__name__}")
                 self.current_effect.update()
 
-
     @EngineManager.requires_active
     def get_state(self):
         """Return the current state of the LED strip."""
@@ -118,12 +114,11 @@ class EffectsEngine(Engine):
         print("Setting effect to", effect_name)
         if effect_name in self.effects:
             self.current_effect = self.effects[effect_name](self.pixels, self.coords)
-            self.config["current_effect"] = effect_name
+            Config()["current_effect"] = effect_name
             for param in self.current_effect.parameters.values():
-                last_value = self.config.get("parameters", {}).get(effect_name, {}).get(param.name, None)
+                last_value = Config().get("parameters", {}).get(effect_name, {}).get(param.name, None)
                 if last_value is not None:
                     param.set(last_value)    
-            self.save_data()
             print(f"Set effect to {effect_name}")
             return {"status": "success", "current_effect": effect_name}
         return {"status": "error", "message": "Effect not found"}
@@ -141,15 +136,14 @@ class EffectsEngine(Engine):
     def set_parameter(self, param_name, value):
         """Set a specific parameter for the current effect."""
         if self.current_effect and param_name in self.current_effect.parameters:
-            if "parameters" not in self.config:
-                self.config["parameters"] = {}
+            if "parameters" not in Config():
+                Config()["parameters"] = {}
 
             effect_name = self.get_effect_name(self.current_effect)
-            if effect_name not in self.config["parameters"]:
-                self.config["parameters"][effect_name] = {}
+            if effect_name not in Config()["parameters"]:
+                Config()["parameters"][effect_name] = {}
 
             self.current_effect.parameters[param_name].set(value)
-            self.config["parameters"][effect_name][param_name] = value
-            self.save_data()
+            Config()["parameters"][effect_name][param_name] = value
             return {"status": "success"}
         return {"status": "error", "message": "Invalid parameter"}

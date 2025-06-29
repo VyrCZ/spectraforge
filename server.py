@@ -5,6 +5,7 @@ from modules.engine_effects import EffectsEngine
 from modules.engine_calibration import CalibrationEngine
 from modules.setup import SetupType
 from flask_socketio import SocketIO, emit
+import json
 
 # set working directory to the directory of this file
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -35,6 +36,7 @@ class DummyNeoPixel():
         return self.num_leds
 
 LED_COUNT = 200
+CONFIG_PATH = "config/server_config.json"
 # determine if running on windows to run debug instead
 if os.name == 'nt':
     #import sys
@@ -111,6 +113,19 @@ def page_setup():
 @app.route("/setup/new")
 def page_setup_new():
     return render_template("setup_new.html")
+
+@app.route("/api/change_setup", methods=["POST"])
+def change_setup():
+    """Change the current setup."""
+    request_data = request.json
+    setup_name = request_data.get("name")
+    if not setup_name:
+        return jsonify({"status": "error", "message": "Setup name is required."}), 400
+    try:
+        effects_engine.change_setup(setup_name)
+        return jsonify({"status": "success", "message": f"Changed to setup '{setup_name}'."})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 # Calibration API endpoints
 
@@ -197,9 +212,16 @@ def setup_done_callback():
     socketio.emit("setup_done")
 
 if __name__ == "__main__":
+    # Load configuration
+    if os.path.exists(CONFIG_PATH):
+        with open(CONFIG_PATH, "r") as f:
+            config = json.load(f)
+    else:
+        config = {"current_setup": None, "current_effect": None, "parameters": {}}
     manager = EngineManager()
-    effects_engine = EffectsEngine(pixels)
+    effects_engine = EffectsEngine(pixels, manager.active_setup)
     calibration_engine = CalibrationEngine(pixels, take_photo_callback, send_image_callback, setup_done_callback)
+
     # IMPORTANT! Always register the effects engine first, as it is the main engine.
     manager.register_engine(effects_engine)
     manager.register_engine(calibration_engine)

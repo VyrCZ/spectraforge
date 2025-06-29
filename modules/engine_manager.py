@@ -1,21 +1,38 @@
 from functools import wraps
 from modules.engine import Engine
+from modules.setup import Setup
+from modules.config_manager import Config
+import json
 
 class EngineManager:
-    _instance = None  # ← Added for singleton**
-    _initialized = False  # ← Added guard so __init__ only runs once**
+    """
+    A singleton class responsible for managing multiple engines and ensuring that only one engine is active at a time.
+    This class also handles the setup system, calling engines when the setup is changed.
+    All engines must decorate their methods communicating with the app, especially when modifying the LED state with the `@EngineManager.requires_active` decorator to ensure that the engine is active and others are not before executing the method.
+    """
+    _instance = None
+    _initialized = False
+    SETUPS_FOLDER = "config/setups"
 
     def __new__(cls, *args, **kwargs):
-        if cls._instance is None:  # ← Ensure only one instance ever created
+        if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance
 
     def __init__(self):
         if self.__class__._initialized:
-            return  # ← Skip if already initialized
+            return
         self.engines = []
         self.active_engine = None
-        self.__class__._initialized = True  # ← Mark init-done**
+        active_setup_name = Config().get("current_setup", None)
+        if active_setup_name:
+            try:
+                with open(f"{self.SETUPS_FOLDER}/{active_setup_name}.json", "r") as f:
+                    active_setup_data = json.load(f)
+            except FileNotFoundError:
+                print(f"Setup {active_setup_name} not found, using default setup.")
+        self.active_setup = Setup.from_json(active_setup_name, active_setup_data) if active_setup_name else None
+        self.__class__._initialized = True
 
     def register_engine(self, engine: Engine):
         """
@@ -26,6 +43,7 @@ class EngineManager:
         else:
             print(f"Engine {engine} is already registered.")
         if self.active_engine is None:
+            engine.on_setup_changed(self.active_setup)
             engine.on_enable()
             self.active_engine = engine
         engine.manager = self
@@ -55,3 +73,12 @@ class EngineManager:
         def __init__(self, engine):
             super().__init__(f"Engine {engine} is not registered.")
             self.engine = engine
+
+    def change_setup(self, setup: Setup):
+        """
+        Change the current setup and notify all of the engines.
+        """
+        for engine in self.engines:
+            engine.on_setup_changed(setup)
+        self.active_setup = setup
+        
