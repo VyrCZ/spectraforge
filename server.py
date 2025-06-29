@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, jsonify, send_from_directory
 from modules.engine_manager import EngineManager
 from modules.engine_effects import EffectsEngine
 from modules.engine_calibration import CalibrationEngine
+from modules.setup import SetupType
 from flask_socketio import SocketIO, emit
 
 # set working directory to the directory of this file
@@ -55,26 +56,6 @@ def page_index():
 @app.route("/effects")
 def page_effects():
     return render_template("effects.html", effects=list(effects_engine.effects.keys()))
-
-
-# setup and calibration pages
-@app.route("/setup")
-def page_setup():
-    setups = []
-    if os.path.exists(effects_engine.SETUP_FOLDER):
-        setups = [f[:-5] for f in os.listdir(effects_engine.SETUP_FOLDER) if f.endswith(".json")]
-    # TODO: Handle case where no setups are available
-    return render_template("setup.html", current_setup=effects_engine.config.get("current_setup"), setups=setups)
-
-@app.route("/setup/new")
-def page_setup_new():
-    return render_template("setup_new.html")
-
-@app.route("/start_calibration")
-def page_start_calibration():
-    """Start the calibration process."""
-    calibration_engine.start_calibration()
-    return jsonify({"status": "success", "message": "Calibration started."})
     
 
 @app.route('/favicon.ico')
@@ -116,6 +97,43 @@ def set_parameter():
         return jsonify(result)
     return jsonify(result), 400
 
+# Setup API endpoints
+
+# setup and calibration pages
+@app.route("/setup")
+def page_setup():
+    setups = []
+    if os.path.exists(effects_engine.SETUP_FOLDER):
+        setups = [f[:-5] for f in os.listdir(effects_engine.SETUP_FOLDER) if f.endswith(".json")]
+    # TODO: Handle case where no setups are available
+    return render_template("setup.html", current_setup=effects_engine.config.get("current_setup"), setups=setups)
+
+@app.route("/setup/new")
+def page_setup_new():
+    return render_template("setup_new.html")
+
+# Calibration API endpoints
+
+@app.route("/api/calibration/new_setup", methods=["POST"])
+def new_setup():
+    """Create a new calibration setup."""
+    request_data = request.json
+    setup_name = request_data.get("name")
+    setup_type = request_data.get("type")
+    # cast setup_type to SetupType enum if necessary
+    if not setup_name or not setup_type:
+        return jsonify({"status": "error", "message": "Setup name and type are required."}), 400
+    try:
+        setup_type = SetupType(setup_type)
+    except ValueError as e:
+        return jsonify({"status": "error", "message": str(e)}), 400
+    try:
+        calibration_engine.new_setup(setup_name, setup_type)
+        return jsonify({"status": "success", "message": f"New setup '{setup_name}' created."})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
 @app.route("/api/calibration/show_pixel", methods=["POST"])
 def show_pixel():
     """Show a specific pixel in the calibration engine."""
@@ -129,7 +147,7 @@ def show_pixel():
         return jsonify({"status": "success", "message": f"Pixel {index} set to {color}."})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
-    
+
 @socketio.on("photo_start")
 def connect_calibration():
     """Connect to the calibration engine."""
@@ -147,7 +165,6 @@ def send_image_callback(image_data, x, y):
 @socketio.on("photo_data")
 def receive_photo_data(data):
     calibration_engine.receive_photo_data(data)
-    
     
 @app.route("/api/calibration/upload_pixel_image", methods=["POST"])
 def upload_pixel_image():
@@ -170,16 +187,19 @@ def receive_led_position(data):
     if x is None or y is None:
         emit("led_position_error", {"status": "error", "message": "X and Y coordinates are required."})
         return
-    try:
-        calibration_engine.receive_image_position(x, y)
-        emit("led_position_success", {"status": "success", "message": f"LED position set to ({x}, {y})."})
-    except Exception as e:
-        emit("led_position_error", {"status": "error", "message": str(e)})
+    #try:
+    calibration_engine.receive_image_position(x, y)
+    #except Exception as e:
+        #print(f"Error receiving LED position: {e}")
+
+def setup_done_callback():
+    """Callback for when the setup is done."""
+    socketio.emit("setup_done")
 
 if __name__ == "__main__":
     manager = EngineManager()
     effects_engine = EffectsEngine(pixels)
-    calibration_engine = CalibrationEngine(pixels, take_photo_callback, send_image_callback)
+    calibration_engine = CalibrationEngine(pixels, take_photo_callback, send_image_callback, setup_done_callback)
     # IMPORTANT! Always register the effects engine first, as it is the main engine.
     manager.register_engine(effects_engine)
     manager.register_engine(calibration_engine)

@@ -206,3 +206,12 @@ button.icon{
 #setup_center{
     padding: 5vh;
 }
+
+.devider {
+    width: 100%;
+    height: 1px;
+    background-color: #999;
+    margin-top: 10px;
+    margin-right: 10px;
+    margin-left: 10px;
+}

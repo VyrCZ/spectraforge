@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <title>LED Control</title>
     <script src="https://cdn.jsdelivr.net/npm/@jaames/iro@5"></script>
@@ -8,6 +9,7 @@
     <link rel="icon" href="static/icons/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="static/css/style.css">
 </head>
+
 <body>
     <img src="static/icons/menu.svg" id="menu_icon" onclick="toggleMenu()">
     <div id="menu_container">
@@ -16,17 +18,21 @@
     <div id="effect_header">
         <h1>Setup</h1>
     </div>
-    <div id="setup_center">
-        <h2 for="setup">Setups:</label>
-        <br>
-        <div style="display: flex; align-items: center; flex-direction: row;">
-            <select id="setup_select" name="setup">
-                {% for setup in setups %}
-                <option value="{{ setup }}">{{ setup }}</option>
-                {% endfor %}
-            </select>
-            <button id="new_setup_button" class="icon" onclick="createNewSetup()"><img src="static/icons/plus.svg"></button>
+    <div id="effects_container">
+        <h2>Setups:</h2>
+        <div class="effect_container" onclick="createNewSetup()">
+            <p>Create a new setup</p>
+            <img src="{{ url_for('static', filename='icons/plus.svg') }}" alt="Add Icon" class="add_icon">
         </div>
+        <div class="devider"></div>
+        {% for setup in setups %}
+        <div class="effect_container" onclick="changeSetup('{{ setup }}')">
+            <p>{{ setup }}</p>
+            <div class="effect_tag debug_border">
+                Universal
+            </div>
+        </div>
+        {% endfor %}
     </div>
 </body>
 </html>

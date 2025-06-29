@@ -7,6 +7,7 @@ from modules.setup import SetupType, Setup
 from datetime import datetime
 from PIL import Image
 import numpy as np
+import json
 
 class CalibrationEngine(Engine):
     """
@@ -14,12 +15,14 @@ class CalibrationEngine(Engine):
     """
 
     IMAGE_DIR_ROOT = "calibration/images/"
+    SETUP_DIR_ROOT = "config/setups/"
 
-    def __init__(self, pixels, take_photo_callback, send_image_callback):
+    def __init__(self, pixels, take_photo_callback, send_image_callback, setup_done_callback):
         self.pixels = pixels
         self.pixel_count = 3 # TODO: replace with the actual pixel count
         self.take_photo_callback = take_photo_callback
         self.send_image_callback = send_image_callback
+        self.setup_done_callback = setup_done_callback
         self.calibration_color = (255, 0, 0)  # Red color for calibration
         self.current_setup = None
         self.image_dir = os.path.join(self.IMAGE_DIR_ROOT, datetime.now().strftime("%Y-%m-%d")) # fallback, just in case
@@ -35,8 +38,7 @@ class CalibrationEngine(Engine):
         """
         Initialize the calibration engine with a new setup.
         """
-        self.positions = []
-        self.current_setup = Setup(setup_name, setup_type, [], datetime.now().strftime("%Y-%m-%d"))
+        self.current_setup = Setup(setup_name, setup_type, [])
         self.image_dir = os.path.join(self.IMAGE_DIR_ROOT, self.current_setup.get_formatted_name())
 
     @EngineManager.requires_active
@@ -62,7 +64,7 @@ class CalibrationEngine(Engine):
         self.pixels[self.current_index] = self.calibration_color
         self.pixels.show()
         # give time to the camera to focus
-        #time.sleep(2) TODO: remove this after testing
+        time.sleep(0.5) #TODO: remove this after testing
         print(f"Showing pixel {self.current_index}.")
         self.take_photo_callback()
 
@@ -90,7 +92,7 @@ class CalibrationEngine(Engine):
             image_file.write(image_bytes)
 
         #if self.current_index < len(self.pixels):
-        if self.current_index <= self.pixel_count: # testing
+        if self.current_index < self.pixel_count - 1: # testing
             self.next_pixel()
         else:
             self.start_editing()
@@ -114,15 +116,34 @@ class CalibrationEngine(Engine):
         brightest_value = np.max(image_array)
         brightest_pixels = np.where(image_array == brightest_value)
 
-        # Average out coordinates of brightest pixels
-        brightest_y = int(np.mean(brightest_pixels[0]))
-        brightest_x = int(np.mean(brightest_pixels[1]))
-        return brightest_x, brightest_y
+        # get the center of the brightest pixels
+        center_y = int(np.mean(brightest_pixels[0]))
+        center_x = int(np.mean(brightest_pixels[1]))
+
+        # calculate the distance from the center of the image, remove if too far
+        DISTANCE_THRESHOLD = 30  # Threshold of pixels from the center to consider as the LED position
+
+        # recalculate the center of the brightest pixels
+        filtered_pixels_y = []
+        filtered_pixels_x = []
+
+        for y, x in zip(brightest_pixels[0], brightest_pixels[1]):
+            distance = np.sqrt((x - center_x)**2 + (y - center_y)**2)
+            if distance <= DISTANCE_THRESHOLD:
+                filtered_pixels_y.append(y)
+                filtered_pixels_x.append(x)
+
+        if filtered_pixels_x and filtered_pixels_y:
+            center_x = int(np.mean(filtered_pixels_x))
+            center_y = int(np.mean(filtered_pixels_y))
+        
+        return center_x, center_y
+        
 
     def send_next_image(self):
         # get the led position from the image, then convert the image to base64
         self.current_index += 1
-        x, y = self.get_image_led_position(f"{self.current_index}.png")
+        x, y = self.calculate_led_position(f"{self.current_index}.png")
         base64_image = base64.b64encode(open(os.path.join(self.image_dir, f"{self.current_index}.png"), "rb").read()).decode('utf-8')
         image_data = f"data:image/png;base64,{base64_image}"
         self.send_image_callback(image_data, x, y)
@@ -130,8 +151,19 @@ class CalibrationEngine(Engine):
     @EngineManager.requires_active
     def receive_image_position(self, x, y):
         print(f"Received image position: ({x}, {y}) for pixel {self.current_index}.")
-        self.positions.append((self.current_index, x, y))
-        if self.current_index < self.pixel_count:
+        self.current_setup.coords.append((x, y))
+        if self.current_index < self.pixel_count - 1:
             self.send_next_image()
         else:
-            print("All images processed. Finalizing setup.")
+            self.finish_setup()
+
+    def finish_setup(self):
+        setup_data = {
+            "type": str(self.current_setup.type.value),
+            "coordinates": self.current_setup.coords
+        }
+        setup_file_path = os.path.join(self.SETUP_DIR_ROOT, f"{self.current_setup.get_formatted_name()}.json")
+        with open(setup_file_path, "w") as setup_file:
+            json.dump(setup_data, setup_file, indent=4)
+        print(f"Setup {self.current_setup.get_formatted_name()} saved to {setup_file_path}.")
+        self.setup_done_callback()

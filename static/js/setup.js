@@ -31,6 +31,16 @@ function nextStep() {
             return;
         }
         setupType = document.querySelector('#setup_type').value;
+        fetch('/api/calibration/new_setup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name: name,
+                type: setupType
+            })
+        })
     }
     else if (currentStep === 2) {
         setupCamera();
@@ -56,44 +66,47 @@ function setupCamera() {
     navigator.mediaDevices.getUserMedia({ video: true })
         .then((stream) => {
             video.srcObject = stream;
+            socket = io.connect();
+            console.log("Setting up camera...");
+
+            socket.on("connect", () => {
+                socket.emit("photo_start");
+            });
+        
+            socket.on("take_photo", async () => {
+                const imageData = await capturePhoto();
+                socket.emit("photo_data", { image: imageData });
+            });
+        
+            socket.on("edit_photo_data", ({ image, x, y }) => {
+                console.log("Received image data for editing from server:", x, y);
+                if (!editing) {
+                    editing = true;
+                    nextStep();
+                }
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.querySelector('#led_pos_canvas');
+                    const ctx = canvas.getContext('2d');
+        
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    edited_image = img;
+                    edited_image_x = x;
+                    edited_image_y = y;
+                    drawImageAndCross();
+                };
+                img.src = image; // Corrected from `image_data` to `image`
+            });
+
+            socket.on("setup_done", () => {
+                setupDone();
+            });
         })
         .catch((err) => {
             alert("Error accessing camera: " + err.message);
         });
-    console.log("Setting up camera...");
-
-    socket = io.connect();
-
-    socket.on("connect", () => {
-        socket.emit("photo_start");
-    });
-
-    socket.on("take_photo", async () => {
-        const imageData = await capturePhoto();
-        socket.emit("photo_data", { image: imageData });
-    });
-
-    socket.on("edit_photo_data", ({ image, x, y }) => {
-        console.log("Received image data for editing from server:", x, y);
-        if (!editing) {
-            editing = true;
-            nextStep();
-        }
-        const img = new Image();
-        img.onload = () => {
-            const canvas = document.querySelector('#led_pos_canvas');
-            const ctx = canvas.getContext('2d');
-
-            canvas.width = img.width;
-            canvas.height = img.height;
-            ctx.drawImage(img, 0, 0);
-            edited_image = img;
-            edited_image_x = x;
-            edited_image_y = y;
-            drawImageAndCross();
-        };
-        img.src = image; // Corrected from `image_data` to `image`
-    });
 }
 
 async function capturePhoto() {
@@ -128,6 +141,16 @@ function setupEditCanvas() {
         //socket.emit("pixel_selected", { x, y });
     });
 
+    
+    document.addEventListener('keydown', function(event) {
+        console.log("Key pressed: ", event.key);
+        if (event.key === 'Space') {
+            // Prevent default spacebar behavior (like scrolling)
+            event.preventDefault();
+            // Trigger the next step
+            sendLedPosition();
+        }
+    });
 }
 
 function drawImageAndCross() {
@@ -158,4 +181,8 @@ function sendLedPosition(){
     };
     console.log("Sending LED position to server:", data);
     socket.emit("led_position", data);
+}
+
+function setupDone(){
+    document.location.href = "/setup";
 }
