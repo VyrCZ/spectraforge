@@ -25,11 +25,11 @@
             <img src="{{ url_for('static', filename='icons/plus.svg') }}" alt="Add Icon" class="add_icon">
         </div>
         <div class="devider"></div>
-        {% for setup in setups %}
+        {% for setup, tag in setup_data %}
         <div class="effect_container" onclick="changeSetup('{{ setup }}')">
             <p>{{ setup }}</p>
             <div class="effect_tag debug_border">
-                Universal
+                {{ tag }}
             </div>
         </div>
         {% endfor %}

@@ -186,3 +186,20 @@ function sendLedPosition(){
 function setupDone(){
     document.location.href = "/setup";
 }
+
+function changeSetup(setupName){
+    console.log("Changing setup to:", setupName);
+    fetch('/api/change_setup', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name: setupName })
+    }).then(response => {
+        if (response.ok) {
+            document.location.href = "/setup";
+        } else {
+            alert(`Error changing setup: ${response.statusText}`);
+        }
+    });
+}

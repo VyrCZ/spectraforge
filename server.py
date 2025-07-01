@@ -1,11 +1,13 @@
 import os
+import traceback
+import json
 from flask import Flask, render_template, request, jsonify, send_from_directory
 from modules.engine_manager import EngineManager
 from modules.engine_effects import EffectsEngine
 from modules.engine_calibration import CalibrationEngine
 from modules.setup import SetupType
 from flask_socketio import SocketIO, emit
-import json
+from modules.config_manager import Config
 
 # set working directory to the directory of this file
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -36,7 +38,6 @@ class DummyNeoPixel():
         return self.num_leds
 
 LED_COUNT = 200
-CONFIG_PATH = "config/server_config.json"
 # determine if running on windows to run debug instead
 if os.name == 'nt':
     #import sys
@@ -48,6 +49,7 @@ else:
     PIN = board.D18
     pixels = NeoPixel(PIN, LED_COUNT, auto_write=False)
 app = Flask(__name__)
+app.jinja_env.globals.update(zip=zip)
 socketio = SocketIO(app)
 # Globals for effect management
 
@@ -94,6 +96,7 @@ def set_parameter():
     request_data = request.json
     param_name = request_data.get("name")
     value = request_data.get("value")
+    print(f"Setting parameter {param_name} to {value}")
     result = effects_engine.set_parameter(param_name, value)
     if result["status"] == "success":
         return jsonify(result)
@@ -105,10 +108,24 @@ def set_parameter():
 @app.route("/setup")
 def page_setup():
     setups = []
+    tags = []
     if os.path.exists(effects_engine.SETUP_FOLDER):
-        setups = [f[:-5] for f in os.listdir(effects_engine.SETUP_FOLDER) if f.endswith(".json")]
+        for file in os.listdir(effects_engine.SETUP_FOLDER):
+            if file.endswith(".json"):
+                try:
+                    with open(os.path.join(effects_engine.SETUP_FOLDER, file), "r") as f:
+                        setup_data = json.load(f)
+                        setup_type = setup_data.get("type", None)
+                        if setup_type:
+                            tags.append(setup_type)
+                            setups.append(file[:-5])  # remove .json extension
+                except json.JSONDecodeError:
+                    print(f"Error decoding JSON from {file}: {traceback.format_exc()}")
+                except Exception as e:
+                    print(f"Error reading setup file {file}: {traceback.format_exc()}")
+
     # TODO: Handle case where no setups are available
-    return render_template("setup.html", current_setup=effects_engine.config.get("current_setup"), setups=setups)
+    return render_template("setup.html", current_setup=Config().config.get("current_setup"), setup_data=zip(setups, tags))
 
 @app.route("/setup/new")
 def page_setup_new():
@@ -122,9 +139,10 @@ def change_setup():
     if not setup_name:
         return jsonify({"status": "error", "message": "Setup name is required."}), 400
     try:
-        effects_engine.change_setup(setup_name)
+        manager.change_setup_by_name(setup_name)
         return jsonify({"status": "success", "message": f"Changed to setup '{setup_name}'."})
     except Exception as e:
+        print("Error changing setup: "+traceback.format_exc())
         return jsonify({"status": "error", "message": str(e)}), 500
 
 # Calibration API endpoints
@@ -212,12 +230,6 @@ def setup_done_callback():
     socketio.emit("setup_done")
 
 if __name__ == "__main__":
-    # Load configuration
-    if os.path.exists(CONFIG_PATH):
-        with open(CONFIG_PATH, "r") as f:
-            config = json.load(f)
-    else:
-        config = {"current_setup": None, "current_effect": None, "parameters": {}}
     manager = EngineManager()
     effects_engine = EffectsEngine(pixels, manager.active_setup)
     calibration_engine = CalibrationEngine(pixels, take_photo_callback, send_image_callback, setup_done_callback)

@@ -31,12 +31,12 @@ class EffectsEngine(Engine):
         print("EffectsEngine enabled.")
         self.load_effects()
         
-        effect_name = Config().get("current_effect")
+        effect_name = Config().config.get("current_effect")
         if effect_name in self.effects:
             self.current_effect = self.effects[effect_name](self.pixels, self.coords)
             # load parameters
             for param in self.current_effect.parameters.values():
-                last_value = Config().get("parameters", {}).get(effect_name, {}).get(param.name)
+                last_value = Config().config.get("parameters", {}).get(effect_name, {}).get(param.name)
                 if last_value is not None:
                     param.set(last_value)
         else:
@@ -44,7 +44,8 @@ class EffectsEngine(Engine):
             if self.effects:
                 effect_name = list(self.effects.keys())[0]
                 self.current_effect = list(self.effects.values())[0](self.pixels, self.coords)
-                Config()["current_effect"] = effect_name
+                Config().config["current_effect"] = effect_name
+                Config().save()
 
         self.running = True
         self.runner_thread = Thread(target=self.effect_runner, daemon=True)
@@ -114,9 +115,10 @@ class EffectsEngine(Engine):
         print("Setting effect to", effect_name)
         if effect_name in self.effects:
             self.current_effect = self.effects[effect_name](self.pixels, self.coords)
-            Config()["current_effect"] = effect_name
+            Config().config["current_effect"] = effect_name
+            Config().save()
             for param in self.current_effect.parameters.values():
-                last_value = Config().get("parameters", {}).get(effect_name, {}).get(param.name, None)
+                last_value = Config().config.get("parameters", {}).get(effect_name, {}).get(param.name, None)
                 if last_value is not None:
                     param.set(last_value)    
             print(f"Set effect to {effect_name}")
@@ -135,15 +137,19 @@ class EffectsEngine(Engine):
     @EngineManager.requires_active
     def set_parameter(self, param_name, value):
         """Set a specific parameter for the current effect."""
+        print(f"Setting parameter {param_name} to {value}")
         if self.current_effect and param_name in self.current_effect.parameters:
-            if "parameters" not in Config():
-                Config()["parameters"] = {}
+            if "parameters" not in Config().config:
+                Config().config["parameters"] = {}
+                Config().save()
 
             effect_name = self.get_effect_name(self.current_effect)
-            if effect_name not in Config()["parameters"]:
-                Config()["parameters"][effect_name] = {}
+            if effect_name not in Config().config["parameters"]:
+                Config().config["parameters"][effect_name] = {}
+                Config().save()
 
             self.current_effect.parameters[param_name].set(value)
-            Config()["parameters"][effect_name][param_name] = value
+            Config().config["parameters"][effect_name][param_name] = value
+            Config().save()
             return {"status": "success"}
         return {"status": "error", "message": "Invalid parameter"}

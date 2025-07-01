@@ -24,7 +24,7 @@ class EngineManager:
             return
         self.engines = []
         self.active_engine = None
-        active_setup_name = Config().get("current_setup", None)
+        active_setup_name = Config().config.get("current_setup", None)
         if active_setup_name:
             try:
                 with open(f"{self.SETUPS_FOLDER}/{active_setup_name}.json", "r") as f:
@@ -81,4 +81,16 @@ class EngineManager:
         for engine in self.engines:
             engine.on_setup_changed(setup)
         self.active_setup = setup
+
+    def change_setup_by_name(self, setup_name: str):
+        """
+        Change the current setup by name.
+        """
+        try:
+            with open(f"{self.SETUPS_FOLDER}/{setup_name}.json", "r") as f:
+                setup_data = json.load(f)
+            setup = Setup.from_json(setup_name, setup_data)
+            self.change_setup(setup)
+        except FileNotFoundError:
+            raise FileNotFoundError(f"Setup {setup_name} not found in {self.SETUPS_FOLDER}.")
         
