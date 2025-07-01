@@ -1,9 +1,9 @@
-from modules.effect import LightEffect, ParamType
+from modules.effect import LightEffect, ParamType, EffectType
 import random
 
 class Sparkles(LightEffect):
     def __init__(self, pixels, coords):
-        super().__init__(pixels, coords)
+        super().__init__(pixels, coords, "Sparkles", EffectType.UNIVERSAL)
         self.color = self.add_parameter("Color", ParamType.COLOR, "#FF0000"),
         self.speed = self.add_parameter("Speed", "slider", 20, min=1, max=100, step=1)
         self.amount = self.add_parameter("Amount", "slider", 1, min=1, max=10, step=1)

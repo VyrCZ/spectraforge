@@ -1,4 +1,4 @@
-from modules.effect import LightEffect, ParamType
+from modules.effect import LightEffect, ParamType, EffectType
 import modules.mathutils as mu
 import time
 import random
@@ -6,7 +6,7 @@ import colorsys
 
 class IndependantRainbow(LightEffect):
     def __init__(self, pixels, coords):
-        super().__init__(pixels, coords)
+        super().__init__(pixels, coords, "Chaos Rainbow", EffectType.UNIVERSAL)
         self.speed = self.add_parameter("Speed", ParamType.SLIDER, 0.5, min=0.01, max=0.99, step=0.01)
         self.hue = [random.random() for _ in range(len(self.pixels))]
 

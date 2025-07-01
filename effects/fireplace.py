@@ -1,11 +1,11 @@
-from modules.effect import LightEffect, ParamType
+from modules.effect import LightEffect, ParamType, EffectType
 import modules.mathutils as mu
 import colorsys
 import random
 
 class Fireplace(LightEffect):
     def __init__(self, pixels, coords):
-        super().__init__(pixels, coords)
+        super().__init__(pixels, coords, "Fireplace", EffectType.PRIMARILY_3D)
         self.color = self.add_parameter("Base Color", ParamType.COLOR, "#ffaa00")
         self.level = self.add_parameter("Level", ParamType.SLIDER, self.height / 2, min=0, max=self.height)
         self.speed = self.add_parameter("Speed", ParamType.SLIDER, 0.2, min=0.1, max=0.5, step=0.05)
@@ -23,18 +23,18 @@ class Fireplace(LightEffect):
         turned_off_pixels = []
         weights = []
         for i in range(len(self.pixels)):
-            if self.coords[i][2] > self.level.get() and self.lights[i] <= 0:
+            if self.coords[i][1] > self.level.get() and self.lights[i] <= 0:
                 turned_off_pixels.append(i)
-                weights.append(1 / ((self.coords[i][2] - self.level.get()) ** 4))
+                weights.append(1 / ((self.coords[i][1] - self.level.get()) ** 4))
         if len(turned_off_pixels) > 20:
             for i in random.choices(population=turned_off_pixels, weights=weights, k=int(self.amount.get())):
-                self.hue[i] = base_hue - mu.lerp(0, 0.2, mu.clamp(mu.normalize(self.coords[i][2], self.level.get(), self.height) + random.uniform(-0.1, 0.1), 0, 1))
+                self.hue[i] = base_hue - mu.lerp(0, 0.2, mu.clamp(mu.normalize(self.coords[i][1], self.level.get(), self.height) + random.uniform(-0.1, 0.1), 0, 1))
                 self.lights[i] = random.uniform(0.7, 1)
 
 
         # Handle pixels
         for i in range(len(self.pixels)):
-            if self.coords[i][2] > self.level.get():
+            if self.coords[i][1] > self.level.get():
                 # Count actively lit pixels
                 if self.lights[i] > 0:
                     active_particles += 1

@@ -1,10 +1,10 @@
-from modules.effect import LightEffect, ParamType
+from modules.effect import LightEffect, ParamType, EffectType
 import modules.mathutils as mu
 import time
 
 class StaticFour(LightEffect):
     def __init__(self, pixels, coords):
-        super().__init__(pixels, coords)
+        super().__init__(pixels, coords, "Static Four", EffectType.PRIMARILY_3D)
         self.colors = [
             self.add_parameter("Color 1", ParamType.COLOR, "#FF0000"),
             self.add_parameter("Color 2", ParamType.COLOR, "#FFFF00"),

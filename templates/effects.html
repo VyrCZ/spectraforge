@@ -12,6 +12,7 @@
     </script>
     <link rel="icon" href="static/icons/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="static/css/style.css">
+    <link rel="stylesheet" href="static/css/tag_colors.css">
 </head>
 <body>
     <img src="static/icons/menu.svg" id="menu_icon" onclick="toggleMenu()">
@@ -28,11 +29,11 @@
         </div>
     </div>
     <div id="effects_container">
-        {% for effect in effects %}
+        {% for effect, type in effect_data %}
         <div class="effect_container" onclick="changeEffect('{{ effect }}')">
             <p>{{ effect }}</p>
             <div class="effect_tag debug_border">
-                Universal
+                {{ type }}
             </div>
         </div>
         {% endfor %}

@@ -29,11 +29,31 @@ class ParamType:
     CHECKBOX = "checkbox"
     INPUT = "input"
 
+class EffectType:
+    ONLY_2D = "only_2d"
+    ONLY_3D = "only_3d"
+    PRIMARILY_2D = "primarily_2d"
+    PRIMARILY_3D = "primarily_3d"
+    UNIVERSAL = "universal"
+
+    def display_name(cls):
+        """Return a human-readable name for the effect type."""
+        return {
+            EffectType.ONLY_2D: "2D Only",
+            EffectType.ONLY_3D: "3D Only",
+            EffectType.PRIMARILY_2D: "Primarily 2D",
+            EffectType.PRIMARILY_3D: "Primarily 3D",
+            EffectType.UNIVERSAL: "Universal"
+        }.get(cls, "Unknown")
+
+
 
 class LightEffect:
-    def __init__(self, pixels, coords):
+    def __init__(self, pixels, coords, name, effect_type: EffectType):
         self.pixels = pixels
         self.coords = coords
+        self.name = name
+        self.effect_type = effect_type
         self.parameters = {}
         self.height = max([coord[2] for coord in coords])
 

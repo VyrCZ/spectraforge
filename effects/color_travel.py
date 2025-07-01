@@ -1,10 +1,10 @@
-from modules.effect import LightEffect, ParamType
+from modules.effect import LightEffect, ParamType, EffectType
 import modules.mathutils as mu
 import time
 
 class ColorSweep(LightEffect):
     def __init__(self, pixels, coords):
-        super().__init__(pixels, coords)
+        super().__init__(pixels, coords, "Color Travel", EffectType.UNIVERSAL)
         self.speed = self.add_parameter("Speed", ParamType.SLIDER, 40, min=1, max=100, step=1)
         self.color = self.add_parameter("Color", ParamType.COLOR, "#FF0000")
         self.falloff = self.add_parameter("Falloff", ParamType.SLIDER, 10, min=1, max=50, step=1)

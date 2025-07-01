@@ -1,4 +1,4 @@
-from modules.effect import LightEffect, ParamType
+from modules.effect import LightEffect, ParamType, EffectType
 import modules.mathutils as mu
 import math
 import random
@@ -6,7 +6,7 @@ import colorsys
 
 class Grow(LightEffect):
     def __init__(self, pixels, coords):
-        super().__init__(pixels, coords)
+        super().__init__(pixels, coords, "Grow", EffectType.PRIMARILY_3D)
         self.active_color = None
         self.growing = False
         self.speed = self.add_parameter("Speed", ParamType.SLIDER, 10, min=1, max=100, step=1)

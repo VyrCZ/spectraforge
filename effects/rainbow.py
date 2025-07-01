@@ -1,11 +1,11 @@
-from modules.effect import LightEffect, ParamType
+from modules.effect import LightEffect, ParamType, EffectType
 import modules.mathutils as mu
 import time
 import colorsys
 
 class Rainbow(LightEffect):
     def __init__(self, pixels, coords):
-        super().__init__(pixels, coords)
+        super().__init__(pixels, coords, "Rainbow", EffectType.UNIVERSAL)
         self.speed = self.add_parameter("Speed", ParamType.SLIDER, 0.1, min=0.5, max=50, step=0.1)
         self.reverse = self.add_parameter("Reverse", ParamType.CHECKBOX, False)
         self.current_z = 0

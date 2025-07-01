@@ -1,10 +1,10 @@
-from modules.effect import LightEffect, ParamType
+from modules.effect import LightEffect, ParamType, EffectType
 import modules.mathutils as mu
 import time
 
 class Breathing(LightEffect):
     def __init__(self, pixels, coords):
-        super().__init__(pixels, coords)
+        super().__init__(pixels, coords, "Breathing", EffectType.UNIVERSAL)
         self.fade_speed = self.add_parameter("Fade Speed", ParamType.SLIDER, 50, min=1, max=500, step=1)
         self.color = self.add_parameter("Color", ParamType.COLOR, "#FF0000")
         self.off_time = 0.5

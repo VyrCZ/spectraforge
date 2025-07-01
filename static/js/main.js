@@ -12,15 +12,14 @@ document.addEventListener('DOMContentLoaded', () => {
     itemTags.forEach(element => {
         const tagText = element.textContent.trim();
         console.log(tagText);
-        switch (tagText) {
-            case "3D":
-            case "3D Only":
-                element.style.backgroundColor = "#f7ea36";
-                break;
-            case "2D":
-            case "2D Only":
-                element.style.backgroundColor = "#4577f7";
-                break;
+        if (tagText.includes("2D")){
+            element.classList.add('tag_2d');
+        }
+        else if (tagText.includes("3D")){
+            element.classList.add('tag_3d');
+        }
+        else{
+            element.classList.add('tag_other');
         }
     });
 });

@@ -5,8 +5,9 @@ from threading import Thread
 
 from modules.engine import Engine
 from modules.engine_manager import EngineManager
-from modules.setup import Setup
+from modules.setup import Setup, SetupType
 from modules.config_manager import Config
+from modules.effect import EffectType
 
 class EffectsEngine(Engine):
     """
@@ -153,3 +154,24 @@ class EffectsEngine(Engine):
             Config().save()
             return {"status": "success"}
         return {"status": "error", "message": "Invalid parameter"}
+
+    @EngineManager.requires_active
+    def get_effect_data(self):
+        """Get data for loaded effects for the frontend.
+        Returns a zip of effect names and their types."""
+        effect_data = []
+        types = []
+        for name, effect_class in self.effects.items():
+            effect_instance = effect_class(self.pixels, self.coords)
+            types.append(EffectType.display_name(effect_instance.effect_type))
+            effect_data.append(name)
+        effect_data = list(zip(effect_data, types))
+        sorting_key_2d = {
+            EffectType.display_name(EffectType.ONLY_2D): 0,
+            EffectType.display_name(EffectType.PRIMARILY_2D): 1,
+            EffectType.display_name(EffectType.UNIVERSAL): 2,
+            EffectType.display_name(EffectType.PRIMARILY_3D): 3,
+            EffectType.display_name(EffectType.ONLY_3D): 4
+        }
+        sorted_data = sorted(effect_data, key=lambda x: sorting_key_2d.get(x[1], 5), reverse=self.setup.type == SetupType.THREE_DIMENSIONAL)
+        return sorted_data

@@ -59,7 +59,7 @@ def page_index():
 
 @app.route("/effects")
 def page_effects():
-    return render_template("effects.html", effects=list(effects_engine.effects.keys()))
+    return render_template("effects.html", effect_data=list(effects_engine.get_effect_data()))
     
 
 @app.route('/favicon.ico')

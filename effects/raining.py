@@ -1,10 +1,10 @@
-from modules.effect import LightEffect, ParamType
+from modules.effect import LightEffect, ParamType, EffectType
 import math
 import random
 
 class RainEffect(LightEffect):
     def __init__(self, pixels, coords):
-        super().__init__(pixels, coords)
+        super().__init__(pixels, coords, "Raining", EffectType.UNIVERSAL)
         self.color = self.add_parameter("Droplet Color", ParamType.COLOR, "#0000FF")
         self.speed = self.add_parameter("Speed", ParamType.SLIDER, 5, min=1, max=10, step=1)  # Fall speed
         self.amount = self.add_parameter("Amount", ParamType.SLIDER, 5, min=1, max=20, step=1)  # Droplet count
