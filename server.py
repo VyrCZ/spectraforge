@@ -60,7 +60,6 @@ def page_index():
 @app.route("/effects")
 def page_effects():
     return render_template("effects.html", effect_data=list(effects_engine.get_effect_data()))
-    
 
 @app.route('/favicon.ico')
 def favicon():
@@ -153,15 +152,16 @@ def new_setup():
     request_data = request.json
     setup_name = request_data.get("name")
     setup_type = request_data.get("type")
+    led_count = request_data.get("led_count")
     # cast setup_type to SetupType enum if necessary
-    if not setup_name or not setup_type:
-        return jsonify({"status": "error", "message": "Setup name and type are required."}), 400
+    if not setup_name or not setup_type or not led_count:
+        return jsonify({"status": "error", "message": "Setup name, type (str: 2D|3D) and led count are required."}), 400
     try:
         setup_type = SetupType(setup_type)
     except ValueError as e:
         return jsonify({"status": "error", "message": str(e)}), 400
     try:
-        calibration_engine.new_setup(setup_name, setup_type)
+        calibration_engine.new_setup(setup_name, setup_type, led_count)
         return jsonify({"status": "success", "message": f"New setup '{setup_name}' created."})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500

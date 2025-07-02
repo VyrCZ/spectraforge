@@ -6,7 +6,7 @@ import base64
 from modules.setup import SetupType, Setup
 from datetime import datetime
 from PIL import Image
-import numpy as np
+import math
 import json
 
 class CalibrationEngine(Engine):
@@ -19,7 +19,7 @@ class CalibrationEngine(Engine):
 
     def __init__(self, pixels, take_photo_callback, send_image_callback, setup_done_callback):
         self.pixels = pixels
-        self.pixel_count = 3 # TODO: replace with the actual pixel count
+        self.pixel_count = 200  # Default pixel count, should be set by the setup
         self.take_photo_callback = take_photo_callback
         self.send_image_callback = send_image_callback
         self.setup_done_callback = setup_done_callback
@@ -34,12 +34,13 @@ class CalibrationEngine(Engine):
         print("Calibration disabled.")
 
     @EngineManager.requires_active
-    def new_setup(self, setup_name, setup_type: SetupType):
+    def new_setup(self, setup_name, setup_type: SetupType, led_count):
         """
         Initialize the calibration engine with a new setup.
         """
         self.current_setup = Setup(setup_name, setup_type, [])
         self.image_dir = os.path.join(self.IMAGE_DIR_ROOT, self.current_setup.get_formatted_name())
+        self.pixel_count = led_count
 
     @EngineManager.requires_active
     def start_shooting(self):
@@ -109,33 +110,42 @@ class CalibrationEngine(Engine):
         Tries to calculate the pixel position of the LED in the image.
         """
         image_path = os.path.join(self.image_dir, file_name)
-        image = Image.open(image_path)
+        image = Image.open(image_path).convert("L")
+        pixels = image.load()
+        width, height = image.size
 
-        # get the brightest pixels
-        image_array = np.array(image.convert("L"))  # Convert to grayscale for brightness calculation
-        brightest_value = np.max(image_array)
-        brightest_pixels = np.where(image_array == brightest_value)
+        brightest_value = 0
+        for x in range(width):
+            for y in range(height):
+                if pixels[x, y] > brightest_value:
+                    brightest_value = pixels[x, y]
 
-        # get the center of the brightest pixels
-        center_y = int(np.mean(brightest_pixels[0]))
-        center_x = int(np.mean(brightest_pixels[1]))
+        brightest_pixels = []
+        for x in range(width):
+            for y in range(height):
+                if pixels[x, y] == brightest_value:
+                    brightest_pixels.append((x, y))
 
-        # calculate the distance from the center of the image, remove if too far
-        DISTANCE_THRESHOLD = 30  # Threshold of pixels from the center to consider as the LED position
+        if not brightest_pixels:
+            return width // 2, height // 2
 
-        # recalculate the center of the brightest pixels
-        filtered_pixels_y = []
-        filtered_pixels_x = []
+        sum_x = sum(p[0] for p in brightest_pixels)
+        sum_y = sum(p[1] for p in brightest_pixels)
+        center_x = int(sum_x / len(brightest_pixels))
+        center_y = int(sum_y / len(brightest_pixels))
 
-        for y, x in zip(brightest_pixels[0], brightest_pixels[1]):
-            distance = np.sqrt((x - center_x)**2 + (y - center_y)**2)
+        DISTANCE_THRESHOLD = 30
+        filtered_pixels = []
+        for x, y in brightest_pixels:
+            distance = math.sqrt((x - center_x)**2 + (y - center_y)**2)
             if distance <= DISTANCE_THRESHOLD:
-                filtered_pixels_y.append(y)
-                filtered_pixels_x.append(x)
+                filtered_pixels.append((x, y))
 
-        if filtered_pixels_x and filtered_pixels_y:
-            center_x = int(np.mean(filtered_pixels_x))
-            center_y = int(np.mean(filtered_pixels_y))
+        if filtered_pixels:
+            sum_x = sum(p[0] for p in filtered_pixels)
+            sum_y = sum(p[1] for p in filtered_pixels)
+            center_x = int(sum_x / len(filtered_pixels))
+            center_y = int(sum_y / len(filtered_pixels))
         
         return center_x, center_y
         

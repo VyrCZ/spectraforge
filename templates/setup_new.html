@@ -19,13 +19,21 @@
     </div>
     <div class="setup_step" id="setup_step_1">
         <form id="setup_form">
-            <label for="setup_name">Setup Name (no spaces):</label>
-            <input type="text" id="setup_name" name="setup_name" required>
-            <label for="setup_type">Setup Type:</label>
-            <select id="setup_type" name="setup_type" required>
-                <option value="2D">2D</option>
-                <option value="3D">3D</option>
-            </select>
+            <div class="setup_form_item">
+                <label for="setup_name">Setup Name (no spaces):</label>
+                <input type="text" id="setup_name" name="setup_name" required>
+            </div>
+            <div class="setup_form_item">
+                <label for="setup_type">Setup Type:</label>
+                <select id="setup_type" name="setup_type" required>
+                    <option value="2D">2D</option>
+                    <option value="3D">3D</option>
+                </select>
+            </div>
+            <div class="setup_form_item">
+                <label for="led_count">Number of LEDs:</label>
+                <input id="led_count" type="number">
+            </div>
             <button type="button" id="next_step_button" class="square" onclick="nextStep()">
                 Next
             </button>

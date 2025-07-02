@@ -29,9 +29,9 @@
         </div>
     </div>
     <div id="effects_container">
-        {% for effect, type in effect_data %}
+        {% for effect, type, display_name in effect_data %}
         <div class="effect_container" onclick="changeEffect('{{ effect }}')">
-            <p>{{ effect }}</p>
+            <p>{{ display_name }}</p>
             <div class="effect_tag debug_border">
                 {{ type }}
             </div>

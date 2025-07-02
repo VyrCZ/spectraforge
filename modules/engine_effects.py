@@ -159,13 +159,15 @@ class EffectsEngine(Engine):
     def get_effect_data(self):
         """Get data for loaded effects for the frontend.
         Returns a zip of effect names and their types."""
-        effect_data = []
+        effect_names = []
         types = []
+        display_names = []
         for name, effect_class in self.effects.items():
             effect_instance = effect_class(self.pixels, self.coords)
             types.append(EffectType.display_name(effect_instance.effect_type))
-            effect_data.append(name)
-        effect_data = list(zip(effect_data, types))
+            effect_names.append(name)
+            display_names.append(effect_instance.display_name)
+        effect_data = list(zip(effect_names, types, display_names))
         sorting_key_2d = {
             EffectType.display_name(EffectType.ONLY_2D): 0,
             EffectType.display_name(EffectType.PRIMARILY_2D): 1,

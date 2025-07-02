@@ -49,10 +49,10 @@ class EffectType:
 
 
 class LightEffect:
-    def __init__(self, pixels, coords, name, effect_type: EffectType):
+    def __init__(self, pixels, coords, display_name, effect_type: EffectType):
         self.pixels = pixels
         self.coords = coords
-        self.name = name
+        self.display_name = display_name
         self.effect_type = effect_type
         self.parameters = {}
         self.height = max([coord[2] for coord in coords])

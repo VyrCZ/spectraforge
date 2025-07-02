@@ -215,3 +215,18 @@ button.icon{
     margin-right: 10px;
     margin-left: 10px;
 }
+
+#setup_form {
+    display: flex;
+    flex-direction: column;
+    padding: 1vh;
+}
+
+#setup_form div{
+    margin-bottom: 10px;
+}
+
+#setup_form button {
+    align-self: flex-end;
+    margin-top: 20px;
+}

@@ -26,8 +26,13 @@ function nextStep() {
     if (currentStep === 1) {
         // Validate the first step
         const name = document.querySelector('#setup_name').value;
+        const ledCount = document.querySelector('#led_count').value;
         if (!name) {
             alert('Please enter a name for your setup.');
+            return;
+        }
+        else if (isNaN(ledCount) || ledCount <= 0) {
+            alert('Please enter a valid number of LEDs.');
             return;
         }
         setupType = document.querySelector('#setup_type').value;
@@ -38,7 +43,8 @@ function nextStep() {
             },
             body: JSON.stringify({
                 name: name,
-                type: setupType
+                type: setupType,
+                led_count: parseInt(ledCount)
             })
         })
     }
