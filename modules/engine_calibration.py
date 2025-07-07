@@ -4,6 +4,7 @@ import os
 import time
 import base64
 from modules.setup import SetupType, Setup
+from modules.log_manager import Log
 from datetime import datetime
 from PIL import Image
 import math
@@ -28,10 +29,10 @@ class CalibrationEngine(Engine):
         self.image_dir = os.path.join(self.IMAGE_DIR_ROOT, datetime.now().strftime("%Y-%m-%d")) # fallback, just in case
 
     def on_enable(self):
-        print("Calibration enabled.")
+        Log.info("CalibrationEngine", "CalibrationEngine enabled.")
 
     def on_disable(self):
-        print("Calibration disabled.")
+        Log.info("CalibrationEngine", "CalibrationEngine disabled.")
 
     @EngineManager.requires_active
     def new_setup(self, setup_name, setup_type: SetupType, led_count):
@@ -49,7 +50,7 @@ class CalibrationEngine(Engine):
         Returns True when ready to start.
         """
         self.current_index = -1
-        print("Starting shooting process.")
+        Log.info("CalibrationEngine", "Starting shooting process.")
         self.next_pixel()
     
     @EngineManager.requires_active
@@ -58,7 +59,7 @@ class CalibrationEngine(Engine):
         Show the next pixel in the calibration process.
         """
         if self.current_index >= len(self.pixels):
-            print("All pixels have been shown.")
+            Log.info("CalibrationEngine", "All pixels have been shown.")
             return
         self.current_index += 1
         self.pixels.fill((0, 0, 0))
@@ -66,7 +67,7 @@ class CalibrationEngine(Engine):
         self.pixels.show()
         # give time to the camera to focus
         time.sleep(0.5)
-        print(f"Showing pixel {self.current_index}.")
+        Log.debug("CalibrationEngine", f"Showing pixel {self.current_index}.")
         self.take_photo_callback()
 
     @EngineManager.requires_active
@@ -75,7 +76,7 @@ class CalibrationEngine(Engine):
         Save an image of the pixel shown at the given index.
         """
 
-        print("Received photo data for pixel index:", self.current_index)
+        Log.debug("CalibrationEngine", f"Received photo data for pixel index: {self.current_index}")
         # make sure the image directory exists
         if not os.path.exists(self.image_dir):
             os.makedirs(self.image_dir)
@@ -160,7 +161,7 @@ class CalibrationEngine(Engine):
 
     @EngineManager.requires_active
     def receive_image_position(self, x, y):
-        print(f"Received image position: ({x}, {y}) for pixel {self.current_index}.")
+        Log.debug("CalibrationEngine", f"Received position data for pixel {self.current_index}: ({x}, {y})")
         self.current_setup.coords.append((x, y))
         if self.current_index < self.pixel_count - 1:
             self.send_next_image()
@@ -175,5 +176,5 @@ class CalibrationEngine(Engine):
         setup_file_path = os.path.join(self.SETUP_DIR_ROOT, f"{self.current_setup.get_formatted_name()}.json")
         with open(setup_file_path, "w") as setup_file:
             json.dump(setup_data, setup_file, indent=4)
-        print(f"Setup {self.current_setup.get_formatted_name()} saved to {setup_file_path}.")
+        Log.info("CalibrationEngine", f"Calibration is done, setup {self.current_setup.get_formatted_name()} saved.")
         self.setup_done_callback()

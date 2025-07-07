@@ -8,6 +8,7 @@ from modules.engine_manager import EngineManager
 from modules.setup import Setup, SetupType
 from modules.config_manager import Config
 from modules.effect import EffectType
+from modules.log_manager import Log
 
 class EffectsEngine(Engine):
     """
@@ -29,7 +30,7 @@ class EffectsEngine(Engine):
         #self.coords = self.setup.coords
 
     def on_enable(self):
-        print("EffectsEngine enabled.")
+        Log.info("EffectsEngine", "EffectsEngine enabled.")
         self.load_effects()
         
         effect_name = Config().config.get("current_effect")
@@ -53,7 +54,7 @@ class EffectsEngine(Engine):
         self.runner_thread.start()
 
     def on_disable(self):
-        print("EffectsEngine disabled.")
+        Log.info("EffectsEngine", "EffectsEngine disabled.")
         self.running = False
         if self.runner_thread:
             self.runner_thread.join()
@@ -81,6 +82,7 @@ class EffectsEngine(Engine):
                     cls = getattr(module, attr)
                     if hasattr(module, "LightEffect") and isinstance(cls, type) and issubclass(cls, module.LightEffect) and cls is not module.LightEffect:
                         self.effects[module_name] = cls
+        Log.info("EffectsEngine", f"Loaded {len(self.effects)} effects.")
         return self.effects
     
     def effect_runner(self):
@@ -113,7 +115,7 @@ class EffectsEngine(Engine):
     @EngineManager.requires_active
     def set_effect(self, effect_name):
         """Set the current LED effect."""
-        print("Setting effect to", effect_name)
+        Log.info("EffectsEngine", f"Setting effect to {effect_name}")
         if effect_name in self.effects:
             self.current_effect = self.effects[effect_name](self.pixels, self.coords)
             Config().config["current_effect"] = effect_name
@@ -121,8 +123,8 @@ class EffectsEngine(Engine):
             for param in self.current_effect.parameters.values():
                 last_value = Config().config.get("parameters", {}).get(effect_name, {}).get(param.name, None)
                 if last_value is not None:
-                    param.set(last_value)    
-            print(f"Set effect to {effect_name}")
+                    param.set(last_value)
+            Log.info("EffectsEngine", f"Effect set to {effect_name}")
             return {"status": "success", "current_effect": effect_name}
         return {"status": "error", "message": "Effect not found"}
 
@@ -138,7 +140,7 @@ class EffectsEngine(Engine):
     @EngineManager.requires_active
     def set_parameter(self, param_name, value):
         """Set a specific parameter for the current effect."""
-        print(f"Setting parameter {param_name} to {value}")
+        Log.info("EffectsEngine", f"Setting parameter {param_name} to {value}")
         if self.current_effect and param_name in self.current_effect.parameters:
             if "parameters" not in Config().config:
                 Config().config["parameters"] = {}

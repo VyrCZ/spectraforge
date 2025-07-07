@@ -1,4 +1,5 @@
 import json
+from modules.log_manager import Log
 
 class Config:
     _instance = None
@@ -17,7 +18,7 @@ class Config:
     def load(self):
         with open(self.CONFIG_PATH, 'r') as file:
             self.config = json.load(file)
-            print(f"Config: {self.config}")
+            Log.info("Config", "Configuration loaded successfully.")
 
     def save(self):
         with open(self.CONFIG_PATH, 'w') as file:

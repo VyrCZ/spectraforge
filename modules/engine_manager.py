@@ -2,6 +2,7 @@ from functools import wraps
 from modules.engine import Engine
 from modules.setup import Setup, SetupType
 from modules.config_manager import Config
+from modules.log_manager import Log
 import json
 
 class EngineManager:
@@ -30,8 +31,9 @@ class EngineManager:
                 with open(f"{self.SETUPS_FOLDER}/{active_setup_name}.json", "r") as f:
                     active_setup_data = json.load(f)
             except FileNotFoundError:
-                print(f"Setup {active_setup_name} not found, using default setup.")
+                Log.warn("EngineManager", f"Setup {active_setup_name} not found, using default setup.")
         self.active_setup = Setup.from_json(active_setup_name, active_setup_data) if active_setup_name else None
+        Log.info("EngineManager", "EngineManager initialized with active setup: " + str(self.active_setup))
         self.__class__._initialized = True
 
     def register_engine(self, engine: Engine):
@@ -41,7 +43,7 @@ class EngineManager:
         if engine not in self.engines:
             self.engines.append(engine)
         else:
-            print(f"Engine {engine} is already registered.")
+            Log.warn("EngineManager", f"Engine {engine} is already registered.")
         if self.active_engine is None:
             engine.on_setup_changed(self.active_setup)
             engine.on_enable()

@@ -8,6 +8,7 @@ from modules.engine_calibration import CalibrationEngine
 from modules.setup import SetupType
 from flask_socketio import SocketIO, emit
 from modules.config_manager import Config
+from modules.log_manager import Log
 
 # set working directory to the directory of this file
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -230,6 +231,23 @@ def setup_done_callback():
     """Callback for when the setup is done."""
     socketio.emit("setup_done")
 
+@app.route("/log")
+def page_log():
+    """Render the log page."""
+    return render_template("log.html")
+
+@app.route("/api/get_log", methods=["GET"])
+def get_logs():
+    logs = Log.get_log_messages()
+    return jsonify({"logs": logs})
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    """Handle exceptions globally and log them."""
+    Log.error("Server", traceback.format_exc())
+    return jsonify({"status": "error", "message": f"Error: {traceback.format_exc()}"}), 500
+    
+
 if __name__ == "__main__":
     manager = EngineManager()
     effects_engine = EffectsEngine(pixels, manager.active_setup)
@@ -238,7 +256,7 @@ if __name__ == "__main__":
     # IMPORTANT! Always register the effects engine first, as it is the main engine.
     manager.register_engine(effects_engine)
     manager.register_engine(calibration_engine)
-    print(f"Coords: {manager.active_setup.coords}")
+    Log.info("Server", "Starting Spectraforge server...")
     try:
         if os.name == "nt":
             app.run(host="0.0.0.0", port=5000)

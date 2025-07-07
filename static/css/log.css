@@ -1,0 +1,107 @@
+#log_body_container {
+    display: flex;
+    height: 100vh;
+}
+
+#log_sidebar {
+    width: 270px;
+    background-color: #1d1d1d;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    overflow-y: auto;
+}
+
+#log_main_container {
+    flex: 1;
+    margin-left: 270px;
+    /* Adjusted to account for sidebar width */
+    padding: 20px;
+}
+
+#log_container {
+    border-radius: 12px;
+    background-color: #111;
+    padding: 20px;
+    margin: 20px;
+    font-family: monospace;
+    overflow-y: auto;
+}
+
+.log_entry {
+    margin-bottom: 5px;
+}
+
+.log_tag {
+    margin-right: 5px;
+}
+
+.log_datetime {
+    color: #999;
+}
+
+.log_channel {
+    color: #bea2ff;
+}
+
+.log_text {
+    color: #ddd;
+}
+
+p {
+    color: #fff;
+}
+
+.log_date {
+    color: #ddd;
+}
+
+.log_info {
+    color: #69b5f4;
+}
+
+.log_warn {
+    color: #f4c869;
+}
+
+.log_error {
+    color: #f45757;
+}
+
+.log_debug {
+    color: #bbbbbb;
+}
+
+
+.filter-list {
+    list-style: none;
+    margin-right: 5px;
+    margin-left: 5px;
+    padding: 0;
+    margin-top: 0.5rem;
+}
+
+.filter-list li+li {
+    margin-top: 0.5rem;
+}
+
+.filter-list button {
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: 1px solid #333;
+    background-color: #282828;
+    color: #eee;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.filter-list button:hover,
+.filter-list button.active {
+    background: #1e7a1e;
+    /* green accent */
+    border-color: #1e7a1e;
+}

@@ -11,3 +11,4 @@ config/**/*.json
 **.jpeg
 **.png
 static/js/packages/*.js
+logs/**

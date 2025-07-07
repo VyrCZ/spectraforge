@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Spectraforge</title>
+    <script src="static/js/main.js"></script>
+    <script src="static/js/logs.js"></script>
+    <link rel="icon" href="static/icons/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="static/css/style.css">
+    <link rel="stylesheet" href="static/css/log.css">
+    <link rel="stylesheet" href="static/css/tag_colors.css">
+</head>
+
+<body>
+    <div id="log_body_container">
+        <div id="log_sidebar">
+            <div id="menu_header">
+                <h1>Logs</h1>
+            </div>
+            <ul class="filter-list">
+                <li><button data-filter="*" class="active">All</button></li>
+                <!-- Channels will be populated here by logs.js -->
+              </ul>
+        </div>
+        <div id="log_main_container">
+            <img src="static/icons/menu.svg" id="menu_icon" onclick="toggleMenu()">
+            <div id="menu_container">
+                {% include 'sidebar_menu.html' %}
+            </div>
+            <div id="log_container"></div>
+        </div>
+    </div>
+</body>
+
+</html>
