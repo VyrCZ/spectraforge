@@ -23,7 +23,7 @@ class CalibrationEngine(Engine):
         self.take_photo_callback = take_photo_callback
         self.send_image_callback = send_image_callback
         self.setup_done_callback = setup_done_callback
-        self.calibration_color = (255, 0, 0)  # Red color for calibration
+        self.calibration_color = (255, 255, 255)  # Red color for calibration
         self.current_setup = None
         self.image_dir = os.path.join(self.IMAGE_DIR_ROOT, datetime.now().strftime("%Y-%m-%d")) # fallback, just in case
 
@@ -65,7 +65,7 @@ class CalibrationEngine(Engine):
         self.pixels[self.current_index] = self.calibration_color
         self.pixels.show()
         # give time to the camera to focus
-        time.sleep(0.5) #TODO: remove this after testing
+        time.sleep(0.5)
         print(f"Showing pixel {self.current_index}.")
         self.take_photo_callback()
 

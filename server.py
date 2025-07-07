@@ -154,6 +154,7 @@ def new_setup():
     setup_type = request_data.get("type")
     led_count = request_data.get("led_count")
     # cast setup_type to SetupType enum if necessary
+    print(f"Creating new setup: {setup_name}, type: {setup_type}, led_count: {led_count}")
     if not setup_name or not setup_type or not led_count:
         return jsonify({"status": "error", "message": "Setup name, type (str: 2D|3D) and led count are required."}), 400
     try:
@@ -237,7 +238,11 @@ if __name__ == "__main__":
     # IMPORTANT! Always register the effects engine first, as it is the main engine.
     manager.register_engine(effects_engine)
     manager.register_engine(calibration_engine)
+    print(f"Coords: {manager.active_setup.coords}")
     try:
-        app.run(host="0.0.0.0", port=5000)
+        if os.name == "nt":
+            app.run(host="0.0.0.0", port=5000)
+        else:            
+            app.run(host="0.0.0.0", port=5000, ssl_context=('cert.pem', 'key.pem'))
     finally:
         manager.active_engine.on_disable()

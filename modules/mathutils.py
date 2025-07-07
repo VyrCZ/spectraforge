@@ -109,3 +109,23 @@ def color_lerp(color1, color2, blend_factor):
     return tuple(
         int(lerp(c1, c2, blend_factor)) for c1, c2 in zip(color1, color2)
     )
+
+
+def distance(coord1, coord2):
+    """
+    Calculates the Euclidean distance between two 3D or 2D coordinates.
+    
+    coord1 - the first coordinate as a tuple (x, y, z)
+    coord2 - the second coordinate as a tuple (x, y, z)
+    """
+    if len(coord1) == 2 or len(coord2) == 2:
+        # If the coordinates are 2D, ignore the z-axis
+        return math.sqrt(
+            (coord1[0] - coord2[0]) ** 2 +
+            (coord1[1] - coord2[1]) ** 2
+        )
+    return math.sqrt(
+        (coord1[0] - coord2[0]) ** 2 +
+        (coord1[1] - coord2[1]) ** 2 +
+        (coord1[2] - coord2[2]) ** 2
+    )

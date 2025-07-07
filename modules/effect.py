@@ -55,7 +55,8 @@ class LightEffect:
         self.display_name = display_name
         self.effect_type = effect_type
         self.parameters = {}
-        self.height = max([coord[2] for coord in coords])
+        self.height = max([coord[1] for coord in coords]) - min([coord[1] for coord in coords])
+        print(f"Height: {self.height}")
 
     def add_parameter(self, name, param_type, default_value, **kwargs):
         """Add a configurable parameter."""

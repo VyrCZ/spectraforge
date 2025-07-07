@@ -10,3 +10,4 @@ config/**/*.json
 **.jpg
 **.jpeg
 **.png
+static/js/packages/*.js

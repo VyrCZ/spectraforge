@@ -1,6 +1,6 @@
 from functools import wraps
 from modules.engine import Engine
-from modules.setup import Setup
+from modules.setup import Setup, SetupType
 from modules.config_manager import Config
 import json
 
@@ -78,6 +78,11 @@ class EngineManager:
         """
         Change the current setup and notify all of the engines.
         """
+        # if the coordinates are 2D, add a z coordinate of 0 to all coordinates
+        if setup.type == SetupType.TWO_DIMENSIONAL:
+            for coord in setup.coords:
+                if len(coord) == 2:
+                    coord.append(0)
         for engine in self.engines:
             engine.on_setup_changed(setup)
         self.active_setup = setup
