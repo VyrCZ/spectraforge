@@ -1,0 +1,69 @@
+#canvas_body_container {
+    display: flex;
+    height: 100vh;
+}
+
+#canvas_sidebar {
+    width: 270px;
+    background-color: #1d1d1d;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    overflow-y: auto;
+}
+
+#canvas_main_container {
+    flex: 1;
+    margin-left: 270px;
+    /* Adjusted to account for sidebar width */
+    padding: 20px;
+}
+
+#canvas_container {
+    border-radius: 12px;
+    background-color: #111;
+    padding: 20px;
+    margin: 20px;
+    font-family: monospace;
+    /* take as much height as possible */
+    height: calc(100vh - 120px);
+}
+
+#canvas {
+    /* make it fill the container */
+    width: 100%;
+    height: 100%;
+}
+
+.filter-list {
+    list-style: none;
+    margin-right: 5px;
+    margin-left: 5px;
+    padding: 0;
+    margin-top: 0.5rem;
+}
+
+.filter-list li+li {
+    margin-top: 0.5rem;
+}
+
+.filter-list button {
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: 1px solid #333;
+    background-color: #282828;
+    color: #eee;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.filter-list button:hover,
+.filter-list button.active {
+    background: #1e7a1e;
+    /* green accent */
+    border-color: #1e7a1e;
+}

@@ -1,5 +1,7 @@
 import os
 import datetime
+import traceback
+import re
 
 class Log:
     LOG_DIRECTORY = "logs"
@@ -44,6 +46,13 @@ class Log:
     def error(channel, message):
         """Log an error message."""
         Log._make_log("ERROR", channel, message)
+
+    @staticmethod
+    def error_exc(channel, exception: Exception):
+        tb = traceback.format_exc()
+        single_line_tb = tb.replace('\n', ' | ')
+        tabless_text = re.sub(r' +', ' ', single_line_tb)
+        Log.error(channel, f"Error {exception} occured. {tabless_text}")
 
     @staticmethod
     def debug(channel, message):

@@ -5,6 +5,7 @@ from flask import Flask, render_template, request, jsonify, send_from_directory
 from modules.engine_manager import EngineManager
 from modules.engine_effects import EffectsEngine
 from modules.engine_calibration import CalibrationEngine
+from modules.engine_canvas import CanvasEngine
 from modules.setup import SetupType
 from flask_socketio import SocketIO, emit
 from modules.config_manager import Config
@@ -142,7 +143,7 @@ def change_setup():
         manager.change_setup_by_name(setup_name)
         return jsonify({"status": "success", "message": f"Changed to setup '{setup_name}'."})
     except Exception as e:
-        print("Error changing setup: "+traceback.format_exc())
+        Log.error_exc("EngineManager", e)
         return jsonify({"status": "error", "message": str(e)}), 500
 
 # Calibration API endpoints
@@ -166,6 +167,7 @@ def new_setup():
         calibration_engine.new_setup(setup_name, setup_type, led_count)
         return jsonify({"status": "success", "message": f"New setup '{setup_name}' created."})
     except Exception as e:
+        Log.error_exc("CalibrationEngine", e)
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
@@ -181,6 +183,7 @@ def show_pixel():
         calibration_engine.show_pixel(index, color)
         return jsonify({"status": "success", "message": f"Pixel {index} set to {color}."})
     except Exception as e:
+        Log.error_exc("CalibrationEngine", e)
         return jsonify({"status": "error", "message": str(e)}), 500
 
 @socketio.on("photo_start")
@@ -212,6 +215,7 @@ def upload_pixel_image():
         calibration_engine.upload_pixel_image(index, image)
         return jsonify({"status": "success", "message": f"Pixel {index} image saved."})
     except Exception as e:
+        Log.error_exc("CalibrationEngine", e)
         return jsonify({"status": "error", "message": str(e)}), 500
     
 @socketio.on("led_position")
@@ -222,19 +226,63 @@ def receive_led_position(data):
     if x is None or y is None:
         emit("led_position_error", {"status": "error", "message": "X and Y coordinates are required."})
         return
-    #try:
-    calibration_engine.receive_image_position(x, y)
-    #except Exception as e:
-        #print(f"Error receiving LED position: {e}")
+    try:
+        calibration_engine.receive_image_position(x, y)
+    except Exception as e:
+        Log.error_exc("CalibrationEngine", e)
+        emit("led_position_error", {"status": "error", "message": str(e)})
 
 def setup_done_callback():
     """Callback for when the setup is done."""
     socketio.emit("setup_done")
 
-@app.route("/log")
-def page_log():
-    """Render the log page."""
-    return render_template("log.html")
+# Canvas
+
+@app.route("/api/get_coords", methods=["GET"])
+def get_coords():
+    """Get the coordinates of the LEDs in the canvas."""
+    coords = manager.active_setup.coords if manager.active_setup else []
+    return jsonify({"coords": coords})
+
+@app.route("/canvas")
+def page_canvas():
+    """Render the canvas page."""
+    return render_template("canvas.html")
+
+@app.route("/api/canvas/get_pixels", methods=["GET"])
+def get_pixels():
+    pixel_list = canvas_engine.get_pixels()
+    return jsonify({"pixels": pixel_list})
+
+@app.route("/api/canvas/set_pixels", methods=["POST"])
+def set_pixels():
+    """Set the pixel colors in the canvas."""
+    request_data = request.json
+    pixel_dict = request_data.get("pixels", {})
+    if not pixel_dict:
+        return jsonify({"status": "error", "message": "Pixel data is required."}), 400
+    try:
+        canvas_engine.set_pixels(pixel_dict)
+        return jsonify({"status": "success", "message": "Pixels updated."})
+    except Exception as e:
+        Log.error_exc("CanvasEngine", e)
+        return jsonify({"status": "error", "message": str(e)}), 500
+    
+@app.route("/api/canvas/clear_canvas", methods=["POST"])
+def clear_canvas():
+    """Clear the canvas by setting all pixels to black."""
+    try:
+        canvas_engine.clear_canvas()
+        return jsonify({"status": "success", "message": "Canvas cleared."})
+    except Exception as e:
+        Log.error_exc("CanvasEngine", e)
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+# Log API endpoints
+@app.route("/logs")
+def page_logs():
+    """Render the logs page."""
+    return render_template("logs.html")
 
 @app.route("/api/get_log", methods=["GET"])
 def get_logs():
@@ -244,7 +292,7 @@ def get_logs():
 @app.errorhandler(Exception)
 def handle_exception(e):
     """Handle exceptions globally and log them."""
-    Log.error("Server", traceback.format_exc())
+    Log.error_exc("Server", e)
     return jsonify({"status": "error", "message": f"Error: {traceback.format_exc()}"}), 500
     
 
@@ -252,10 +300,12 @@ if __name__ == "__main__":
     manager = EngineManager()
     effects_engine = EffectsEngine(pixels, manager.active_setup)
     calibration_engine = CalibrationEngine(pixels, take_photo_callback, send_image_callback, setup_done_callback)
+    canvas_engine = CanvasEngine(pixels)
 
     # IMPORTANT! Always register the effects engine first, as it is the main engine.
     manager.register_engine(effects_engine)
     manager.register_engine(calibration_engine)
+    manager.register_engine(canvas_engine)
     Log.info("Server", "Starting Spectraforge server...")
     try:
         if os.name == "nt":

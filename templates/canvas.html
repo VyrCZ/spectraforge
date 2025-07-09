@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Spectraforge</title>
+    <script src="static/js/main.js"></script>
+    <script src="static/js/canvas.js"></script>
+    <link rel="icon" href="static/icons/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="static/css/style.css">
+    <link rel="stylesheet" href="static/css/canvas.css">
+    <link rel="stylesheet" href="static/css/tag_colors.css">
+</head>
+
+<body>
+    <img src="static/icons/menu.svg" id="menu_icon" onclick="toggleMenu()">
+    <div id="menu_container">
+        {% include 'sidebar_menu.html' %}
+    </div>
+    <div id="canvas_body_container">
+        <div id="canvas_sidebar">
+            <div id="menu_header">
+                <h1>Canvas</h1>
+            </div>
+        </div>
+        <div id="canvas_main_container">
+            <div id="canvas_container">
+                <canvas id="canvas">
+                    
+                </canvas>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

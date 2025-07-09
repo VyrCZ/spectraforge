@@ -87,6 +87,10 @@ div h1{
     border-bottom: 1px solid #aaa;
 }
 
+.menu_item:hover {
+    background-color: #2a2a2a;
+}
+
 #menu_items a:last-child .menu_item {
     border-bottom: none;
 }

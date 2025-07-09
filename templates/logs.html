@@ -12,6 +12,10 @@
 </head>
 
 <body>
+    <img src="static/icons/menu.svg" id="menu_icon" onclick="toggleMenu()">
+    <div id="menu_container">
+        {% include 'sidebar_menu.html' %}
+    </div>
     <div id="log_body_container">
         <div id="log_sidebar">
             <div id="menu_header">
@@ -23,10 +27,6 @@
               </ul>
         </div>
         <div id="log_main_container">
-            <img src="static/icons/menu.svg" id="menu_icon" onclick="toggleMenu()">
-            <div id="menu_container">
-                {% include 'sidebar_menu.html' %}
-            </div>
             <div id="log_container"></div>
         </div>
     </div>
