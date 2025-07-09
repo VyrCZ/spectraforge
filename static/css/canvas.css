@@ -22,36 +22,39 @@
 
 #canvas_container {
     border-radius: 12px;
-    background-color: #111;
+    background-color: #1d1d1d;
     padding: 20px;
     margin: 20px;
     font-family: monospace;
     /* take as much height as possible */
     height: calc(100vh - 120px);
+    position: relative;
 }
 
-#canvas {
+#canvas_sidebar_content {
+    padding: 20px;
+}
+
+#led_container {
     /* make it fill the container */
     width: 100%;
     height: 100%;
 }
 
-.filter-list {
-    list-style: none;
-    margin-right: 5px;
-    margin-left: 5px;
-    padding: 0;
-    margin-top: 0.5rem;
+.led {
+    position: absolute;
+    width: 2.5vh;
+    height: 2.5vh;
+    background-color: black;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+    transition: background-color 0.2s, box-shadow 0.2s;
 }
 
-.filter-list li+li {
-    margin-top: 0.5rem;
-}
-
-.filter-list button {
+.button {
     width: 100%;
     text-align: left;
-    background: transparent;
     border: 1px solid #333;
     background-color: #282828;
     color: #eee;
@@ -61,9 +64,77 @@
     transition: background 0.2s;
 }
 
-.filter-list button:hover,
-.filter-list button.active {
+.button:hover {
     background: #1e7a1e;
     /* green accent */
     border-color: #1e7a1e;
+}
+
+#undo_redo_buttons .button{
+    width: 48%;
+    display: flex;
+    justify-content: center;
+}
+
+#undo_redo_buttons {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+#canvas_sidebar h2 {
+    color: #eee;
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+}
+
+#canvas_sidebar .button{
+    margin-bottom: 10px;
+}
+
+#canvas_sidebar .slider {
+    margin-bottom: 15px;
+}
+
+.slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 10px;
+    border: 1px solid #333;
+    border-radius: 5px;
+    background: #282828;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+}
+
+.slider::-webkit-slider-thumb,
+.slider::-moz-range-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #1e7a1e;
+    cursor: pointer;
+    border: none;
+}
+
+#cursor_brush {
+    position: fixed;
+    width: 12px;
+    height: 12px;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    pointer-events: none; /* Prevents the cursor from interfering with mouse events */
+    z-index: 1000; /* Ensure it is above other elements */
+    display: none; /* Initially hidden */
+}
+
+#color_picker {
+    /* align children to the center */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 15px;
 }

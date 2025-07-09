@@ -258,22 +258,13 @@ def get_pixels():
 def set_pixels():
     """Set the pixel colors in the canvas."""
     request_data = request.json
-    pixel_dict = request_data.get("pixels", {})
-    if not pixel_dict:
+    pixel_list = request_data.get("pixels", [])
+    if not pixel_list:
+        Log.warn("CanvasEngine", "Client sent empty pixel list, ignoring.")
         return jsonify({"status": "error", "message": "Pixel data is required."}), 400
     try:
-        canvas_engine.set_pixels(pixel_dict)
+        canvas_engine.set_pixels(pixel_list)
         return jsonify({"status": "success", "message": "Pixels updated."})
-    except Exception as e:
-        Log.error_exc("CanvasEngine", e)
-        return jsonify({"status": "error", "message": str(e)}), 500
-    
-@app.route("/api/canvas/clear_canvas", methods=["POST"])
-def clear_canvas():
-    """Clear the canvas by setting all pixels to black."""
-    try:
-        canvas_engine.clear_canvas()
-        return jsonify({"status": "success", "message": "Canvas cleared."})
     except Exception as e:
         Log.error_exc("CanvasEngine", e)
         return jsonify({"status": "error", "message": str(e)}), 500

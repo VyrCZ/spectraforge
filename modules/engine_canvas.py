@@ -13,7 +13,9 @@ class CanvasEngine(Engine):
         self.state = [(0, 0, 0)] * len(pixels)
 
     def on_enable(self):
-        self.pixels = self.state
+        for pix in range(len(self.pixels)):
+            self.pixels[pix] = self.state[pix]
+        self.pixels.show()
         Log.info("CanvasEngine", "CanvasEngine enabled.")
 
     def on_disable(self):
@@ -24,32 +26,18 @@ class CanvasEngine(Engine):
         return self.state
     
     @EngineManager.requires_active
-    def set_pixels(self, pixel_dict):
+    def set_pixels(self, pixel_list):
         """
         Set the pixel colors in the canvas.
-        pixel_dict format: 
-        {
-            pixel_index: (r, g, b),
-            ...
-        }
+        (You have to set the whole pixel list, not just a part of it.)
+        :param pixel_list: List of tuples representing RGB colors for each pixel.
         """
-
-        for index, color in pixel_dict.items():
-            if 0 <= index < len(self.state):
-                self.state[index] = color
-            else:
-                Log.warn("CanvasEngine", f"Pixel index {index} out of bounds. Ignoring.")
-        self.pixels = self.state
+        if len(pixel_list) != len(self.pixels):
+            Log.warn("CanvasEngine", "Pixel list length does not match the canvas size, not updating.")
+            return
+        self.state = pixel_list
+        for pix in range(len(self.pixels)):
+            self.pixels[pix] = self.state[pix]
         self.pixels.show()
         Log.debug("CanvasEngine", "Pixels updated.")
-
-    @EngineManager.requires_active
-    def clear_canvas(self):
-        """
-        Clear the canvas by setting all pixels to black.
-        """
-        self.state = [(0, 0, 0)] * len(self.pixels)
-        self.pixels = self.state
-        self.pixels.show()
-        Log.debug("CanvasEngine", "Canvas cleared.")
     
