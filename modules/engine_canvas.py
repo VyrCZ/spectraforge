@@ -35,6 +35,7 @@ class CanvasEngine(Engine):
         if len(pixel_list) != len(self.pixels):
             Log.warn("CanvasEngine", "Pixel list length does not match the canvas size, not updating.")
             return
+        Log.debug("CanvasEngine", pixel_list)
         self.state = pixel_list
         for pix in range(len(self.pixels)):
             self.pixels[pix] = self.state[pix]

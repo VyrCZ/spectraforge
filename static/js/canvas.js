@@ -99,17 +99,14 @@ function clearCanvas() {
     sendPixels();
 }
 
-function sendPixels(){
-    const leds = led_container.getElementsByClassName('led');
-    const pixel_list = [];
-    
-    for (let i = 0; i < leds.length; i++) {
-        const led = leds[i];
-        const color = window.getComputedStyle(led).backgroundColor;
-        pixel_list.push(color);
+function sendPixels(pixel_list = null){
+    if (!pixel_list) {
+        pixel_list = getLedState().map(color => {
+            const rgb = parseRgbString(color);
+            return [rgb[0], rgb[1], rgb[2]]; // Convert to [R, G, B] array
+        });
     }
-    console.log(`LED color: ${pixel_list[0]}`)
-    
+        
     fetch("/api/canvas/set_pixels", {
         method: "POST",
         headers: {
@@ -130,20 +127,33 @@ function sendPixels(){
     });
 }
 
+function getEventCoords(event) {
+    if (event.touches && event.touches.length > 0) {
+        return { x: event.touches[0].clientX, y: event.touches[0].clientY };
+    }
+    return { x: event.clientX, y: event.clientY };
+}
+
 function checkAndDraw(event){
+    if (event.type.startsWith('touch')) {
+        event.preventDefault();
+    }
+    const coords = getEventCoords(event);
+
     if (brushActive) {
         // Update the cursor position
         const cursorBrush = document.getElementById('cursor_brush');
+        cursorBrush.style.display = 'block';
         cursorBrush.style.width = `${brushSize}px`;
         cursorBrush.style.height = `${brushSize}px`;
-        cursorBrush.style.left = `${event.clientX - brushSize / 2}px`; // Center the brush
-        cursorBrush.style.top = `${event.clientY - brushSize / 2}px`;
+        cursorBrush.style.left = `${coords.x - brushSize / 2}px`; // Center the brush
+        cursorBrush.style.top = `${coords.y - brushSize / 2}px`;
     }
     if (!drawing) return;
 
     // if over any led, change its color
-    const x = event.clientX - led_container.getBoundingClientRect().left;
-    const y = event.clientY - led_container.getBoundingClientRect().top;
+    const x = coords.x - led_container.getBoundingClientRect().left;
+    const y = coords.y - led_container.getBoundingClientRect().top;
 
     const leds = led_container.getElementsByClassName('led');
     for (let i = 0; i < leds.length; i++) {
@@ -159,12 +169,17 @@ function checkAndDraw(event){
     }
 }
 
+function parseRgbString(rgbString) {
+    const result = rgbString.match(/\d+/g);
+    return result ? result.map(Number) : [0, 0, 0];
+}
+
 function getLedState() {
     const leds = led_container.getElementsByClassName('led');
     const pixel_list = [];
     for (let i = 0; i < leds.length; i++) {
         const led = leds[i];
-        const color = window.getComputedStyle(led).backgroundColor;
+        const color = led.style.backgroundColor || 'black'; // Default to black if no color set
         pixel_list.push(color);
     }
     return pixel_list;
@@ -187,6 +202,7 @@ function undo() {
     const lastState = undoStack.pop();
     redoBuffer.push(getLedState());
     setLedState(lastState);
+    sendPixels(lastState);
 }
 
 function redo() {
@@ -194,6 +210,7 @@ function redo() {
     const lastState = redoBuffer.pop();
     undoStack.push(getLedState());
     setLedState(lastState);
+    sendPixels(lastState);
 }
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -251,6 +268,26 @@ document.addEventListener("DOMContentLoaded", function() {
             });
             
             led_container.addEventListener('mousemove', checkAndDraw)
+
+            // add touch events
+            led_container.addEventListener('touchstart', function(event) {
+                drawing = true;
+                brushActive = true;
+                addToUndoStack();
+                redoBuffer = [];
+                checkAndDraw(event);
+            });
+
+            led_container.addEventListener('touchend', function(event) {
+                drawing = false;
+                brushActive = false;
+                const cursorBrush = document.getElementById('cursor_brush');
+                cursorBrush.style.display = 'none';
+                sendPixels();
+            });
+
+            led_container.addEventListener('touchmove', checkAndDraw);
+
             // add shortcuts for undo and redo
             document.addEventListener('keydown', function(event) {
                 if (event.ctrlKey && event.key === 'z') {

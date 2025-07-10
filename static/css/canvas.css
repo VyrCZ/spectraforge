@@ -138,3 +138,25 @@
     align-items: center;
     margin-top: 15px;
 }
+
+@media (max-width: 768px) {
+    #canvas_body_container {
+        flex-direction: column;
+    }
+
+    #canvas_sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        z-index: 10;
+    }
+
+    #canvas_main_container {
+        margin-left: 0;
+        height: 100vh;
+    }
+
+    #menu_icon {
+        z-index: 20;
+    }
+}

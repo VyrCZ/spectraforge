@@ -7,11 +7,21 @@ class Log:
     LOG_DIRECTORY = "logs"
     LOG_TEMPLATE = "[$DATETIME] [$CHANNEL] [$LOGTYPE]: $MESSAGE"
     _current_log_file = None
+    MAX_LOG_FILES = 10
     
     @staticmethod
     def _setup_log_file():
         if not os.path.exists(Log.LOG_DIRECTORY):
             os.makedirs(Log.LOG_DIRECTORY)
+
+        log_amount = len([name for name in os.listdir(Log.LOG_DIRECTORY) if os.path.isfile(os.path.join(Log.LOG_DIRECTORY, name))])
+        if log_amount >= Log.MAX_LOG_FILES:
+            # Remove the oldest log file
+            log_files = sorted([f for f in os.listdir(Log.LOG_DIRECTORY) if f.endswith('.log')])
+            if log_files:
+                oldest_log = log_files[0]
+                os.remove(os.path.join(Log.LOG_DIRECTORY, oldest_log))
+
         
         log_filename = f'{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.log'
         Log._current_log_file = os.path.join(Log.LOG_DIRECTORY, log_filename)

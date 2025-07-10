@@ -17,9 +17,9 @@ function changeEffect(effectName) {
 // Update a specific parameter on the server
 function updateParameter(name, value, type) {
     console.log(`Updating parameter: ${name} with value: ${value} of type: ${type}`);
-    if (type === "checkbox") {
-        value = value === "on" || value === true; // Convert checkbox value to boolean
-    }
+    /*if (type === "checkbox") {
+        
+    }*/
     fetch("/api/set_parameter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -89,7 +89,7 @@ function getState(handleParams = true) {
                         input.value = parameters[name]; // Set value from state
                     }
 
-                    input.onchange = () => updateParameter(name, input.value, param.param_type);
+                    input.onchange = () => updateParameter(name, (input.type === "checkbox") ? input.checked : input.value, param.param_type);
                     parametersDiv.appendChild(container);
                     container.appendChild(label);
                     container.appendChild(input);
