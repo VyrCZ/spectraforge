@@ -6,6 +6,7 @@ from modules.engine_manager import EngineManager
 from modules.engine_effects import EffectsEngine
 from modules.engine_calibration import CalibrationEngine
 from modules.engine_canvas import CanvasEngine
+from modules.engine_audiotest import AudioTestEngine
 from modules.setup import SetupType
 from flask_socketio import SocketIO, emit
 from modules.config_manager import Config
@@ -285,6 +286,68 @@ def handle_exception(e):
     """Handle exceptions globally and log them."""
     Log.error_exc("Server", e)
     return jsonify({"status": "error", "message": f"Error: {traceback.format_exc()}"}), 500
+
+@app.route("/audio")
+def page_audio():
+    """Render the audio page."""
+    return render_template("audio.html", audio_list=os.listdir(os.path.join(app.root_path, 'audio')))
+
+# Audio API
+@app.route("/api/audio/get_audio_files", methods=["GET"])
+def get_audio_files():
+    """Get a list of available audio files."""
+    audio_folder = os.path.join(app.root_path, 'audio')
+    try:
+        audio_files = [f for f in os.listdir(audio_folder) if f.endswith('.mp3') or f.endswith('.wav') or f.endswith('.ogg')]
+        return jsonify({"status": "success", "files": audio_files})
+    except Exception as e:
+        Log.error_exc("Server", e)
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route("/audio/<path:filename>")
+def send_audio(filename):
+    """Send an audio file from the audio directory."""
+    audio_folder = os.path.join(app.root_path, 'audio')
+    return send_from_directory(audio_folder, filename)
+
+@socketio.on("audio_client_connected")
+def audio_client_connected(data):
+    # get file name from data
+    """Handle client connection for audio playback."""
+    audio_file = data.get("audio_file")
+    if not audio_file:
+        Log.warn("AudioEngine", "No audio file provided by client.")
+        emit("audio_error", {"status": "error", "message": "Audio file is required."})
+        return
+    audio_test_engine.on_audio_load(audio_file)
+
+def audio_engine_ready():
+    """Callback for when the audio engine is ready for playback."""
+    socketio.emit("audio_ready")
+
+@socketio.on("audio_play")
+def on_audio_play():
+    Log.info("Server", "Audio play played by user.")
+    manager.active_engine.on_audio_play()
+
+@socketio.on("audio_pause")
+def on_audio_pause():
+    Log.info("Server", "Audio paused by user.")
+    manager.active_engine.on_audio_pause()
+
+@socketio.on("audio_stop")
+def on_audio_stop():
+    Log.info("Server", "Audio stopped by user.")
+    manager.active_engine.on_audio_stop()
+
+@socketio.on("audio_seek")
+def on_audio_seek(data):
+    Log.info("Server", "Audio seek requested by user.")
+    time_pos = data.get("time")
+    manager.active_engine.on_audio_seek(time_pos)
+
+
+
     
 
 if __name__ == "__main__":
@@ -292,11 +355,13 @@ if __name__ == "__main__":
     effects_engine = EffectsEngine(pixels, manager.active_setup)
     calibration_engine = CalibrationEngine(pixels, take_photo_callback, send_image_callback, setup_done_callback)
     canvas_engine = CanvasEngine(pixels)
+    audio_test_engine = AudioTestEngine(pixels, audio_engine_ready)
 
     # IMPORTANT! Always register the effects engine first, as it is the main engine.
     manager.register_engine(effects_engine)
     manager.register_engine(calibration_engine)
     manager.register_engine(canvas_engine)
+    manager.register_audio_engine(audio_test_engine)
     Log.info("Server", "Starting Spectraforge server...")
     try:
         if os.name == "nt":

@@ -1,0 +1,30 @@
+{
+    "songName": "Centipede",
+    "songArtist": "Knife Party",
+    "editorData": {
+        "bpm": 140,
+        "offset": 1750,
+        "createdLayers": 2
+    },
+    "timeline": [
+        {
+            "effect": "fade",
+            "parameters": {
+                "from": "#FFFFFF",
+                "to": "#000000"
+            },
+            "start": 14.7,
+            "end": 15.2,
+            "layer": 0,
+            "opaque": false,
+            "filters": [
+                {
+                    "filter": "checkerboard",
+                    "parameters": {
+                        "odd": false
+                    }
+                }
+            ]
+        }
+    ]
+}

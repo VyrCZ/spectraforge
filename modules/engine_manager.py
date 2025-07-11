@@ -1,5 +1,5 @@
 from functools import wraps
-from modules.engine import Engine
+from modules.engine import Engine, AudioEngine
 from modules.setup import Setup, SetupType
 from modules.config_manager import Config
 from modules.log_manager import Log
@@ -50,6 +50,28 @@ class EngineManager:
             self.active_engine = engine
         engine.manager = self
 
+    def register_audio_engine(self, audio_engine: AudioEngine):
+        """
+        Register a new audio engine.
+        """
+        if not isinstance(audio_engine, AudioEngine):
+            raise TypeError("Audio engine must be an instance of AudioEngine.")
+        self.register_engine(audio_engine)
+        Log.info("EngineManager", f"Audio engine {audio_engine} registered.")
+
+    def set_active_engine(self, engine_instance: Engine):
+        """
+        Set the active engine to the specified engine class.
+        """
+        if engine_instance not in self.engines:
+            raise EngineManager.EngineNotRegisteredError(engine_instance)
+        if self.active_engine is engine_instance:
+            return
+        if self.active_engine:
+            self.active_engine.on_disable()
+        engine_instance.on_enable()
+        self.active_engine = engine_instance
+
     @staticmethod
     def requires_active(func):
         """
@@ -60,21 +82,17 @@ class EngineManager:
             mgr = getattr(engine_instance, 'manager', None)
             if mgr is None or engine_instance not in mgr.engines:
                 raise EngineManager.EngineNotRegisteredError(engine_instance)
-
-            if mgr.active_engine is engine_instance:
-                pass  # already active
-            else:
-                mgr.active_engine.on_disable()
-                engine_instance.on_enable()
-                mgr.active_engine = engine_instance
-
+            mgr.set_active_engine(engine_instance)
             return func(engine_instance, *args, **kwargs)
         return wrapper
 
     class EngineNotRegisteredError(Exception):
         def __init__(self, engine):
             super().__init__(f"Engine {engine} is not registered.")
-            self.engine = engine
+
+    class NonAudioEngineActiveError(Exception):
+        def __init__(self, engine):
+            super().__init__(f"Active engine {engine} is not an audio engine, but an audio engine is required for this operation.")
 
     def change_setup(self, setup: Setup):
         """
@@ -101,3 +119,15 @@ class EngineManager:
         except FileNotFoundError:
             raise FileNotFoundError(f"Setup {setup_name} not found in {self.SETUPS_FOLDER}.")
         
+    def audio_callbacks(self, callback_name: str, *args, **kwargs):
+        """
+        Call the audio callback on the active audio engine.
+        """
+        if not isinstance(self.active_engine, AudioEngine):
+            raise self.NonAudioEngineActiveError(self.active_engine)
+        callback = getattr(self.active_engine, f"on_audio_{callback_name}", None)
+        if callback is None:
+            raise AttributeError(f"Audio engine {self.active_engine} does not have a callback for {callback_name}.")
+        return callback(*args, **kwargs)
+
+

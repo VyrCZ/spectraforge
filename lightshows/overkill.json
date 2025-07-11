@@ -1,0 +1,2058 @@
+{
+    "timeline": [
+        {
+            "start": 0.0,
+            "end": 1.557165,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#000000",
+                "color2": "#ff0000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 1.724138,
+            "end": 2.023338,
+            "effect": "flash",
+            "parameters": {
+                "color1": "#000000",
+                "color2": "#ff0000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 2.068966,
+            "end": 2.068966,
+            "effect": "solid_color",
+            "parameters": {
+                "color": "#ff0000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 4.137931,
+            "end": 6.812422,
+            "effect": "string_up",
+            "parameters": {
+                "color": "#ff0000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 6.898622,
+            "end": 9.570812,
+            "effect": "string_down",
+            "parameters": {
+                "color": "#ff0000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 9.662574,
+            "end": 12.240355,
+            "effect": "string_up",
+            "parameters": {
+                "color": "#ff0000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 12.417916,
+            "end": 15.004039,
+            "effect": "string_down",
+            "parameters": {
+                "color": "#ff0000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 15.172414,
+            "end": 17.754558,
+            "effect": "string_up",
+            "parameters": {
+                "color": "#ff0000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 17.931034,
+            "end": 20.517732,
+            "effect": "string_down",
+            "parameters": {
+                "color": "#ff0000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 20.694785,
+            "end": 23.278005,
+            "effect": "string_up",
+            "parameters": {
+                "color": "#ff0000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 23.448276,
+            "end": 24.671202,
+            "effect": "string_down",
+            "parameters": {
+                "color": "#ff0000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 24.833741,
+            "end": 26.020862,
+            "effect": "swipe_up",
+            "parameters": {
+                "color": "#ff0000",
+                "width": 50,
+                "steps": 0,
+                "no_clear": true
+            },
+            "layer": 0
+        },
+        {
+            "start": 26.216242,
+            "end": 26.85396,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#7f7f7f",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 26.896552,
+            "end": 27.199785,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#000000",
+                "color2": "#000032"
+            },
+            "layer": 0
+        },
+        {
+            "start": 27.242884,
+            "end": 27.927351,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#000032",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 29.655172,
+            "end": 29.95439,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#000000",
+                "color2": "#000032"
+            },
+            "layer": 0
+        },
+        {
+            "start": 30.0,
+            "end": 30.303294,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#000032",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 30.344828,
+            "end": 31.379763,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#7f7f7f",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 31.724138,
+            "end": 32.367981,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#7f7f7f",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 32.412208,
+            "end": 32.712617,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#000000",
+                "color2": "#000032"
+            },
+            "layer": 0
+        },
+        {
+            "start": 32.758621,
+            "end": 33.448399,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#000032",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 34.482759,
+            "end": 35.123084,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#7f7f7f",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 35.172414,
+            "end": 35.471383,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#000000",
+                "color2": "#000032"
+            },
+            "layer": 0
+        },
+        {
+            "start": 35.517241,
+            "end": 36.207166,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#000032",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 37.250724,
+            "end": 37.888442,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#7f7f7f",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 37.931035,
+            "end": 38.234267,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#000000",
+                "color2": "#000032"
+            },
+            "layer": 0
+        },
+        {
+            "start": 38.277367,
+            "end": 38.961834,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#000032",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 40.689655,
+            "end": 40.988873,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#000000",
+                "color2": "#000032"
+            },
+            "layer": 0
+        },
+        {
+            "start": 41.034483,
+            "end": 41.337776,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#000032",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 41.379311,
+            "end": 42.414246,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#7f7f7f",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 42.758621,
+            "end": 43.402464,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#7f7f7f",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 43.446691,
+            "end": 43.747099,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#000000",
+                "color2": "#000032"
+            },
+            "layer": 0
+        },
+        {
+            "start": 43.793104,
+            "end": 44.482882,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#000032",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 45.517242,
+            "end": 46.157567,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#7f7f7f",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 46.206897,
+            "end": 46.505866,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#000000",
+                "color2": "#000032"
+            },
+            "layer": 0
+        },
+        {
+            "start": 46.551724,
+            "end": 47.241379,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#000032",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 48.285207,
+            "end": 48.922925,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#7f7f7f",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 48.965518,
+            "end": 49.26875,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#000000",
+                "color2": "#000032"
+            },
+            "layer": 0
+        },
+        {
+            "start": 49.31185,
+            "end": 49.996316,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#000032",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 51.724138,
+            "end": 52.023356,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#000000",
+                "color2": "#000032"
+            },
+            "layer": 0
+        },
+        {
+            "start": 52.068966,
+            "end": 52.372259,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#000032",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 52.413794,
+            "end": 53.448729,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#7f7f7f",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 53.793104,
+            "end": 54.436947,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#7f7f7f",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 54.481174,
+            "end": 54.781582,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#000000",
+                "color2": "#000032"
+            },
+            "layer": 0
+        },
+        {
+            "start": 54.827587,
+            "end": 55.517364,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#000032",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 56.551725,
+            "end": 57.192049,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#7f7f7f",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 57.24138,
+            "end": 57.540349,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#000000",
+                "color2": "#000032"
+            },
+            "layer": 0
+        },
+        {
+            "start": 57.586207,
+            "end": 58.275862,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#000032",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 59.310345,
+            "end": 59.615263,
+            "effect": "flash2_times",
+            "parameters": {
+                "color1": "#ff0000",
+                "color2": "#000000",
+                "times": 3
+            },
+            "layer": 0
+        },
+        {
+            "start": 59.655172,
+            "end": 59.960091,
+            "effect": "flash2_times",
+            "parameters": {
+                "color1": "#ff0000",
+                "color2": "#000000",
+                "times": 3
+            },
+            "layer": 0
+        },
+        {
+            "start": 60.0,
+            "end": 61.033998,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ff0000",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 62.068966,
+            "end": 62.373884,
+            "effect": "flash2_times",
+            "parameters": {
+                "color1": "#ff0000",
+                "color2": "#000000",
+                "times": 3
+            },
+            "layer": 0
+        },
+        {
+            "start": 62.413793,
+            "end": 62.718712,
+            "effect": "flash2_times",
+            "parameters": {
+                "color1": "#ff0000",
+                "color2": "#000000",
+                "times": 3
+            },
+            "layer": 0
+        },
+        {
+            "start": 62.758621,
+            "end": 63.792618,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ff0000",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 64.827586,
+            "end": 65.132505,
+            "effect": "flash2_times",
+            "parameters": {
+                "color1": "#ff0000",
+                "color2": "#000000",
+                "times": 3
+            },
+            "layer": 0
+        },
+        {
+            "start": 65.172414,
+            "end": 65.477332,
+            "effect": "flash2_times",
+            "parameters": {
+                "color1": "#ff0000",
+                "color2": "#000000",
+                "times": 3
+            },
+            "layer": 0
+        },
+        {
+            "start": 65.517241,
+            "end": 65.851694,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ff0000",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 65.862069,
+            "end": 66.196522,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ff5600",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 66.206897,
+            "end": 66.54135,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ffb700",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 66.551724,
+            "end": 66.886177,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ff0000",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 66.896552,
+            "end": 67.231005,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ff5600",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 67.241379,
+            "end": 67.575832,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ffb700",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 67.586207,
+            "end": 68.877924,
+            "effect": "swipe_up",
+            "parameters": {
+                "color": "#ff0000",
+                "width": 50,
+                "steps": 0,
+                "no_clear": false
+            },
+            "layer": 0
+        },
+        {
+            "start": 68.968229,
+            "end": 70.259644,
+            "effect": "string_down",
+            "parameters": {
+                "color": "#c8c8c8"
+            },
+            "layer": 0
+        },
+        {
+            "start": 70.344828,
+            "end": 70.934474,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ff0000",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 71.034483,
+            "end": 72.957098,
+            "effect": "flash_times",
+            "parameters": {
+                "color1": "#ffb700",
+                "color2": "#14ff00",
+                "times": 4
+            },
+            "layer": 0
+        },
+        {
+            "start": 73.103448,
+            "end": 74.306757,
+            "effect": "swipe_down",
+            "parameters": {
+                "color": "#ff6500"
+            },
+            "layer": 0
+        },
+        {
+            "start": 74.482759,
+            "end": 74.80562,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ff3800",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 74.827586,
+            "end": 75.150448,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ff3800",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 75.172414,
+            "end": 75.495275,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ffb700",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 75.517241,
+            "end": 75.840103,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ff3800",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 75.862069,
+            "end": 76.527553,
+            "effect": "swipe_right",
+            "parameters": {
+                "color": "#7f7f7f"
+            },
+            "layer": 0
+        },
+        {
+            "start": 76.551724,
+            "end": 78.556009,
+            "effect": "swipe_up",
+            "parameters": {
+                "color": "#ff0000",
+                "width": 50,
+                "steps": 0,
+                "no_clear": true
+            },
+            "layer": 0
+        },
+        {
+            "start": 78.62069,
+            "end": 79.969524,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ff0000",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 81.37931,
+            "end": 81.716979,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ff0000",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 81.724138,
+            "end": 82.061806,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ff6500",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 82.068966,
+            "end": 82.678614,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ffc600",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 82.758621,
+            "end": 83.781809,
+            "effect": "swipe_up",
+            "parameters": {
+                "color": "#ff6500",
+                "width": 50,
+                "steps": 0,
+                "no_clear": false
+            },
+            "layer": 0
+        },
+        {
+            "start": 83.793103,
+            "end": 84.118625,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ff6500",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 84.137931,
+            "end": 84.4756,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ff0000",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 84.482759,
+            "end": 84.820427,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#00f2ff",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 84.827586,
+            "end": 85.437234,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ffc600",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 85.517241,
+            "end": 86.540429,
+            "effect": "swipe_up",
+            "parameters": {
+                "color": "#00f2ff",
+                "width": 50,
+                "steps": 0,
+                "no_clear": false
+            },
+            "layer": 0
+        },
+        {
+            "start": 86.551724,
+            "end": 86.877245,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#00f2ff",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 86.896552,
+            "end": 87.23422,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ff0000",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 87.241379,
+            "end": 87.579048,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#b500ff",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 87.586207,
+            "end": 88.195855,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ffc600",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 88.275862,
+            "end": 89.29905,
+            "effect": "swipe_up",
+            "parameters": {
+                "color": "#b500ff",
+                "width": 50,
+                "steps": 0,
+                "no_clear": false
+            },
+            "layer": 0
+        },
+        {
+            "start": 89.310345,
+            "end": 89.635866,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#b500ff",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 89.655172,
+            "end": 91.01932,
+            "effect": "flash_times",
+            "parameters": {
+                "color1": "#ff0000",
+                "color2": "#000000",
+                "times": 8
+            },
+            "layer": 0
+        },
+        {
+            "start": 91.034483,
+            "end": 91.535964,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ff9600",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 91.551724,
+            "end": 92.053205,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ff9600",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 92.068966,
+            "end": 92.398005,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ff9600",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 92.413793,
+            "end": 93.773787,
+            "effect": "swipe_up",
+            "parameters": {
+                "color": "#ffd500"
+            },
+            "layer": 0
+        },
+        {
+            "start": 93.793103,
+            "end": 95.153098,
+            "effect": "swipe_down",
+            "parameters": {
+                "color": "#ff8700"
+            },
+            "layer": 0
+        },
+        {
+            "start": 95.172414,
+            "end": 96.532408,
+            "effect": "swipe_backward",
+            "parameters": {
+                "color": "#ff0000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 96.551724,
+            "end": 97.914631,
+            "effect": "swipe_forward",
+            "parameters": {
+                "color": "#9b00ff"
+            },
+            "layer": 0
+        },
+        {
+            "start": 97.931034,
+            "end": 99.29651,
+            "effect": "gradient",
+            "parameters": {
+                "color1": "#ff0000",
+                "color2": "#ffbf00",
+                "speed": 10
+            },
+            "layer": 0
+        },
+        {
+            "start": 99.310345,
+            "end": 100.67582,
+            "effect": "gradient",
+            "parameters": {
+                "color1": "#ff0000",
+                "color2": "#a600ff",
+                "speed": 10
+            },
+            "layer": 0
+        },
+        {
+            "start": 100.689655,
+            "end": 100.976212,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ffce00",
+                "color2": "#ff0000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 101.034483,
+            "end": 101.321039,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ffce00",
+                "color2": "#ff0000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 101.37931,
+            "end": 101.665867,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ffce00",
+                "color2": "#ff0000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 101.724138,
+            "end": 102.010695,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ffce00",
+                "color2": "#ff0000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 102.068966,
+            "end": 103.085774,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ff0000",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 103.448276,
+            "end": 103.788524,
+            "effect": "swipe_backward",
+            "parameters": {
+                "color": "#ffac00"
+            },
+            "layer": 0
+        },
+        {
+            "start": 103.793103,
+            "end": 104.133352,
+            "effect": "swipe_forward",
+            "parameters": {
+                "color": "#ffac00",
+                "width": 50,
+                "steps": 0,
+                "no_clear": true
+            },
+            "layer": 0
+        },
+        {
+            "start": 104.137931,
+            "end": 104.46786,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ffac00",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 104.482759,
+            "end": 105.508413,
+            "effect": "string_up",
+            "parameters": {
+                "color": "#ff0000",
+                "trail_length": 50,
+                "steps": 0,
+                "no_clear": true
+            },
+            "layer": 0
+        },
+        {
+            "start": 105.517241,
+            "end": 105.84295,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ff7878",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 105.862069,
+            "end": 106.887723,
+            "effect": "string_down",
+            "parameters": {
+                "color": "#ff8300",
+                "trail_length": 50,
+                "steps": 0,
+                "no_clear": true
+            },
+            "layer": 0
+        },
+        {
+            "start": 106.896552,
+            "end": 107.22226,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ffc588",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 107.241379,
+            "end": 108.267034,
+            "effect": "swipe_up",
+            "parameters": {
+                "color": "#ffb700",
+                "width": 80,
+                "steps": 0,
+                "no_clear": true
+            },
+            "layer": 0
+        },
+        {
+            "start": 108.275862,
+            "end": 108.937868,
+            "effect": "flash2_times",
+            "parameters": {
+                "color1": "#ff0000",
+                "color2": "#ffb700",
+                "times": 8
+            },
+            "layer": 0
+        },
+        {
+            "start": 108.965517,
+            "end": 110.053878,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#000000",
+                "color2": "#ff6c00"
+            },
+            "layer": 0
+        },
+        {
+            "start": 110.344828,
+            "end": 110.655766,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ff3f3f",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 110.689655,
+            "end": 110.99646,
+            "effect": "swipe_right",
+            "parameters": {
+                "color": "#ffbb00"
+            },
+            "layer": 0
+        },
+        {
+            "start": 111.37931,
+            "end": 112.380623,
+            "effect": "gradient",
+            "parameters": {
+                "color1": "#ffbb00",
+                "color2": "#ff0000",
+                "speed": 15
+            },
+            "layer": 0
+        },
+        {
+            "start": 112.413793,
+            "end": 112.746727,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ffa6a6",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 112.758621,
+            "end": 113.759933,
+            "effect": "gradient",
+            "parameters": {
+                "color1": "#ffc600",
+                "color2": "#ff0000",
+                "speed": 15
+            },
+            "layer": 0
+        },
+        {
+            "start": 113.793103,
+            "end": 114.126038,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ffa6a6",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 114.137931,
+            "end": 115.139244,
+            "effect": "gradient",
+            "parameters": {
+                "color1": "#ff0000",
+                "color2": "#ffbb00",
+                "speed": 15
+            },
+            "layer": 0
+        },
+        {
+            "start": 115.172414,
+            "end": 115.505348,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ffa6a6",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 115.862069,
+            "end": 116.186944,
+            "effect": "swipe_forward",
+            "parameters": {
+                "color": "#ff7474"
+            },
+            "layer": 0
+        },
+        {
+            "start": 116.551724,
+            "end": 116.877661,
+            "effect": "swipe_down",
+            "parameters": {
+                "color": "#ff0000",
+                "width": 50,
+                "steps": 0,
+                "no_clear": true
+            },
+            "layer": 0
+        },
+        {
+            "start": 116.896552,
+            "end": 117.222489,
+            "effect": "swipe_down",
+            "parameters": {
+                "color": "#ff9600",
+                "width": 50,
+                "steps": 0,
+                "no_clear": true
+            },
+            "layer": 0
+        },
+        {
+            "start": 117.241379,
+            "end": 117.575104,
+            "effect": "flash2_times",
+            "parameters": {
+                "color1": "#ff4f00",
+                "color2": "#ff0000",
+                "times": 3
+            },
+            "layer": 0
+        },
+        {
+            "start": 117.931034,
+            "end": 118.256971,
+            "effect": "swipe_right",
+            "parameters": {
+                "color": "#ff0000",
+                "width": 50,
+                "steps": 0,
+                "no_clear": true
+            },
+            "layer": 0
+        },
+        {
+            "start": 118.275862,
+            "end": 118.601799,
+            "effect": "swipe_left",
+            "parameters": {
+                "color": "#ff9600",
+                "width": 50,
+                "steps": 0,
+                "no_clear": true
+            },
+            "layer": 0
+        },
+        {
+            "start": 118.62069,
+            "end": 118.936517,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#fe7e7e",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 118.965517,
+            "end": 119.96683,
+            "effect": "gradient",
+            "parameters": {
+                "color1": "#ff0000",
+                "color2": "#ffbb00",
+                "speed": 15
+            },
+            "layer": 0
+        },
+        {
+            "start": 120.0,
+            "end": 120.646719,
+            "effect": "gradient",
+            "parameters": {
+                "color1": "#0900ff",
+                "color2": "#da00ff",
+                "speed": 15
+            },
+            "layer": 0
+        },
+        {
+            "start": 120.689655,
+            "end": 120.689655,
+            "effect": "solid_color",
+            "parameters": {
+                "color": "#ffa800"
+            },
+            "layer": 0
+        },
+        {
+            "start": 121.034483,
+            "end": 121.034483,
+            "effect": "solid_color",
+            "parameters": {
+                "color": "#ff6100"
+            },
+            "layer": 0
+        },
+        {
+            "start": 121.37931,
+            "end": 121.687364,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ff0000",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 121.724138,
+            "end": 122.058184,
+            "effect": "string_down",
+            "parameters": {
+                "color": "#ff0000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 121.895617,
+            "end": 122.239058,
+            "effect": "string_down",
+            "parameters": {
+                "color": "#ff0000"
+            },
+            "layer": 1
+        },
+        {
+            "start": 122.0682,
+            "end": 122.40082,
+            "effect": "string_down",
+            "parameters": {
+                "color": "#ff0000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 122.413793,
+            "end": 123.415106,
+            "effect": "gradient",
+            "parameters": {
+                "color1": "#ffbb00",
+                "color2": "#ff0000",
+                "speed": 15
+            },
+            "layer": 0
+        },
+        {
+            "start": 123.448276,
+            "end": 123.78121,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ffa6a6",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 123.793103,
+            "end": 124.794416,
+            "effect": "gradient",
+            "parameters": {
+                "color1": "#ffbb00",
+                "color2": "#ff0000",
+                "speed": 15
+            },
+            "layer": 0
+        },
+        {
+            "start": 124.827586,
+            "end": 125.160521,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ffa6a6",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 125.172414,
+            "end": 126.173726,
+            "effect": "gradient",
+            "parameters": {
+                "color1": "#ffbb00",
+                "color2": "#ff0000",
+                "speed": 15
+            },
+            "layer": 0
+        },
+        {
+            "start": 126.206897,
+            "end": 126.539831,
+            "effect": "rainbow",
+            "parameters": {},
+            "layer": 0
+        },
+        {
+            "start": 126.896552,
+            "end": 130.295873,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ff4a4a",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 130.345215,
+            "end": 131.027302,
+            "effect": "swipe_up",
+            "parameters": {
+                "color": "#ff5050"
+            },
+            "layer": 0
+        },
+        {
+            "start": 130.516463,
+            "end": 131.297234,
+            "effect": "swipe_up",
+            "parameters": {
+                "color": "#ff5050"
+            },
+            "layer": 1
+        },
+        {
+            "start": 130.690612,
+            "end": 131.471383,
+            "effect": "swipe_up",
+            "parameters": {
+                "color": "#ff5050"
+            },
+            "layer": 2
+        },
+        {
+            "start": 130.861859,
+            "end": 131.64263,
+            "effect": "swipe_up",
+            "parameters": {
+                "color": "#ff5050"
+            },
+            "layer": 3
+        },
+        {
+            "start": 131.033107,
+            "end": 131.813878,
+            "effect": "swipe_up",
+            "parameters": {
+                "color": "#ff5050"
+            },
+            "layer": 0
+        },
+        {
+            "start": 131.37931,
+            "end": 132.062575,
+            "effect": "flash",
+            "parameters": {
+                "color1": "#ff5050",
+                "color2": "#000000",
+                "frequency": 10
+            },
+            "layer": 1
+        },
+        {
+            "start": 132.068966,
+            "end": 132.250549,
+            "effect": "flash2_times",
+            "parameters": {
+                "color1": "#646464",
+                "color2": "#000000",
+                "times": 4
+            },
+            "layer": 0
+        },
+        {
+            "start": 132.413793,
+            "end": 132.772142,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ff9600",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 133.448276,
+            "end": 134.449588,
+            "effect": "gradient",
+            "parameters": {
+                "color1": "#ffbb00",
+                "color2": "#ff0000",
+                "speed": 15
+            },
+            "layer": 0
+        },
+        {
+            "start": 134.482759,
+            "end": 134.815693,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ffa6a6",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 134.827586,
+            "end": 135.828899,
+            "effect": "gradient",
+            "parameters": {
+                "color1": "#ffc600",
+                "color2": "#ff0000",
+                "speed": 15
+            },
+            "layer": 0
+        },
+        {
+            "start": 135.862069,
+            "end": 136.195003,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ffa6a6",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 136.206897,
+            "end": 137.208209,
+            "effect": "gradient",
+            "parameters": {
+                "color1": "#ff0000",
+                "color2": "#ffbb00",
+                "speed": 15
+            },
+            "layer": 0
+        },
+        {
+            "start": 137.241379,
+            "end": 137.574314,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ffa6a6",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 137.931034,
+            "end": 138.255909,
+            "effect": "swipe_forward",
+            "parameters": {
+                "color": "#ff7474"
+            },
+            "layer": 0
+        },
+        {
+            "start": 138.62069,
+            "end": 138.946627,
+            "effect": "swipe_down",
+            "parameters": {
+                "color": "#ff0000",
+                "width": 50,
+                "steps": 0,
+                "no_clear": true
+            },
+            "layer": 0
+        },
+        {
+            "start": 138.965517,
+            "end": 139.291454,
+            "effect": "swipe_down",
+            "parameters": {
+                "color": "#ff9600",
+                "width": 50,
+                "steps": 0,
+                "no_clear": true
+            },
+            "layer": 0
+        },
+        {
+            "start": 139.310345,
+            "end": 139.64407,
+            "effect": "flash2_times",
+            "parameters": {
+                "color1": "#ff4f00",
+                "color2": "#ff0000",
+                "times": 3
+            },
+            "layer": 0
+        },
+        {
+            "start": 140.0,
+            "end": 140.325937,
+            "effect": "swipe_right",
+            "parameters": {
+                "color": "#ff0000",
+                "width": 50,
+                "steps": 0,
+                "no_clear": true
+            },
+            "layer": 0
+        },
+        {
+            "start": 140.344828,
+            "end": 140.670764,
+            "effect": "swipe_left",
+            "parameters": {
+                "color": "#ff9600",
+                "width": 50,
+                "steps": 0,
+                "no_clear": true
+            },
+            "layer": 0
+        },
+        {
+            "start": 140.689655,
+            "end": 141.005483,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#fe7e7e",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 141.034483,
+            "end": 142.035795,
+            "effect": "gradient",
+            "parameters": {
+                "color1": "#ff0000",
+                "color2": "#ffbb00",
+                "speed": 15
+            },
+            "layer": 0
+        },
+        {
+            "start": 142.068966,
+            "end": 142.715685,
+            "effect": "gradient",
+            "parameters": {
+                "color1": "#0900ff",
+                "color2": "#da00ff",
+                "speed": 15
+            },
+            "layer": 0
+        },
+        {
+            "start": 142.758621,
+            "end": 142.758621,
+            "effect": "solid_color",
+            "parameters": {
+                "color": "#ffa800"
+            },
+            "layer": 0
+        },
+        {
+            "start": 143.103448,
+            "end": 143.103448,
+            "effect": "solid_color",
+            "parameters": {
+                "color": "#ff6100"
+            },
+            "layer": 0
+        },
+        {
+            "start": 143.448276,
+            "end": 143.756329,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ff0000",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 143.793103,
+            "end": 144.12715,
+            "effect": "string_down",
+            "parameters": {
+                "color": "#ff0000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 143.964582,
+            "end": 144.308023,
+            "effect": "string_down",
+            "parameters": {
+                "color": "#ff0000"
+            },
+            "layer": 1
+        },
+        {
+            "start": 144.137166,
+            "end": 144.469785,
+            "effect": "string_down",
+            "parameters": {
+                "color": "#ff0000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 144.482759,
+            "end": 145.484071,
+            "effect": "gradient",
+            "parameters": {
+                "color1": "#ffbb00",
+                "color2": "#ff0000",
+                "speed": 15
+            },
+            "layer": 0
+        },
+        {
+            "start": 145.517241,
+            "end": 145.850176,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ffa6a6",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 145.862069,
+            "end": 146.863382,
+            "effect": "gradient",
+            "parameters": {
+                "color1": "#ffbb00",
+                "color2": "#ff0000",
+                "speed": 15
+            },
+            "layer": 0
+        },
+        {
+            "start": 146.896552,
+            "end": 147.229486,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ffa6a6",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 147.241379,
+            "end": 148.242692,
+            "effect": "gradient",
+            "parameters": {
+                "color1": "#ffbb00",
+                "color2": "#ff0000",
+                "speed": 15
+            },
+            "layer": 0
+        },
+        {
+            "start": 148.275862,
+            "end": 148.929345,
+            "effect": "swipe_up",
+            "parameters": {
+                "color": "#646464",
+                "width": 50,
+                "steps": 0,
+                "no_clear": true
+            },
+            "layer": 0
+        },
+        {
+            "start": 148.965517,
+            "end": 149.294949,
+            "effect": "gradient",
+            "parameters": {
+                "color1": "#000000",
+                "color2": "#ff0000",
+                "speed": 15
+            },
+            "layer": 0
+        },
+        {
+            "start": 149.310345,
+            "end": 150.322533,
+            "effect": "split_vertical",
+            "parameters": {
+                "color1": "#00ffdb",
+                "color2": "#c800ff"
+            },
+            "layer": 0
+        },
+        {
+            "start": 150.344828,
+            "end": 151.674679,
+            "effect": "flash2_times",
+            "parameters": {
+                "color1": "#ffbf00",
+                "color2": "#000000",
+                "times": 5
+            },
+            "layer": 0
+        },
+        {
+            "start": 151.724138,
+            "end": 152.045665,
+            "effect": "flash_times",
+            "parameters": {
+                "color1": "#ffbf00",
+                "color2": "#000000",
+                "times": 3
+            },
+            "layer": 0
+        },
+        {
+            "start": 152.068966,
+            "end": 153.060995,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ffbf00",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 153.103448,
+            "end": 154.457074,
+            "effect": "flash",
+            "parameters": {
+                "color1": "#a200ff",
+                "color2": "#646464",
+                "frequency": 5
+            },
+            "layer": 0
+        },
+        {
+            "start": 154.482759,
+            "end": 157.207254,
+            "effect": "string_up",
+            "parameters": {
+                "color": "#646464",
+                "trail_length": 50,
+                "steps": 0,
+                "no_clear": true
+            },
+            "layer": 0
+        },
+        {
+            "start": 157.241379,
+            "end": 157.92969,
+            "effect": "swipe_forward",
+            "parameters": {
+                "color": "#ff0000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 157.931034,
+            "end": 159.932806,
+            "effect": "string_down",
+            "parameters": {
+                "color": "#ff5000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 160.0,
+            "end": 160.659792,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ff5000",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 160.689655,
+            "end": 162.712165,
+            "effect": "swipe_left",
+            "parameters": {
+                "color": "#004aff",
+                "width": true
+            },
+            "layer": 0
+        },
+        {
+            "start": 162.758621,
+            "end": 163.401763,
+            "effect": "gradient",
+            "parameters": {
+                "color1": "#004aff",
+                "color2": "#646464",
+                "speed": 30
+            },
+            "layer": 0
+        },
+        {
+            "start": 163.448276,
+            "end": 165.408984,
+            "effect": "swipe_down",
+            "parameters": {
+                "color": "#c400ff"
+            },
+            "layer": 0
+        },
+        {
+            "start": 165.515707,
+            "end": 165.515707,
+            "effect": "solid_color",
+            "parameters": {
+                "color": "#ffac00"
+            },
+            "layer": 0
+        },
+        {
+            "start": 165.860506,
+            "end": 166.197095,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ff0000",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 166.2012,
+            "end": 168.241737,
+            "effect": "string_up",
+            "parameters": {
+                "color": "#646464",
+                "trail_length": 50,
+                "steps": 0,
+                "no_clear": true
+            },
+            "layer": 0
+        },
+        {
+            "start": 168.275862,
+            "end": 168.964172,
+            "effect": "swipe_forward",
+            "parameters": {
+                "color": "#ff0000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 168.965517,
+            "end": 170.967289,
+            "effect": "string_down",
+            "parameters": {
+                "color": "#ff5000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 171.034483,
+            "end": 171.694274,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ff5000",
+                "color2": "#000000"
+            },
+            "layer": 0
+        },
+        {
+            "start": 171.724138,
+            "end": 173.746648,
+            "effect": "swipe_left",
+            "parameters": {
+                "color": "#004aff",
+                "width": true
+            },
+            "layer": 0
+        },
+        {
+            "start": 173.793103,
+            "end": 174.436245,
+            "effect": "gradient",
+            "parameters": {
+                "color1": "#004aff",
+                "color2": "#646464",
+                "speed": 30
+            },
+            "layer": 0
+        },
+        {
+            "start": 174.482759,
+            "end": 176.480409,
+            "effect": "swipe_down",
+            "parameters": {
+                "color": "#c400ff"
+            },
+            "layer": 0
+        },
+        {
+            "start": 176.551724,
+            "end": 177.571349,
+            "effect": "fade",
+            "parameters": {
+                "color1": "#ff6060",
+                "color2": "#000000"
+            },
+            "layer": 0
+        }
+    ]
+}
