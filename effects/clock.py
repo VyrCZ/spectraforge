@@ -6,8 +6,8 @@ import requests as req
 import math
 
 class Clock(LightEffect):
-    def __init__(self, pixels, coords):
-        super().__init__(pixels, coords, "The Clock", EffectType.ONLY_2D)
+    def __init__(self, renderer, coords):
+        super().__init__(renderer, coords, "The Clock", EffectType.ONLY_2D)
         self.fade_speed = self.add_parameter("Fade Speed", ParamType.SLIDER, 50, min=1, max=500, step=1)
         self.hands_color = self.add_parameter("Hands Color", ParamType.COLOR, "#ffffff")
         self.frame_color = self.add_parameter("Frame Color", ParamType.COLOR, "#0051ff")
@@ -63,7 +63,7 @@ class Clock(LightEffect):
             
             # Draw frame
             if abs(dist_from_center - self.radius) < 1:
-                self.pixels[i] = frame_c
+                self.renderer[i] = frame_c
                 continue
 
             # Calculate pixel angle relative to center
@@ -75,10 +75,10 @@ class Clock(LightEffect):
             on_second = abs(angle - second_angle) < 0.1 and dist_from_center <= second_len
 
             if on_hour or on_minute:
-                self.pixels[i] = hands_c
+                self.renderer[i] = hands_c
             elif on_second:
-                self.pixels[i] = seconds_c
+                self.renderer[i] = seconds_c
             else:
-                self.pixels[i] = (0, 0, 0)
+                self.renderer[i] = (0, 0, 0)
 
-        self.pixels.show()
+        self.renderer.show()

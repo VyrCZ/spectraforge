@@ -11,48 +11,14 @@ from modules.setup import SetupType
 from flask_socketio import SocketIO, emit
 from modules.config_manager import Config
 from modules.log_manager import Log
+from modules.led_renderer import LEDRenderer
 
 # set working directory to the directory of this file
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-class DummyNeoPixel():
-    """
-    A replacement for the NeoPixel class when running on Windows or for debugging purposes.
-    This class simulates the behavior of NeoPixel without actual hardware interaction.
-    """
-    def __init__(self, pin, num_leds, auto_write, print_pixels=True):
-        self.num_leds = num_leds
-        self.pixels = [(0, 0, 0)] * num_leds
-        self.auto_write = auto_write
-        self.print_pixels = print_pixels
 
-    def __setitem__(self, key, value):
-        self.pixels[key] = value
-
-    def fill(self, color):
-        for i in range(self.num_leds):
-            self.pixels[i] = color
-
-    def show(self):
-        if self.print_pixels:
-            print(self.pixels)
-
-    def __len__(self):
-        return self.num_leds
-
-LED_COUNT = 200
-# determine if running on windows to run debug instead
-if os.name == 'nt':
-    #import sys
-    pixels = DummyNeoPixel(18, LED_COUNT, auto_write=False, print_pixels=False)
-else:
-    from neopixel import NeoPixel
-    import board
-    # LED Configuration
-    PIN = board.D18
-    pixels = NeoPixel(PIN, LED_COUNT, auto_write=False)
 app = Flask(__name__)
-app.jinja_env.globals.update(zip=zip)
+app.jinja_env.globals.update(zip=zip) # allows using zip in Jinja templates
 socketio = SocketIO(app)
 # Globals for effect management
 
@@ -352,10 +318,11 @@ def on_audio_seek(data):
 
 if __name__ == "__main__":
     manager = EngineManager()
-    effects_engine = EffectsEngine(pixels, manager.active_setup)
-    calibration_engine = CalibrationEngine(pixels, take_photo_callback, send_image_callback, setup_done_callback)
-    canvas_engine = CanvasEngine(pixels)
-    audio_test_engine = AudioTestEngine(pixels, audio_engine_ready)
+    renderer = LEDRenderer(manager.active_setup)
+    effects_engine = EffectsEngine(renderer, manager.active_setup)
+    calibration_engine = CalibrationEngine(renderer, take_photo_callback, send_image_callback, setup_done_callback)
+    canvas_engine = CanvasEngine(renderer)
+    audio_test_engine = AudioTestEngine(renderer, audio_engine_ready)
 
     # IMPORTANT! Always register the effects engine first, as it is the main engine.
     manager.register_engine(effects_engine)

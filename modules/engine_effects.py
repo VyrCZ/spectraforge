@@ -17,8 +17,8 @@ class EffectsEngine(Engine):
 
     SETUP_FOLDER = "config/setups"
 
-    def __init__(self, pixels, init_setup):
-        self.pixels = pixels
+    def __init__(self, renderer, init_setup):
+        self.renderer = renderer
         self.current_effect = None
         self.effects = {}
         self.running = False
@@ -35,7 +35,7 @@ class EffectsEngine(Engine):
         
         effect_name = Config().config.get("current_effect")
         if effect_name in self.effects:
-            self.current_effect = self.effects[effect_name](self.pixels, self.coords)
+            self.current_effect = self.effects[effect_name](self.renderer, self.coords)
             # load parameters
             for param in self.current_effect.parameters.values():
                 last_value = Config().config.get("parameters", {}).get(effect_name, {}).get(param.name)
@@ -45,7 +45,7 @@ class EffectsEngine(Engine):
             # set to first effect
             if self.effects:
                 effect_name = list(self.effects.keys())[0]
-                self.current_effect = list(self.effects.values())[0](self.pixels, self.coords)
+                self.current_effect = list(self.effects.values())[0](self.renderer, self.coords)
                 Config().config["current_effect"] = effect_name
                 Config().save()
 
@@ -58,8 +58,8 @@ class EffectsEngine(Engine):
         self.running = False
         if self.runner_thread:
             self.runner_thread.join()
-        self.pixels.fill((0, 0, 0))
-        self.pixels.show()
+        self.renderer.fill((0, 0, 0))
+        self.renderer.show()
 
     def on_setup_changed(self, setup):
         self.setup = setup
@@ -117,7 +117,7 @@ class EffectsEngine(Engine):
         """Set the current LED effect."""
         Log.info("EffectsEngine", f"Setting effect to {effect_name}")
         if effect_name in self.effects:
-            self.current_effect = self.effects[effect_name](self.pixels, self.coords)
+            self.current_effect = self.effects[effect_name](self.renderer, self.coords)
             Config().config["current_effect"] = effect_name
             Config().save()
             for param in self.current_effect.parameters.values():
@@ -133,7 +133,7 @@ class EffectsEngine(Engine):
         """Get parameters for a specific effect."""
         if effect_name in self.effects:
             effect_class = self.effects[effect_name]
-            parameters = effect_class(self.pixels, self.coords).get_parameters()
+            parameters = effect_class(self.renderer, self.coords).get_parameters()
             return parameters
         return {"error": "Effect not found"}
 
@@ -165,7 +165,7 @@ class EffectsEngine(Engine):
         types = []
         display_names = []
         for name, effect_class in self.effects.items():
-            effect_instance = effect_class(self.pixels, self.coords)
+            effect_instance = effect_class(self.renderer, self.coords)
             types.append(EffectType.display_name(effect_instance.effect_type))
             effect_names.append(name)
             display_names.append(effect_instance.display_name)

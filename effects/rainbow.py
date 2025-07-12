@@ -4,8 +4,8 @@ import time
 import colorsys
 
 class Rainbow(LightEffect):
-    def __init__(self, pixels, coords):
-        super().__init__(pixels, coords, "Rainbow", EffectType.UNIVERSAL)
+    def __init__(self, renderer, coords):
+        super().__init__(renderer, coords, "Rainbow", EffectType.UNIVERSAL)
         self.speed = self.add_parameter("Speed", ParamType.SLIDER, 0.1, min=0.5, max=50, step=0.1)
         self.reverse = self.add_parameter("Reverse", ParamType.CHECKBOX, False)
         self.current_y = 0
@@ -18,7 +18,7 @@ class Rainbow(LightEffect):
             self.current_y += self.speed.get()
         if self.current_y > self.height:
             self.current_y = 0
-        for i in range(len(self.pixels)):
+        for i in range(len(self.renderer.leds)):
             normalized_rgb = list(colorsys.hsv_to_rgb(mu.normalize(mu.wrap(self.coords[i][1] - self.current_y, 0, self.height), 0, self.height), 1, 1))
-            self.pixels[i] = tuple([int(channel * 255) for channel in normalized_rgb])
-        self.pixels.show()
+            self.renderer.leds[i] = tuple([int(channel * 255) for channel in normalized_rgb])
+        self.renderer.show()

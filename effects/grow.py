@@ -5,8 +5,8 @@ import random
 import colorsys
 
 class Grow(LightEffect):
-    def __init__(self, pixels, coords):
-        super().__init__(pixels, coords, "Grow", EffectType.PRIMARILY_3D)
+    def __init__(self, renderer, coords):
+        super().__init__(renderer, coords, "Grow", EffectType.PRIMARILY_3D)
         self.active_color = None
         self.growing = False
         self.speed = self.add_parameter("Speed", ParamType.SLIDER, 10, min=1, max=100, step=1)
@@ -26,8 +26,8 @@ class Grow(LightEffect):
         if self.current_size <= 0:
             self.current_size = 0.1
         self.current_size = round(self.current_size, 1)
-        for i in range(len(self.pixels)):
+        for i in range(len(self.renderer)):
             active_color = [channel * (1 - mu.normalize(mu.clamp(abs(math.dist(self.coords[i], self.random_point)), 0, self.current_size), 0, self.current_size)) for channel in self.active_color]
             #print(f"Active color: {active_color}")
-            self.pixels[i] = active_color  # Update specific point's color
-        self.pixels.show()
+            self.renderer[i] = active_color  # Update specific point's color
+        self.renderer.show()

@@ -3,8 +3,8 @@ import math
 import random
 
 class RainEffect(LightEffect):
-    def __init__(self, pixels, coords):
-        super().__init__(pixels, coords, "Raining", EffectType.UNIVERSAL)
+    def __init__(self, renderer, coords):
+        super().__init__(renderer, coords, "Raining", EffectType.UNIVERSAL)
         self.color = self.add_parameter("Droplet Color", ParamType.COLOR, "#0000FF")
         self.speed = self.add_parameter("Speed", ParamType.SLIDER, 5, min=1, max=10, step=1)  # Fall speed
         self.amount = self.add_parameter("Amount", ParamType.SLIDER, 5, min=1, max=20, step=1)  # Droplet count
@@ -40,7 +40,7 @@ class RainEffect(LightEffect):
         amount = int(self.amount.get())
         z_threshold = int(self.threshold.get())
 
-        new_pixels = [(0, 0, 0)] * len(self.pixels)
+        new_renderer = [(0, 0, 0)] * len(self.renderer)
 
         # Update existing droplets
         updated_droplets = []
@@ -49,18 +49,18 @@ class RainEffect(LightEffect):
                 next_led = self._find_next_led(led_idx, z_threshold)
                 if next_led is not None:
                     updated_droplets.append((next_led, 0))  # Move droplet down
-                    new_pixels[next_led] = color
+                    new_renderer[next_led] = color
             else:
                 updated_droplets.append((led_idx, frame_count + 1))
-                new_pixels[led_idx] = color
+                new_renderer[led_idx] = color
 
         # Add new droplets
         for _ in range(amount):
             new_droplet = random.choice(self.top_leds)
             updated_droplets.append((new_droplet, 0))
-            new_pixels[new_droplet] = color
+            new_renderer[new_droplet] = color
 
-        # Update droplet list and pixels
+        # Update droplet list and renderer
         self.droplets = updated_droplets
-        self.pixels[:] = new_pixels
-        self.pixels.show()
+        self.renderer[:] = new_renderer
+        self.renderer.show()

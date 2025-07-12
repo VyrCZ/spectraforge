@@ -18,8 +18,8 @@ class CalibrationEngine(Engine):
     IMAGE_DIR_ROOT = "calibration/images/"
     SETUP_DIR_ROOT = "config/setups/"
 
-    def __init__(self, pixels, take_photo_callback, send_image_callback, setup_done_callback):
-        self.pixels = pixels
+    def __init__(self, renderer, take_photo_callback, send_image_callback, setup_done_callback):
+        self.renderer = renderer
         self.pixel_count = 200  # Default pixel count, should be set by the setup
         self.take_photo_callback = take_photo_callback
         self.send_image_callback = send_image_callback
@@ -58,13 +58,13 @@ class CalibrationEngine(Engine):
         """
         Show the next pixel in the calibration process.
         """
-        if self.current_index >= len(self.pixels):
-            Log.info("CalibrationEngine", "All pixels have been shown.")
+        if self.current_index >= len(self.renderer):
+            Log.info("CalibrationEngine", "All renderer have been shown.")
             return
         self.current_index += 1
-        self.pixels.fill((0, 0, 0))
-        self.pixels[self.current_index] = self.calibration_color
-        self.pixels.show()
+        self.renderer.fill((0, 0, 0))
+        self.renderer[self.current_index] = self.calibration_color
+        self.renderer.show()
         # give time to the camera to focus
         time.sleep(0.5)
         Log.debug("CalibrationEngine", f"Showing pixel {self.current_index}.")
@@ -93,7 +93,7 @@ class CalibrationEngine(Engine):
         with open(file_path, "wb") as image_file:
             image_file.write(image_bytes)
 
-        #if self.current_index < len(self.pixels):
+        #if self.current_index < len(self.renderer):
         if self.current_index < self.pixel_count - 1: # testing
             self.next_pixel()
         else:
@@ -112,41 +112,41 @@ class CalibrationEngine(Engine):
         """
         image_path = os.path.join(self.image_dir, file_name)
         image = Image.open(image_path).convert("L")
-        pixels = image.load()
+        renderer = image.load()
         width, height = image.size
 
         brightest_value = 0
         for x in range(width):
             for y in range(height):
-                if pixels[x, y] > brightest_value:
-                    brightest_value = pixels[x, y]
+                if renderer[x, y] > brightest_value:
+                    brightest_value = renderer[x, y]
 
-        brightest_pixels = []
+        brightest_renderer = []
         for x in range(width):
             for y in range(height):
-                if pixels[x, y] == brightest_value:
-                    brightest_pixels.append((x, y))
+                if renderer[x, y] == brightest_value:
+                    brightest_renderer.append((x, y))
 
-        if not brightest_pixels:
+        if not brightest_renderer:
             return width // 2, height // 2
 
-        sum_x = sum(p[0] for p in brightest_pixels)
-        sum_y = sum(p[1] for p in brightest_pixels)
-        center_x = int(sum_x / len(brightest_pixels))
-        center_y = int(sum_y / len(brightest_pixels))
+        sum_x = sum(p[0] for p in brightest_renderer)
+        sum_y = sum(p[1] for p in brightest_renderer)
+        center_x = int(sum_x / len(brightest_renderer))
+        center_y = int(sum_y / len(brightest_renderer))
 
         DISTANCE_THRESHOLD = 30
-        filtered_pixels = []
-        for x, y in brightest_pixels:
+        filtered_renderer = []
+        for x, y in brightest_renderer:
             distance = math.sqrt((x - center_x)**2 + (y - center_y)**2)
             if distance <= DISTANCE_THRESHOLD:
-                filtered_pixels.append((x, y))
+                filtered_renderer.append((x, y))
 
-        if filtered_pixels:
-            sum_x = sum(p[0] for p in filtered_pixels)
-            sum_y = sum(p[1] for p in filtered_pixels)
-            center_x = int(sum_x / len(filtered_pixels))
-            center_y = int(sum_y / len(filtered_pixels))
+        if filtered_renderer:
+            sum_x = sum(p[0] for p in filtered_renderer)
+            sum_y = sum(p[1] for p in filtered_renderer)
+            center_x = int(sum_x / len(filtered_renderer))
+            center_y = int(sum_y / len(filtered_renderer))
         
         return center_x, center_y
         

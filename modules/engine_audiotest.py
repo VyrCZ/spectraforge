@@ -12,10 +12,10 @@ class AudioTestEngine(AudioEngine):
     Let's see if this works
     """
 
-    def __init__(self, pixels, ready_callback):
+    def __init__(self, renderer, ready_callback):
         Log.info("EngineAudioTest", "Initializing EngineAudioTest.")
         self.ready_callback = ready_callback
-        self.pixels = pixels
+        self.renderer = renderer
         self.FPS = 24
         self._stop_flag = False
         self._runner_thread = None
@@ -97,8 +97,8 @@ class AudioTestEngine(AudioEngine):
         self._stop_flag = True
         if self._runner_thread and self._runner_thread.is_alive():
             self._runner_thread.join()
-        self.pixels.fill((0, 0, 0))
-        self.pixels.show()
+        self.renderer.fill((0, 0, 0))
+        self.renderer.show()
 
     @EngineManager.requires_active
     def on_audio_seek(self, position: float):
@@ -110,8 +110,8 @@ class AudioTestEngine(AudioEngine):
             idx = int(self.current_time * self.FPS)
             b = self.intensities[idx] if idx < len(self.intensities) else 0
             Log.debug("EngineAudioTest", f"{self.current_time:.2f}s: {b}")
-            self.pixels.fill((0, b, 0))
-            self.pixels.show()
+            self.renderer.fill((0, b, 0))
+            self.renderer.show()
             time.sleep(1 / self.FPS)
             self.current_time += 1 / self.FPS
         # auto-cleanup on natural end

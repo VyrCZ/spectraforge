@@ -1,10 +1,10 @@
 from modules.effect import LightEffect, ParamType, EffectType
 
 class StaticColor(LightEffect):
-    def __init__(self, pixels, coords):
-        super().__init__(pixels, coords, "Static Color", EffectType.UNIVERSAL)
+    def __init__(self, renderer, coords):
+        super().__init__(renderer, coords, "Static Color", EffectType.UNIVERSAL)
         self.color = self.add_parameter("Color", ParamType.COLOR, "#FF0000")
 
     def update(self):
-        self.pixels.fill(self.color.get())
-        self.pixels.show()
+        self.renderer.fill(self.color.get())
+        self.renderer.show()

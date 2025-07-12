@@ -49,8 +49,8 @@ class EffectType:
 
 
 class LightEffect:
-    def __init__(self, pixels, coords, display_name, effect_type: EffectType):
-        self.pixels = pixels
+    def __init__(self, renderer, coords, display_name, effect_type: EffectType):
+        self.renderer = renderer
         self.coords = coords
         self.display_name = display_name
         self.effect_type = effect_type
