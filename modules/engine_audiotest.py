@@ -56,7 +56,8 @@ class AudioTestEngine(AudioEngine):
                 chunk = samples[i:i+chunk_size]
                 if not chunk: continue
                 rms = math.sqrt(sum(s**2 for s in chunk) / len(chunk))
-                raw_intensities.append(rms)
+                db = 20 * math.log10(rms + 1e-9)  # +1e-9 avoids log(0)
+                raw_intensities.append(db)
                 Log.debug("EngineAudioTest", f"Calculating chunk {i // chunk_size} / {len(samples) // chunk_size}: RMS = {rms:.2f}")
 
             if not raw_intensities:
