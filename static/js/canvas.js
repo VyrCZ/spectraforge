@@ -99,13 +99,12 @@ function clearCanvas() {
     sendPixels();
 }
 
-function sendPixels(pixel_list = null){
-    if (!pixel_list) {
-        pixel_list = getLedState().map(color => {
-            const rgb = parseRgbString(color);
-            return [rgb[0], rgb[1], rgb[2]]; // Convert to [R, G, B] array
-        });
-    }
+function sendPixels(){
+    pixel_list = getLedState().map(color => {
+        const rgb = parseRgbString(color);
+        console.log("Parsed RGB:", rgb);
+        return [rgb[0], rgb[1], rgb[2]]; // Convert to [R, G, B] array
+    });
         
     fetch("/api/canvas/set_pixels", {
         method: "POST",
@@ -202,7 +201,7 @@ function undo() {
     const lastState = undoStack.pop();
     redoBuffer.push(getLedState());
     setLedState(lastState);
-    sendPixels(lastState);
+    sendPixels();
 }
 
 function redo() {
@@ -210,7 +209,7 @@ function redo() {
     const lastState = redoBuffer.pop();
     undoStack.push(getLedState());
     setLedState(lastState);
-    sendPixels(lastState);
+    sendPixels();
 }
 
 document.addEventListener("DOMContentLoaded", function() {

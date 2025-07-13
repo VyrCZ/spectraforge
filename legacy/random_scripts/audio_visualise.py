@@ -6,14 +6,18 @@ from pydub import AudioSegment
 import matplotlib.pyplot as plt
 
 # --- Config ---
-AUDIO_FILE = "quaoar.wav"   # file under ./audio/
-FPS = 24                         # frames per second / chunks per second
+AUDIO_FILE = "supido.wav"   # file under ./audio/
+FPS = 60                         # frames per second / chunks per second
 WINDOW_SIZE = (400, 400)         # window dimensions
-GAMMA = 5
+GAMMA = 10
+SMOOTH_FACTOR = 0.6            # smoothing factor for audio intensity
 VISUALIZE = True                 # True for pygame, False for matplotlib plot
-VISUAL_OFFSET_S = 0            # Visual offset in seconds to compensate for lag
 
 def calculate_intensities(path: str, fps: int):
+    """
+    smooth_factor: 0 (no smoothing) → 1 (total smoothing, flat line)
+    """
+
     audio = AudioSegment.from_file(path)
     if audio.channels > 1:
         audio = audio.set_channels(1)
@@ -21,6 +25,7 @@ def calculate_intensities(path: str, fps: int):
     audio_length = len(audio) / 1000.0
     samples = audio.get_array_of_samples()
     chunk_size = max(1, int(framerate / fps))
+    
     raw_db = []
     for i in range(0, len(samples), chunk_size):
         chunk = samples[i:i+chunk_size]
@@ -31,14 +36,25 @@ def calculate_intensities(path: str, fps: int):
         raw_db.append(db)
     if not raw_db:
         raise RuntimeError("No intensity values computed.")
-    min_db, max_db = min(raw_db), max(raw_db)
+    
+    # — Changed: apply exponential moving average smoothing —
+    smoothed_db = []
+    prev = raw_db[0]
+    for db in raw_db:
+        # new = α·current + (1−α)·previous
+        prev = SMOOTH_FACTOR * db + (1 - SMOOTH_FACTOR) * prev
+        smoothed_db.append(prev)
+    # — end changes —
+
+    # normalize on smoothed values
+    min_db, max_db = min(smoothed_db), max(smoothed_db)
     span = max_db - min_db
     
     intensities = []
     if span == 0:
-        intensities = [0] * len(raw_db)
+        intensities = [0] * len(smoothed_db)
     else:
-        for db in raw_db:
+        for db in smoothed_db:
             normalized = (db - min_db) / span
             gamma_corrected = normalized ** GAMMA
             intensities.append(int(gamma_corrected * 255))
@@ -77,8 +93,7 @@ def run_visualizer(intensities, fps, audio_path):
             break
 
         current_time_s = pygame.mixer.music.get_pos() / 1000.0
-        compensated_time_s = current_time_s + VISUAL_OFFSET_S
-        idx = int(compensated_time_s * fps)
+        idx = int(current_time_s * fps)
 
         if idx < len(intensities):
             val = intensities[idx]
