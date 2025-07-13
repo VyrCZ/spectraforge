@@ -39,6 +39,20 @@ class AudioEngine(Engine):
     
     **When on_audio_load is called, it is strongly recommended to calculate the light states for the whole audio file, due to performance. When your calculation logic is completed, you must call ready_for_playback to let the server know that the engine is finished and ready.**
     """
+    def __init__(self, renderer, ready_callback):
+        import threading
+        import time
+        self.renderer = renderer
+        self.ready_callback = ready_callback
+        self.FPS = 60
+        self._stop_flag = False
+        self._runner_thread: threading.Thread | None = None
+        self.current_time = 0.0
+        self.audio_length = 0.0
+        self.playback_start_time = 0.0
+        self.seek_time_at_start = 0.0
+        self._time = time
+
     @abstractmethod
     def on_enable(self):
         """
@@ -48,12 +62,11 @@ class AudioEngine(Engine):
         """
         pass
 
-    @abstractmethod
     def on_disable(self):
         """
         Called when the engine is being disabled. *(It is called on the shutdown of the app, but the app is usually not ended gracefully, so do not rely on this method to save the state of the engine)*
         """
-        pass
+        self.on_audio_stop()
 
     @abstractmethod
     def on_audio_load(self, audio_path: str):
@@ -62,32 +75,72 @@ class AudioEngine(Engine):
         """
         pass
 
-    @abstractmethod
     def on_audio_play(self):
         """
         Called when the audio is played in the player.
         """
-        pass
+        import threading
+        self._stop_flag = False
+        if self._runner_thread and self._runner_thread.is_alive():
+            self._runner_thread.join()
+        
+        self.playback_start_time = self._time.monotonic()
+        self.seek_time_at_start = self.current_time
 
-    @abstractmethod
+        self._runner_thread = threading.Thread(target=self._runner, daemon=True)
+        self._runner_thread.start()
+
     def on_audio_pause(self):
         """
         Called when the audio is paused in the player.
         """
-        pass
+        self._stop_flag = True
+        if self._runner_thread and self._runner_thread.is_alive():
+            self._runner_thread.join()
 
-    @abstractmethod
     def on_audio_stop(self):
         """
         Called when the audio is stopped in the player.
         """
-        pass
+        self._stop_flag = True
+        if self._runner_thread and self._runner_thread.is_alive():
+            self._runner_thread.join()
+        self.renderer.fill((0, 0, 0))
+        self.renderer.show()
+        self.current_time = 0.0
 
-    @abstractmethod
     def on_audio_seek(self, position: float):
         """
         Called when the user seeks to a different part of the audio in the player.
 
         Position is in seconds.
         """
+        self.current_time = position
+        if self._runner_thread and self._runner_thread.is_alive():
+            self.playback_start_time = self._time.monotonic()
+            self.seek_time_at_start = self.current_time
+
+    @abstractmethod
+    def on_frame(self, current_time: float):
+        """
+        Called on each frame during audio playback.
+
+        Args:
+            current_time (float): The current playback time in seconds.
+        """
         pass
+
+    def _runner(self):
+        while not self._stop_flag:
+            elapsed = self._time.monotonic() - self.playback_start_time
+            self.current_time = self.seek_time_at_start + elapsed
+
+            if self.current_time >= self.audio_length:
+                break
+
+            self.on_frame(self.current_time)
+            
+            self._time.sleep(1 / self.FPS)
+
+        if not self._stop_flag:
+            self.on_audio_stop()

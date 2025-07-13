@@ -7,6 +7,7 @@ from modules.engine_effects import EffectsEngine
 from modules.engine_calibration import CalibrationEngine
 from modules.engine_canvas import CanvasEngine
 from modules.engine_audiotest import AudioTestEngine
+from modules.engine_visualiser import VisualiserEngine
 from modules.setup import SetupType
 from flask_socketio import SocketIO, emit
 from modules.config_manager import Config
@@ -322,7 +323,7 @@ if __name__ == "__main__":
     effects_engine = EffectsEngine(renderer, manager.active_setup)
     calibration_engine = CalibrationEngine(renderer, take_photo_callback, send_image_callback, setup_done_callback)
     canvas_engine = CanvasEngine(renderer)
-    audio_test_engine = AudioTestEngine(renderer, audio_engine_ready)
+    audio_test_engine = VisualiserEngine(renderer, manager.active_setup, audio_engine_ready)
 
     # IMPORTANT! Always register the effects engine first, as it is the main engine.
     manager.register_engine(effects_engine)

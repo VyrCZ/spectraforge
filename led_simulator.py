@@ -8,6 +8,7 @@ import os
 from modules.setup import Setup
 import threading
 import json
+import traceback
 
 # set working directory to the directory of this file
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -34,7 +35,8 @@ class LedSimulator:
         self.cloud = pv.PolyData(self.coords, force_float=False)
         self.cloud['colors'] = np.array(self.colors, dtype=np.uint8)
         self.plotter = pv.Plotter()
-        self.plotter.background_color = "black"
+        self.plotter.background_color = "#050505"
+        self.plotter.view_xy()
         self.actor = self.plotter.add_points(self.cloud, scalars='colors', rgb=True)
         self.plotter.show(interactive_update=True)
 
@@ -44,11 +46,12 @@ class LedSimulator:
                 self.update_colors()
                 time.sleep(1/60) # 60 fps
             except Exception as e:
-                print(f"Error in simulation loop: {e}")
+                print(f"Error in simulation loop: {traceback.format_exc()}")
                 break
 
     # Function to update colors dynamically
     def update_colors(self):
+        # print current zoom
         self.cloud['colors'] = np.array(self.colors, dtype=np.uint8)
         self.plotter.update_scalars(self.cloud['colors'])  # Efficiently update colors
         self.plotter.update()

@@ -62,6 +62,7 @@ class EffectsEngine(Engine):
         self.renderer.show()
 
     def on_setup_changed(self, setup):
+        Log.debug("EffectsEngine", f"Setup changed to {setup.name}")
         self.setup = setup
         self.coords = setup.coords
 

@@ -2,8 +2,6 @@ from modules.engine import AudioEngine
 from modules.engine_manager import EngineManager
 from modules.log_manager import Log
 from pydub import AudioSegment
-import time
-import threading
 import os
 import math
 
@@ -14,22 +12,16 @@ class AudioTestEngine(AudioEngine):
 
     def __init__(self, renderer, ready_callback):
         Log.info("EngineAudioTest", "Initializing EngineAudioTest.")
-        self.ready_callback = ready_callback
-        self.renderer = renderer
-        self.FPS = 60
-        self._stop_flag = False
-        self._runner_thread = None
-        self.current_time = 0
+        super().__init__(renderer, ready_callback)
         self.GAMMA = 10
         self.SMOOTH_FACTOR = 0.6
-        self.frame_length = 1 / self.FPS
 
     def on_enable(self):
         Log.info("EngineAudioTest", "EngineAudioTest enabled.")
 
     def on_disable(self):
         Log.info("EngineAudioTest", "EngineAudioTest disabled.")
-        self.on_audio_stop()
+        super().on_disable()
 
     @EngineManager.requires_active
     def on_audio_load(self, audio_file: str):
@@ -93,59 +85,9 @@ class AudioTestEngine(AudioEngine):
             return
         self.ready_callback()
 
-    @EngineManager.requires_active
-    def on_audio_play(self):
-        self._stop_flag = False
-        if self._runner_thread and self._runner_thread.is_alive():
-            self._runner_thread.join()
-        
-        self.playback_start_time = time.monotonic()
-        self.seek_time_at_start = self.current_time
-
-        self._runner_thread = threading.Thread(target=self._runner, daemon=True)
-        self._runner_thread.start()
-
-    @EngineManager.requires_active
-    def on_audio_pause(self):
-        Log.info("EngineAudioTest", "Audio playback paused.")
-        self._stop_flag = True
-        if self._runner_thread and self._runner_thread.is_alive():
-            self._runner_thread.join()
-
-    @EngineManager.requires_active
-    def on_audio_stop(self):
-        Log.info("EngineAudioTest", "Audio playback stopped.")
-        self._stop_flag = True
-        if self._runner_thread and self._runner_thread.is_alive():
-            self._runner_thread.join()
-        self.renderer.fill((0, 0, 0))
+    def on_frame(self, current_time: float):
+        idx = int(current_time * self.FPS)
+        b = self.intensities[idx] if idx < len(self.intensities) else 0
+        Log.debug("EngineAudioTest", f"{current_time:.2f}s: {b}")
+        self.renderer.fill((0, b, 0))
         self.renderer.show()
-
-    @EngineManager.requires_active
-    def on_audio_seek(self, position: float):
-        self.current_time = position
-        # If playing, update start times to resync the loop
-        if self._runner_thread and self._runner_thread.is_alive():
-            self.playback_start_time = time.monotonic()
-            self.seek_time_at_start = self.current_time
-        Log.info("EngineAudioTest", f"Audio jumped to position: {self.current_time}s.")
-
-    def _runner(self):
-        while not self._stop_flag:
-            # Calculate current time based on wall clock to prevent drift
-            elapsed = time.monotonic() - self.playback_start_time
-            self.current_time = self.seek_time_at_start + elapsed
-
-            if self.current_time >= self.audio_length:
-                break
-
-            idx = int(self.current_time * self.FPS)
-            b = self.intensities[idx] if idx < len(self.intensities) else 0
-            Log.debug("EngineAudioTest", f"{self.current_time:.2f}s: {b}")
-            self.renderer.fill((0, b, 0))
-            self.renderer.show()
-            time.sleep(1 / self.FPS)
-
-        # auto-cleanup on natural end
-        if not self._stop_flag:
-            self.on_audio_stop()
