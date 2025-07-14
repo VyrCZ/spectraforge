@@ -38,6 +38,7 @@ class LedSimulator:
         self.plotter.background_color = "#050505"
         self.plotter.view_xy()
         self.actor = self.plotter.add_points(self.cloud, scalars='colors', rgb=True)
+        self.plotter.reset_camera()
         self.plotter.show(interactive_update=True)
 
     def start(self):

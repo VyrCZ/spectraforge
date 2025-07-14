@@ -33,7 +33,7 @@ def page_effects():
 
 @app.route('/favicon.ico')
 def favicon():
-    return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+    return send_from_directory(os.path.join(app.root_path, 'static', "icons"), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 @app.route("/api/get_state", methods=["GET"])
 def get_state():

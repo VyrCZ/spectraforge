@@ -15,7 +15,7 @@ class Parameter:
         elif self.param_type == ParamType.SLIDER:
             return float(self.value)
         elif self.param_type == ParamType.CHECKBOX:
-            return self.value == "true"
+            return self.value == True
         return self.value
     
 class ParamType:

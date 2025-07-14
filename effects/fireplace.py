@@ -38,7 +38,7 @@ class Fireplace(LightEffect):
                 # Count actively lit renderer
                 if self.lights[i] > 0:
                     active_particles += 1
-                    self.lights[i] -= self.speed.get() / 20
+                    self.lights[i] -= self.speed.get() / 200
                     if self.lights[i] < 0:
                         self.lights[i] = 0
 

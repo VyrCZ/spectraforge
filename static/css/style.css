@@ -1,5 +1,21 @@
+@font-face {
+    font-family: 'Oxanium';
+    src: url('../fonts/oxanium.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Oxanium';
+    src: url('../fonts/oxanium-bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+}
+
 body{
-    font-family: "Noto Sans", sans-serif;
+    font-family: "Oxanium", sans-serif;
+    font-weight: 400;
+    font-style: normal;
     color: #f4f4f4;
     background-color: #262626;
     margin: 0;
@@ -35,11 +51,20 @@ div h1{
     z-index: 20;
 }
 
+.white_filter{
+    filter: invert(100%) brightness(200%);
+}
+
+#index_logo {
+    width: 200px;
+    height: auto;
+}
+
 #center_container {
     display: flex;
     flex-direction: column;
     align-items: center; /* horizontally center children */
-    margin-top: 20vh;
+    margin-top: 8vh;
     text-align: center;
     padding: 0 3vh; /* Add padding to the left and right */
 }

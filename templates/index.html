@@ -11,7 +11,7 @@
     <script>
         document.addEventListener("DOMContentLoaded", getState);
     </script>
-    <link rel="icon" href="static/icons/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='icons/favicon.ico')}}" type="image/x-icon">
     <link rel="stylesheet" href="static/css/style.css">
 </head>
 <body>
@@ -20,7 +20,7 @@
         {% include 'sidebar_menu.html' %}
     </div>
     <div id="center_container">
-        <img src="static/icons/favicon.ico" id="center_image">
+        <img src="static/icons/spectraforge-no-bg-white.svg" id="index_logo" alt="Spectraforge Logo">
         <p style="font-size: 2em">Lights are active!</p>
         
         <div class="active effect_container" style="cursor: pointer;" onclick="document.location.href='/effects'">

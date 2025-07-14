@@ -61,7 +61,7 @@ function drawLeds(){
         const led = document.createElement('div');
         led.classList.add('led');
         led.style.left = `${x}px`;
-        led.style.top = `${y}px`;
+        led.style.bottom = `${y}px`;
         led_container.appendChild(led);
     }
 }
@@ -73,7 +73,7 @@ function updateLedPositions() {
         const x = canvas_coords[i][0];
         const y = canvas_coords[i][1];
         led.style.left = `${x}px`;
-        led.style.top = `${y}px`;
+        led.style.bottom = `${y}px`;
     }
 }
 
