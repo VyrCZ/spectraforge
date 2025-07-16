@@ -9,6 +9,9 @@ from modules.setup import Setup, SetupType
 from modules.config_manager import Config
 from modules.effect import EffectType
 from modules.log_manager import Log
+from modules.led_renderer import DummyRenderer
+import modules.caching as cache
+import traceback
 
 class EffectsEngine(Engine):
     """
@@ -32,7 +35,6 @@ class EffectsEngine(Engine):
     def on_enable(self):
         Log.info("EffectsEngine", "EffectsEngine enabled.")
         self.load_effects()
-        
         effect_name = Config().config.get("current_effect")
         if effect_name in self.effects:
             self.current_effect = self.effects[effect_name](self.renderer, self.coords)
@@ -71,18 +73,55 @@ class EffectsEngine(Engine):
             if isinstance(effect, eff_class):
                 return name
         return None
+    
+    def validate_effect(self, cls) -> Exception | None:
+        """Validate if the class doesn't throw any immediate exceptions.
+        
+        Returns None if valid, otherwise returns the exception."""
+        dummy_renderer = DummyRenderer(self.setup)
+        if not hasattr(cls, "update") or not callable(cls.update):
+            return TypeError(f"Effect class {cls.__name__} must implement an 'update' method.")
+        if not hasattr(cls, "__init__") or not callable(cls.__init__):
+            return TypeError(f"Effect class {cls.__name__} must have an '__init__' method.")
+        try:
+            effect_instance = cls(dummy_renderer, self.coords)
+            effect_instance.update()  # Call update to check for runtime errors
+        except Exception as e:
+            Log.error_exc("EffectsEngine", e)
+            return e
+        return None
+
             
     def load_effects(self, folder="effects"):
         """Dynamically load all effect scripts."""
+        Log.info("EffectsEngine", "Loading and validating effects...")
         self.effects = {}
+        cached_hashes = []
         for filename in os.listdir(folder):
-            if filename.endswith(".py") and not filename.startswith("__") and filename != "base_effect.py":
+            if filename.endswith(".py") and not filename.startswith("__"):
                 module_name = filename[:-3]
                 module = importlib.import_module(f"{folder}.{module_name}")
                 for attr in dir(module):
                     cls = getattr(module, attr)
+                    # get hashed of previously cached validated effects
+                    cache_data = cache.get_cache_by_name("effects", "valid_effects")
+                    if cache_data:
+                        cached_hashes = list(json.loads(cache_data))
                     if hasattr(module, "LightEffect") and isinstance(cls, type) and issubclass(cls, module.LightEffect) and cls is not module.LightEffect:
-                        self.effects[module_name] = cls
+                        module_hash = cache.hash_module(cls)
+                        if module_hash in cached_hashes:
+                            self.effects[module_name] = cls
+                        else:
+                            Log.debug("EffectsEngine", f"Effect {module_name} isn't cached, validating...")
+                            thrown_exception = self.validate_effect(cls)
+                            if thrown_exception is None:
+                                self.effects[module_name] = cls
+                                cached_hashes.append(module_hash)
+                            else:
+                                Log.warn("EffectsEngine", f"Effect {module_name} is invalid. (Traceback above ^)")
+        # save the cache
+        cache.set_cache_by_name("effects_engine", "valid_effects", json.dumps(cached_hashes))
+            
         Log.info("EffectsEngine", f"Loaded {len(self.effects)} effects.")
         return self.effects
     

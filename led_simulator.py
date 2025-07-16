@@ -35,8 +35,10 @@ class LedSimulator:
         self.cloud = pv.PolyData(self.coords, force_float=False)
         self.cloud['colors'] = np.array(self.colors, dtype=np.uint8)
         self.plotter = pv.Plotter()
-        self.plotter.background_color = "#050505"
+        #self.plotter.background_color = "#050505"
+        self.plotter.background_color = "#FFFFFF"
         self.plotter.view_xy()
+        self.plotter.add_axes(interactive=False)
         self.actor = self.plotter.add_points(self.cloud, scalars='colors', rgb=True)
         self.plotter.reset_camera()
         self.plotter.show(interactive_update=True)

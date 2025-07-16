@@ -4,9 +4,11 @@ from modules.log_manager import Log
 from pydub import AudioSegment
 import os
 import math
+import json
 import numpy as np
 from scipy.fft import rfft, rfftfreq
 import colorsys
+import modules.caching as cache
 
 class VisualiserEngine(AudioEngine):
     """
@@ -53,8 +55,28 @@ class VisualiserEngine(AudioEngine):
     def on_audio_load(self, audio_file: str):
         Log.info("EngineVisualiser", f"Loading audio file: {audio_file}")
         self.bar_heights = []
+        
+        audio_path = os.path.join("audio", audio_file)
         try:
-            audio = AudioSegment.from_file(os.path.join("audio", audio_file))
+            mtime = os.path.getmtime(audio_path)
+            size = os.path.getsize(audio_path)
+            cache_key = f"{audio_path}:{mtime}:{size}"
+        except OSError:
+            Log.error("EngineVisualiser", f"Could not access audio file at {audio_path}")
+            return
+
+        cached_data = cache.get_cache_by_data("visualiser", cache_key)
+        if cached_data:
+            Log.info("EngineVisualiser", "Using cached audio data.")
+            data = json.loads(cached_data)
+            self.bar_heights = data['heights']
+            self.audio_length = data['length']
+            Log.info("EngineVisualiser", f"Audio length: {self.audio_length} seconds.")
+            self.ready_callback()
+            return
+        
+        try:
+            audio = AudioSegment.from_file(audio_path)
 
             if audio.channels > 1:
                 Log.debug("EngineVisualiser", "Audio is not mono, converting to mono.")
@@ -122,7 +144,14 @@ class VisualiserEngine(AudioEngine):
             else:
                 self.bar_heights = np.zeros_like(smoothed_intensities)
 
-            Log.info("EngineVisualiser", f"Calculated heights: {self.bar_heights}")
+            # cache the result
+            cache_content = {
+                'length': self.audio_length,
+                'heights': self.bar_heights.tolist()
+            }
+            cache.set_cache_by_data("visualiser", cache_key, json.dumps(cache_content))
+
+            Log.info("EngineVisualiser", f"Calculated {len(self.bar_heights)} heights.")
 
         except Exception as e:
             Log.error("EngineVisualiser", f"Failed to load or process audio file: {e}")

@@ -5,19 +5,6 @@ import threading
 from modules.setup import Setup
 from modules.log_manager import Log
 
-class DummyNeoPixel():
-    """
-    A replacement for the NeoPixel class when running on Windows or for debugging purposes.
-    This class simulates the behavior of NeoPixel without actual hardware interaction.
-    """
-    def __init__(self, pin, num_leds, auto_write):
-        self.num_leds = num_leds
-        self.pixels = [(0, 0, 0)] * num_leds
-        self.auto_write = auto_write
-
-    def show(self):
-        pass
-
 class LEDRenderer:
     def __init__(self, setup: Setup):
         led_count = len(setup.coords)
@@ -102,3 +89,40 @@ class LEDRenderer:
             for i in range(self.led_count):
                 self._pixels[i] = self.leds[i]
             self._pixels.show()
+
+
+class DummyRenderer:
+    """
+    Renderer without any hardware capabilities, used for testing.
+    """
+    def __init__(self, setup: Setup):
+        led_count = len(setup.coords)
+        self.led_count = led_count
+        self.leds = [(0, 0, 0)] * led_count
+        #Log.debug("DummyRenderer", f"Initializing DummyRenderer with {led_count} LEDs.")
+
+    # add dictionary-like access to the self.leds for the code i already wrote with pixels in mind
+    def __getitem__(self, index):
+        return self.leds[index]
+    
+    def __setitem__(self, index, value):
+        if isinstance(value, tuple) and len(value) == 3:
+            self.leds[index] = value
+        elif isinstance(value, list) and len(value) == 3:
+            self.leds[index] = tuple(value)
+        else:
+            raise ValueError("Value must be a tuple of (R, G, B)")
+        
+    def __len__(self):
+        return self.led_count
+
+    def fill(self, color: tuple[int, int, int]):
+        for i in range(self.led_count):
+            self.leds[i] = color
+
+    def clear(self):
+        self.fill((0, 0, 0))
+
+    def show(self):
+        # DummyRenderer does not display anything
+        pass
