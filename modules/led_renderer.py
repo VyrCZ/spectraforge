@@ -101,6 +101,11 @@ class LEDRenderer:
             self.debug_elements = []
         
         def line(self, point1, point2, color=(255, 0, 0), persistent=False):
+            if len(point1) != 3:
+                point1 = list(point1) + [0]
+            if len(point2) != 3:
+                point2 = list(point2) + [0]
+            
             self.debug_elements.append({
                 "type": "line",
                 "point1": point1,

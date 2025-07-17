@@ -36,12 +36,16 @@ class MeteorShower(LightEffect):
             -math.cos(math.radians(self.angle.get())) * move_distance,
             0
         ]
-        self.spawn_delay = (self.amount.get() / self.speed.get()) / 2
+        self.spawn_delay = (self.amount.get() / self.speed.get()) / 4
         x_offset = (math.tan(math.radians(self.angle.get())) * (self.height / 10))
         x_offset *= -1 if self.angle.get() < 0 else 1  # Adjust direction based on angle
         self.spawn_min_x = self.min_x + x_offset
         self.spawn_max_x = self.max_x + x_offset
-        Log.debug("MeteorShower", f"Cooldown: {self.spawn_cooldown} / {self.spawn_delay}")
+        #self.renderer.debug_draw.line(
+        #    (self.spawn_min_x, self.spawn_y, 0),
+        #    (self.spawn_max_x, self.spawn_y, 0),
+        #    color=(0, 255, 0))
+        #Log.debug("MeteorShower", f"Cooldown: {self.spawn_cooldown} / {self.spawn_delay}")
         if len(self.meteors) < self.amount.get() and self.spawn_cooldown <= 0:
             #print("Spawning meteor")
             self.meteors.append([random.randint(int(self.spawn_min_x), int(self.spawn_max_x)), self.spawn_y, 0])
@@ -60,7 +64,7 @@ class MeteorShower(LightEffect):
                 meteor[1] + math.cos(math.radians(self.angle.get())) * (self.height * self.trail_length.get() / 100),
                 0
             ]
-            self.renderer.debug_draw.line(meteor, tail, (255,255,255))
+            #self.renderer.debug_draw.line(meteor, tail, (255,255,255))
             t = tail
             m = meteor
             for idx, coord in enumerate(self.coords):
