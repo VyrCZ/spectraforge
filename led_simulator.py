@@ -17,6 +17,10 @@ HOST = "127.0.0.1"
 PORT = 4897
 
 class LedSimulator:
+    """
+    A LED simulator that connects to the server and visualizes the LEDs, without the need for a hardware setup.
+    To start, run this script and the server. The simulator will hook and display data sent to the hardware.
+    """
     def __init__(self):
         current_setup = "the_wall.json"
         setup_path = os.path.join("config/setups", current_setup)
@@ -40,8 +44,9 @@ class LedSimulator:
         self.plotter.background_color = "#050505"
         #self.plotter.background_color = "#FFFFFF"
         self.plotter.view_xy()
-        self.plotter.add_axes(interactive=False)
-        self.actor = self.plotter.add_points(self.cloud, scalars="colors", rgb=True)
+        #self.plotter.add_axes(interactive=False)
+        #self.actor = self.plotter.add_points(self.cloud, scalars="colors", rgb=True, point_size=10, style="points_gaussian", emissive=True, render_points_as_spheres=True)
+        self.actor = self.plotter.add_points(self.cloud, scalars="colors", rgb=True, point_size=10)
         self.plotter.reset_camera()
         self.plotter.show(interactive_update=True)
 

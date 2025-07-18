@@ -1,4 +1,4 @@
-#import numpy as np
+import numpy as np
 import math
 import colorsys
 
@@ -129,3 +129,109 @@ def distance(coord1, coord2):
         (coord1[1] - coord2[1]) ** 2 +
         (coord1[2] - coord2[2]) ** 2
     )
+
+def convex_hull(points):
+    """
+    Computes the convex hull of a set of 2D points using the Monotone Chain algorithm.
+    """
+    # sort lexicographically
+    pts = sorted(map(tuple, points))
+    if len(pts) <= 1: 
+        return pts
+    def half_chain(pts):
+        chain = []
+        for p in pts:
+            while len(chain) >= 2 and ((chain[-1][0]-chain[-2][0])*(p[1]-chain[-2][1])
+                                    - (chain[-1][1]-chain[-2][1])*(p[0]-chain[-2][0])) <= 0:
+                chain.pop()
+            chain.append(p)
+        return chain
+
+    lower = half_chain(pts)
+    upper = half_chain(reversed(pts))
+    # omit last point of each (it's repeated)
+    return lower[:-1] + upper[:-1]
+
+def find_closest_edge(point, edges):
+    """
+    Finds the closest edge to a point in a list of edges.
+    Returns the normal vector of the closest edge.
+    """
+    min_dist = float("inf")
+    closest_edge_index = -1
+
+    for i in range(len(edges)):
+        # only use x,y components
+        p1 = np.array(edges[i][:2])
+        p2 = np.array(edges[(i + 1) % len(edges)][:2])
+        pt = np.array(point)  # already 2D
+
+        line_vec = p2 - p1
+        point_vec = pt - p1
+
+        line_len_sq = np.dot(line_vec, line_vec)
+        if line_len_sq == 0:
+            dist = np.linalg.norm(point_vec)
+        else:
+            t = max(0, min(1, np.dot(point_vec, line_vec) / line_len_sq))
+            closest_point_on_segment = p1 + t * line_vec
+            dist = np.linalg.norm(pt - closest_point_on_segment)
+
+        if dist < min_dist:
+            min_dist = dist
+            closest_edge_index = i
+
+    # recompute edge normal in 2D
+    p1 = np.array(edges[closest_edge_index][:2])
+    p2 = np.array(edges[(closest_edge_index + 1) % len(edges)][:2])
+    edge_vec = p2 - p1
+    normal = np.array([edge_vec[1], -edge_vec[0]])
+    normal = normal / np.linalg.norm(normal)
+    return normal
+
+def distance_to_closest_edge(point, edges):
+    """
+    Calculates the distance from a point to the closest edge in a list of edges.
+    """
+    min_dist = float("inf")
+
+    for i in range(len(edges)):
+        # only use x,y components
+        p1 = np.array(edges[i][:2])
+        p2 = np.array(edges[(i + 1) % len(edges)][:2])
+        pt = np.array(point[:2])
+
+        line_vec = p2 - p1
+        point_vec = pt - p1
+
+        line_len_sq = np.dot(line_vec, line_vec)
+        if line_len_sq == 0:
+            dist = np.linalg.norm(point_vec)
+        else:
+            t = max(0, min(1, np.dot(point_vec, line_vec) / line_len_sq))
+            closest_point_on_segment = p1 + t * line_vec
+            dist = np.linalg.norm(pt - closest_point_on_segment)
+
+        if dist < min_dist:
+            min_dist = dist
+            
+    return min_dist
+
+def point_in_poly(x, y, poly):
+    """
+    poly: list of (x,y,...) vertices, closed or not (this will handle both)
+    returns True if point is strictly inside, False otherwise (including on the edge)
+    """
+    inside = False
+    n = len(poly)
+    for i in range(n):
+        p0 = poly[i]
+        x0, y0 = p0[0], p0[1]
+        p1 = poly[(i+1) % n]
+        x1, y1 = p1[0], p1[1]
+        # Check if edge crosses horizontal ray to the right of (x,y)
+        intersects = ((y0 > y) != (y1 > y)) and \
+                    (x < (x1 - x0) * (y - y0) / (y1 - y0) + x0)
+        if intersects:
+            inside = not inside
+    return inside

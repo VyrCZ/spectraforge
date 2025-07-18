@@ -104,7 +104,7 @@ class EffectsEngine(Engine):
                 for attr in dir(module):
                     cls = getattr(module, attr)
                     # get hashed of previously cached validated effects
-                    cache_data = cache.get_cache_by_name("effects", "valid_effects")
+                    cache_data = cache.get_cache_by_name("effects_engine", "valid_effects")
                     if cache_data:
                         cached_hashes = list(json.loads(cache_data))
                     if hasattr(module, "LightEffect") and isinstance(cls, type) and issubclass(cls, module.LightEffect) and cls is not module.LightEffect:

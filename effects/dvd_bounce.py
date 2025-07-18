@@ -25,78 +25,7 @@ class DVDBounce(LightEffect):
             min_y + (max_y - min_y) / 2,
         ]
         self.frame_length = 1/60
-        self.edges = self.convex_hull(coords)
-
-    def convex_hull(self, points):
-        # sort lexicographically
-        pts = sorted(map(tuple, points))
-        if len(pts) <= 1: 
-            return pts
-        def half_chain(pts):
-            chain = []
-            for p in pts:
-                while len(chain) >= 2 and ((chain[-1][0]-chain[-2][0])*(p[1]-chain[-2][1])
-                                        - (chain[-1][1]-chain[-2][1])*(p[0]-chain[-2][0])) <= 0:
-                    chain.pop()
-                chain.append(p)
-            return chain
-
-        lower = half_chain(pts)
-        upper = half_chain(reversed(pts))
-        # omit last point of each (it's repeated)
-        return lower[:-1] + upper[:-1]
-    
-    def find_closest_edge(self, point, edges):
-        min_dist = float("inf")
-        closest_edge_index = -1
-
-        for i in range(len(edges)):
-            # only use x,y components
-            p1 = np.array(edges[i][:2])
-            p2 = np.array(edges[(i + 1) % len(edges)][:2])
-            pt = np.array(point)  # already 2D
-
-            line_vec = p2 - p1
-            point_vec = pt - p1
-
-            line_len_sq = np.dot(line_vec, line_vec)
-            if line_len_sq == 0:
-                dist = np.linalg.norm(point_vec)
-            else:
-                t = max(0, min(1, np.dot(point_vec, line_vec) / line_len_sq))
-                closest_point_on_segment = p1 + t * line_vec
-                dist = np.linalg.norm(pt - closest_point_on_segment)
-
-            if dist < min_dist:
-                min_dist = dist
-                closest_edge_index = i
-
-        # recompute edge normal in 2D
-        p1 = np.array(edges[closest_edge_index][:2])
-        p2 = np.array(edges[(closest_edge_index + 1) % len(edges)][:2])
-        edge_vec = p2 - p1
-        normal = np.array([edge_vec[1], -edge_vec[0]])
-        normal = normal / np.linalg.norm(normal)
-        return normal
-
-    def point_in_poly(self, x, y, poly):
-        """
-        poly: list of (x,y,...) vertices, closed or not (we’ll handle closure)
-        returns True if point is strictly inside, False otherwise
-        """
-        inside = False
-        n = len(poly)
-        for i in range(n):
-            p0 = poly[i]
-            x0, y0 = p0[0], p0[1]
-            p1 = poly[(i+1) % n]
-            x1, y1 = p1[0], p1[1]
-            # Check if edge crosses horizontal ray to the right of (x,y)
-            intersects = ((y0 > y) != (y1 > y)) and \
-                        (x < (x1 - x0) * (y - y0) / (y1 - y0) + x0)
-            if intersects:
-                inside = not inside
-        return inside
+        self.edges = mu.convex_hull(coords)
 
     def update(self):
         self.renderer.clear()
@@ -109,11 +38,11 @@ class DVDBounce(LightEffect):
 
         #self.renderer.debug_draw.line(list(self.position), list(new_pos), color=(0, 255, 0))
         # check bounds
-        if not self.point_in_poly(new_pos[0], new_pos[1], self.edges):
+        if not mu.point_in_poly(new_pos[0], new_pos[1], self.edges):
             # bounce
-            normal = self.find_closest_edge(new_pos, self.edges)
+            normal = mu.find_closest_edge(new_pos, self.edges)
             
-            # D′=D−2(D⋅n)n
+            # formula for reflection: R-> = D-> - 2(D-> . N->)N->
             d = np.array(self.direction)
             dot_product = np.dot(d, normal)
             new_direction = d - 2 * dot_product * normal
