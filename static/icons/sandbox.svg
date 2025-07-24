@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 23.0.3, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 256 256" style="enable-background:new 0 0 256 256;" xml:space="preserve">
+<style type="text/css">
+	.st0{clip-path:url(#SVGID_2_);stroke:#000000;stroke-width:2;stroke-miterlimit:10;}
+	.st1{clip-path:url(#SVGID_2_);}
+	.st2{stroke:#000000;stroke-width:2;stroke-miterlimit:10;}
+</style>
+<g id="Vrstva_1">
+</g>
+<g id="Vrstva_2">
+</g>
+<g id="Vrstva_3">
+	<g>
+		<defs>
+			<rect id="SVGID_1_" width="256" height="256"/>
+		</defs>
+		<clipPath id="SVGID_2_">
+			<use xlink:href="#SVGID_1_"  style="overflow:visible;"/>
+		</clipPath>
+		<path class="st0" d="M48,155c74.5,8.8,59,36,151,29s53.9-47.8,105-21c61,32,21,144,21,144h-475C-150,307-146,132,48,155z"/>
+		<g class="st1">
+			<path class="st2" d="M161,149.7l-17.6,43c-1.2,2.9-3.4,5.2-6.3,6.5c-6.1,2.7-16.7,6.7-26.1,2.9c-10-4.1-14.6-14.4-16.7-20.5
+				c-1-2.8-0.9-5.9,0.2-8.7l17.7-43.2L161,149.7z"/>
+			
+				<rect x="100.8" y="79.8" transform="matrix(0.3795 -0.9252 0.9252 0.3795 21.0639 199.7201)" class="st2" width="117.2" height="8.8"/>
+			
+				<rect x="153.3" y="29.6" transform="matrix(0.9252 0.3795 -0.3795 0.9252 26.6087 -65.5988)" class="st2" width="52.7" height="10.3"/>
+		</g>
+	</g>
+</g>
+</svg>

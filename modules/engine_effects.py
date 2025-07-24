@@ -206,6 +206,10 @@ class EffectsEngine(Engine):
         display_names = []
         for name, effect_class in self.effects.items():
             effect_instance = effect_class(self.renderer, self.coords)
+            # Check if the effect is compatible with the current setup
+            if (effect_instance.effect_type == EffectType.ONLY_2D and self.setup.type == SetupType.THREE_DIMENSIONAL) or \
+                (effect_instance.effect_type == EffectType.ONLY_3D and self.setup.type == SetupType.TWO_DIMENSIONAL):
+                continue
             types.append(EffectType.display_name(effect_instance.effect_type))
             effect_names.append(name)
             display_names.append(effect_instance.display_name)

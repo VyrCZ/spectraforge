@@ -26,7 +26,7 @@ class Log:
         log_filename = f'{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.log'
         Log._current_log_file = os.path.join(Log.LOG_DIRECTORY, log_filename)
 
-    def _make_log(log_type, channel, message):
+    def _make_log(log_type, channel, message, auto_print=True):
         if not Log._current_log_file:
             Log._setup_log_file()
 
@@ -37,14 +37,15 @@ class Log:
             .replace("$LOGTYPE", log_type)\
             .replace("$MESSAGE", str(message))
 
-        print(log_entry)
+        if auto_print:
+            print(log_entry)
         with open(Log._current_log_file, "a", encoding="utf-8") as f:
             f.write(log_entry + "\n")
 
 
     @staticmethod
     def info(channel, message):
-        """Log an informational message."""
+        """Log an info message."""
         Log._make_log("INFO", channel, message)
     
     @staticmethod
@@ -59,10 +60,13 @@ class Log:
 
     @staticmethod
     def error_exc(channel, exception: Exception):
+        """Log an exception with its traceback."""
         tb = traceback.format_exc()
         single_line_tb = tb.replace('\n', ' | ')
         tabless_text = re.sub(r' +', ' ', single_line_tb)
-        Log.error(channel, f"Error {exception} occured. {tabless_text}")
+        # Print the traceback normally, but store it in the log in a single line format
+        print(tb)
+        Log._make_log("ERROR", channel, f"Error {exception} occured. {tabless_text}", auto_print=False)
 
     @staticmethod
     def debug(channel, message):

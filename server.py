@@ -6,6 +6,7 @@ from modules.engine_manager import EngineManager
 from modules.engine_effects import EffectsEngine
 from modules.engine_calibration import CalibrationEngine
 from modules.engine_canvas import CanvasEngine
+from modules.engine_sandbox import SandboxEngine
 from modules.engine_audiotest import AudioTestEngine
 from modules.engine_visualiser import VisualiserEngine
 from modules.setup import SetupType
@@ -236,6 +237,25 @@ def set_pixels():
     except Exception as e:
         Log.error_exc("CanvasEngine", e)
         return jsonify({"status": "error", "message": str(e)}), 500
+    
+@app.route("/sandbox")
+def page_sandbox():
+    """Render the sandbox page."""
+    return render_template("sandbox.html", files=sandbox_engine.list_files())
+
+@app.route("/api/sandbox/set_file", methods=["POST"])
+def set_sandbox_file():
+    """Set the current file in the sandbox."""
+    request_data = request.json
+    file_name = request_data.get("file_name")
+    if not file_name:
+        return jsonify({"status": "error", "message": "File name is required."}), 400
+    try:
+        sandbox_engine.set_file(file_name)
+        return jsonify({"status": "success", "message": f"Sandbox file set to '{file_name}'."})
+    except Exception as e:
+        Log.error_exc("SandboxEngine", e)
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 # Log API endpoints
 @app.route("/logs")
@@ -312,9 +332,6 @@ def on_audio_seek(data):
     Log.info("Server", "Audio seek requested by user.")
     time_pos = data.get("time")
     manager.active_engine.on_audio_seek(time_pos)
-
-
-
     
 
 if __name__ == "__main__":
@@ -323,12 +340,15 @@ if __name__ == "__main__":
     effects_engine = EffectsEngine(renderer, manager.active_setup)
     calibration_engine = CalibrationEngine(renderer, take_photo_callback, send_image_callback, setup_done_callback)
     canvas_engine = CanvasEngine(renderer)
+    sandbox_engine = SandboxEngine(renderer, manager.active_setup)
     audio_test_engine = VisualiserEngine(renderer, manager.active_setup, audio_engine_ready)
+
 
     # IMPORTANT! Always register the effects engine first, as it is the main engine.
     manager.register_engine(effects_engine)
     manager.register_engine(calibration_engine)
     manager.register_engine(canvas_engine)
+    manager.register_engine(sandbox_engine)
     manager.register_audio_engine(audio_test_engine)
     Log.info("Server", "Starting Spectraforge server...")
     try:

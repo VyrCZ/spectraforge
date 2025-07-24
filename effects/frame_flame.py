@@ -5,7 +5,7 @@ import random
 
 class FrameFlame(LightEffect):
     def __init__(self, renderer, coords):
-        super().__init__(renderer, coords, "Frame Flame", EffectType.UNIVERSAL)
+        super().__init__(renderer, coords, "Frame Flame", EffectType.ONLY_2D)
         self.color = self.add_parameter("Color", ParamType.COLOR, "#FF0000")
         self.reach = self.add_parameter("Reach", ParamType.SLIDER, 10, min=1, max=50, step=1) # % of height
         self.particle_percent = self.add_parameter("Particle Percent", ParamType.SLIDER, 50, min=5, max=100, step=1) # % of the remaining leds

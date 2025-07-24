@@ -59,18 +59,13 @@ class EngineManager:
         self.register_engine(audio_engine)
         Log.info("EngineManager", f"Audio engine {audio_engine} registered.")
 
-    def set_active_engine(self, engine_instance: Engine):
-        """
-        Set the active engine to the specified engine class.
-        """
-        if engine_instance not in self.engines:
-            raise EngineManager.EngineNotRegisteredError(engine_instance)
-        if self.active_engine is engine_instance:
+    def set_active_engine(self, engine):
+        """Set the active engine."""
+        if self.active_engine == engine:
             return
         if self.active_engine:
             self.active_engine.on_disable()
-        engine_instance.on_enable()
-        self.active_engine = engine_instance
+        self.active_engine = engine
 
     @staticmethod
     def requires_active(func):

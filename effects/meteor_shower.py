@@ -56,7 +56,7 @@ class MeteorShower(LightEffect):
             meteor[1] += move_vector[1]
             #print(f"Meteor pos: {meteor}; Move vector: {move_vector}")
             if meteor[1] < bound_y or meteor[0] < bound_min_x or meteor[0] > bound_max_x:
-                print(f"Removing meteor {meteor}; Bounds: y: {bound_y}, x: [{bound_min_x}, {bound_max_x}]")
+                #print(f"Removing meteor {meteor}; Bounds: y: {bound_y}, x: [{bound_min_x}, {bound_max_x}]")
                 self.meteors.remove(meteor)
                 continue
             tail = [
