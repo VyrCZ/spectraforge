@@ -256,6 +256,39 @@ def set_sandbox_file():
     except Exception as e:
         Log.error_exc("SandboxEngine", e)
         return jsonify({"status": "error", "message": str(e)}), 500
+    
+@app.route("/settings")
+def page_settings():
+    """Render the settings page."""
+    return render_template("settings.html", brightness=Config().config.get("brightness", 1)*100, performance_mode=Config().config.get("performance_mode", "normal"))
+
+@app.route("/api/settings/set_setting", methods=["POST"])
+def set_setting():
+    """Set a specific setting in the server."""
+    request_data = request.json
+    valid_settings = ["brightness", "performance_mode"]
+    for setting_name, setting_value in request_data.items():
+        Log.debug("Server", f"Setting {setting_name} to {setting_value}")
+        if setting_name not in valid_settings:
+            Log.warn("Server", f"Invalid setting '{setting_name}' with value '{setting_value}'. Valid settings are: {valid_settings}")
+            return jsonify({"status": "error", "message": f"Invalid settings. List: {valid_settings}"}), 400
+        
+        if setting_name == "brightness":
+            try:
+                renderer.set_brightness(int(setting_value)/100)  # Convert percentage to float
+                return jsonify({"status": "success", "message": f"Brightness set to {setting_value}."})
+            except Exception as e:
+                Log.error_exc("CalibrationEngine", e)
+                return jsonify({"status": "error", "message": str(e)}), 500
+        elif setting_name == "performance_mode":
+            try:
+                Config().config["performance_mode"] = setting_value
+                Config().save()
+                return jsonify({"status": "success", "message": f"Performance mode set to {setting_value}."})
+            except Exception as e:
+                Log.error_exc("CalibrationEngine", e)
+                return jsonify({"status": "error", "message": str(e)}), 500
+
 
 # Log API endpoints
 @app.route("/logs")

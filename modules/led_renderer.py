@@ -4,6 +4,7 @@ import json
 import threading
 from modules.setup import Setup
 from modules.log_manager import Log
+from modules.config_manager import Config
 import copy
 
 class LEDRenderer:
@@ -12,6 +13,7 @@ class LEDRenderer:
         self.led_count = led_count
         self.leds = [(0, 0, 0)] * led_count
         self.debug_draw = self.DebugDraw()
+        self.brightness = 1.0
         Log.info("LEDRenderer", f"Initializing LEDRenderer with {led_count} LEDs.")
 
         # Setup a led simulator server if running on Windows
@@ -63,6 +65,17 @@ class LEDRenderer:
         
     def __len__(self):
         return self.led_count
+    
+    def set_brightness(self, brightness: float):
+        """
+        Set the brightness of the LEDs.
+        Brightness should be a float between 0 and 1.
+        """
+        self.brightness = max(0, min(brightness, 1))
+        Config().config["brightness"] = self.brightness
+        Config().save()
+        Log.info("LEDRenderer", f"Brightness set to {self.brightness * 100}%")
+
 
     def fill(self, color: tuple[int, int, int]):
         for i in range(self.led_count):
@@ -72,11 +85,16 @@ class LEDRenderer:
         self.fill((0, 0, 0))
 
     def show(self):
+        # led list to apply all filters, like brightness
+        absolute_leds = self.leds.copy()
+        # Apply brightness
+        for i in range(self.led_count):
+            absolute_leds[i] = tuple(int(c * self.brightness) for c in absolute_leds[i])
         if os.name == 'nt':
             if self._clients:
             # Send the current LED colors to all connected clients
                 data = {
-                    "leds": self.leds,
+                    "leds": absolute_leds,
                     "debug_elements": self.debug_draw._get_elements()
                 }
                 message = json.dumps(data).encode('utf-8')
@@ -93,7 +111,7 @@ class LEDRenderer:
         else:
         # Update the hardware display
             for i in range(self.led_count):
-                self._pixels[i] = self.leds[i]
+                self._pixels[i] = absolute_leds[i]
             self._pixels.show()
 
     class DebugDraw():
