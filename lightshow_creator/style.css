@@ -1,0 +1,121 @@
+body {
+    margin: 0;
+    display: flex;
+    flex-direction: row-reverse; /* inspector on the right */
+    height: 100vh;
+    overflow: hidden;
+    background-color: #333;
+}
+
+#inspector {
+    width: 500px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    position: relative;
+}
+
+#inspector_resizer {
+    width: 5px;
+    background-color: #555;
+    cursor: ew-resize;
+    position: absolute;
+    top: 0;
+    left: 0; /* Resizer on the left of the inspector */
+    bottom: 0;
+}
+
+#preview_resizer {
+    height: 5px;
+    background-color: #555;
+    cursor: ns-resize; /* Cursor for vertical resizing */
+    position: relative;
+    z-index: 1;
+}
+
+#main_container {
+    display: flex;
+    flex-direction: column; /* Stack preview and timeline vertically */
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+#preview {
+    flex-grow: 1; /* Allow preview to take up available space */
+    background-color: #060606;
+    color: white;
+    overflow: auto;
+    position: relative;
+}
+
+#timeline {
+    height: 45vh; /* Initial height of the timeline */
+    background-color: #444;
+    color: white;
+    overflow: auto; /* Changed from 'auto' to handle both directions */
+    position: relative;
+}
+
+#timeline_rows_container {
+    position: relative;
+}
+
+.timeline_row {
+    height: 30px; /* Fixed height for each timeline row */
+    border-bottom: 2px solid #555;
+    border-top: 2px solid #333;
+    flex-shrink: 0; /* Prevent rows from shrinking */
+    display: flex;
+    align-items: center;
+
+    background-image: repeating-linear-gradient(
+        to right,
+        transparent,
+        transparent 49px,
+        #555 50px
+    );
+    background-size: 50px 100%;
+}
+
+.timeline_header {
+    height: 40px; /* Fixed height for the header row */
+    border-bottom: 2px solid #555;
+    background-color: #373737; /* Optional: Different background for the header */
+    display: flex;
+    align-items: center; /* Center content vertically */
+    color: #fff; /* White text color for contrast */
+    font-weight: bold; /* Bold text for emphasis */
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.timeline_ruler {
+    height: 20px;
+    background-color: #373737;
+    display: flex;
+    flex-direction: row;  /* ✅ horizontal */
+    align-items: flex-end;
+    white-space: nowrap;
+    font-size: 12px;
+    width: 100%;
+}
+
+.timeline_tick {
+    width: 50px;           /* spacing */
+    display: flex;
+    flex-direction: column; /* ✅ number above line */
+    align-items: center;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.timeline_tick::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    width: 1px;
+    height: 10px;
+    background-color: #777; /* the little vertical line */
+}
