@@ -235,3 +235,26 @@ def point_in_poly(x, y, poly):
         if intersects:
             inside = not inside
     return inside
+
+class Bounds:
+    def __init__(self, coords):
+        """
+        Calculates the bounding box of a set of coordinates.
+        
+        coords - a list of coordinates, each coordinate is a tuple (x, y, z) or (x, y)
+        Returns a tuple (min_x, max_x, min_y, max_y, min_z, max_z) or without z if 2D.
+        """
+
+        if not coords:
+            return None
+        
+        self.coords = coords
+
+        self.min_x = min(coord[0] for coord in coords)
+        self.max_x = max(coord[0] for coord in coords)
+        self.min_y = min(coord[1] for coord in coords)
+        self.max_y = max(coord[1] for coord in coords)
+
+        if len(coords[0]) == 3:  # 3D coordinates
+            self.min_z = min(coord[2] for coord in coords)
+            self.max_z = max(coord[2] for coord in coords)
