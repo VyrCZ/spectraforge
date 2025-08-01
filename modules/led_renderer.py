@@ -13,7 +13,7 @@ class LEDRenderer:
         self.led_count = led_count
         self.leds = [(0, 0, 0)] * led_count
         self.debug_draw = self.DebugDraw()
-        self.brightness = 1.0
+        self.brightness = Config().config.get("brightness", 1.0)
         Log.info("LEDRenderer", f"Initializing LEDRenderer with {led_count} LEDs.")
 
         # Setup a led simulator server if running on Windows

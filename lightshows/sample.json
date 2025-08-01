@@ -16,15 +16,17 @@
             "start": 14.7,
             "end": 15.2,
             "layer": 0,
-            "opaque": false,
-            "filters": [
-                {
-                    "filter": "checkerboard",
-                    "parameters": {
-                        "odd": false
-                    }
-                }
-            ]
+            "opaque": false
+        },
+        {
+            "filter": "mask_quarter",
+            "parameters": {
+                "quadrant": 3,
+                "inverted": false
+            },
+            "start": 14.9,
+            "end": 15.1,
+            "layer": 1
         }
     ]
 }

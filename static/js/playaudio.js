@@ -5,13 +5,20 @@ const socket = io();
 
 document.addEventListener("DOMContentLoaded", () => {
     const audioFileName = sessionStorage.getItem('audioFile');
+    const lightshowFileName = sessionStorage.getItem('lightshowFile');
     if (audioFileName) {
         const effectContainer = document.getElementById('effect_module_container');
         effectContainer.style.display = 'none';
         socket.emit('audio_client_connected', { audio_file: audioFileName });
     }
+    else if (lightshowFileName) {
+        const effectContainer = document.getElementById('effect_module_container');
+        effectContainer.style.display = 'none';
+        socket.emit('lightshow_client_connected', { lightshow_file: lightshowFileName });
+    }
 });
 
+// audio player is shared for both audio and lightshow
 socket.on('audio_ready', () => {
     console.log('🔥 audio_ready received');
     fetch(`/audio/${sessionStorage.getItem('audioFile')}`)

@@ -1,4 +1,4 @@
-from modules.lightshow_effect import *
+from modules.lightshow_effects import *
 import modules.mathutils as mu
 import colorsys
 from modules.effect import EffectType
@@ -34,7 +34,7 @@ class DefaultUniversal(LightshowEffects):
         return frames
 
     @l_effect(EffectType.UNIVERSAL)
-    def flash(self, steps, color1, color2):
+    def flash_full(self, steps, color1, color2):
         frames = []
         for step in range(steps):
             if step % 2 == 0:
@@ -45,7 +45,7 @@ class DefaultUniversal(LightshowEffects):
         return frames
 
     @l_effect(EffectType.UNIVERSAL)
-    def flash2(self, steps, color1, color2):
+    def flash_individual(self, steps, color1, color2):
         frames = []
         for step in range(steps):
             frame = []

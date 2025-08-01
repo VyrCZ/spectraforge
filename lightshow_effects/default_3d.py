@@ -1,4 +1,4 @@
-from modules.lightshow_effect import *
+from modules.lightshow_effects import *
 import modules.mathutils as mu
 import colorsys
 from modules.effect import EffectType

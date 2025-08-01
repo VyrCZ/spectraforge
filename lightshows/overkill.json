@@ -13,7 +13,7 @@
         {
             "start": 1.724138,
             "end": 2.023338,
-            "effect": "flash",
+            "effect": "flash_full",
             "parameters": {
                 "color1": "#000000",
                 "color2": "#ff0000"
@@ -476,7 +476,7 @@
         {
             "start": 59.310345,
             "end": 59.615263,
-            "effect": "flash2_times",
+            "effect": "flash_individual",
             "parameters": {
                 "color1": "#ff0000",
                 "color2": "#000000",
@@ -487,7 +487,7 @@
         {
             "start": 59.655172,
             "end": 59.960091,
-            "effect": "flash2_times",
+            "effect": "flash_individual",
             "parameters": {
                 "color1": "#ff0000",
                 "color2": "#000000",
@@ -508,7 +508,7 @@
         {
             "start": 62.068966,
             "end": 62.373884,
-            "effect": "flash2_times",
+            "effect": "flash_individual",
             "parameters": {
                 "color1": "#ff0000",
                 "color2": "#000000",
@@ -519,7 +519,7 @@
         {
             "start": 62.413793,
             "end": 62.718712,
-            "effect": "flash2_times",
+            "effect": "flash_individual",
             "parameters": {
                 "color1": "#ff0000",
                 "color2": "#000000",
@@ -540,7 +540,7 @@
         {
             "start": 64.827586,
             "end": 65.132505,
-            "effect": "flash2_times",
+            "effect": "flash_individual",
             "parameters": {
                 "color1": "#ff0000",
                 "color2": "#000000",
@@ -551,7 +551,7 @@
         {
             "start": 65.172414,
             "end": 65.477332,
-            "effect": "flash2_times",
+            "effect": "flash_individual",
             "parameters": {
                 "color1": "#ff0000",
                 "color2": "#000000",
@@ -1136,7 +1136,7 @@
         {
             "start": 108.275862,
             "end": 108.937868,
-            "effect": "flash2_times",
+            "effect": "flash_individual",
             "parameters": {
                 "color1": "#ff0000",
                 "color2": "#ffb700",
@@ -1272,7 +1272,7 @@
         {
             "start": 117.241379,
             "end": 117.575104,
-            "effect": "flash2_times",
+            "effect": "flash_individual",
             "parameters": {
                 "color1": "#ff4f00",
                 "color2": "#ff0000",
@@ -1509,7 +1509,7 @@
         {
             "start": 131.37931,
             "end": 132.062575,
-            "effect": "flash",
+            "effect": "flash_full",
             "parameters": {
                 "color1": "#ff5050",
                 "color2": "#000000",
@@ -1520,7 +1520,7 @@
         {
             "start": 132.068966,
             "end": 132.250549,
-            "effect": "flash2_times",
+            "effect": "flash_individual",
             "parameters": {
                 "color1": "#646464",
                 "color2": "#000000",
@@ -1637,7 +1637,7 @@
         {
             "start": 139.310345,
             "end": 139.64407,
-            "effect": "flash2_times",
+            "effect": "flash_individual",
             "parameters": {
                 "color1": "#ff4f00",
                 "color2": "#ff0000",
@@ -1845,7 +1845,7 @@
         {
             "start": 150.344828,
             "end": 151.674679,
-            "effect": "flash2_times",
+            "effect": "flash_individual",
             "parameters": {
                 "color1": "#ffbf00",
                 "color2": "#000000",
@@ -1877,7 +1877,7 @@
         {
             "start": 153.103448,
             "end": 154.457074,
-            "effect": "flash",
+            "effect": "flash_full",
             "parameters": {
                 "color1": "#a200ff",
                 "color2": "#646464",

@@ -8,6 +8,9 @@ function changeEffect(effectName) {
         .then(response => response.json())
         .then(data => {
             console.log(`Effect set to ${effectName}`);
+            // prevent the audio/lightshow file from being played again
+            sessionStorage.removeItem('audioFile');
+            sessionStorage.removeItem('lightshowFile');
             // go back to the main page
             window.location.href = "/";
         })

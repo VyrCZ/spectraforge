@@ -7,8 +7,8 @@ from modules.engine_effects import EffectsEngine
 from modules.engine_calibration import CalibrationEngine
 from modules.engine_canvas import CanvasEngine
 from modules.engine_sandbox import SandboxEngine
-from modules.engine_audiotest import AudioTestEngine
 from modules.engine_visualiser import VisualiserEngine
+from modules.engine_lightshow import LightshowEngine
 from modules.setup import SetupType
 from flask_socketio import SocketIO, emit
 from modules.config_manager import Config
@@ -339,7 +339,7 @@ def audio_client_connected(data):
         Log.warn("AudioEngine", "No audio file provided by client.")
         emit("audio_error", {"status": "error", "message": "Audio file is required."})
         return
-    audio_test_engine.on_audio_load(audio_file)
+    visualiser_engine.on_audio_load(audio_file)
 
 def audio_engine_ready():
     """Callback for when the audio engine is ready for playback."""
@@ -374,7 +374,8 @@ if __name__ == "__main__":
     calibration_engine = CalibrationEngine(renderer, take_photo_callback, send_image_callback, setup_done_callback)
     canvas_engine = CanvasEngine(renderer)
     sandbox_engine = SandboxEngine(renderer, manager.active_setup)
-    audio_test_engine = VisualiserEngine(renderer, manager.active_setup, audio_engine_ready)
+    visualiser_engine = VisualiserEngine(renderer, manager.active_setup, audio_engine_ready)
+    lightshow_engine = LightshowEngine(renderer, manager.active_setup)
 
 
     # IMPORTANT! Always register the effects engine first, as it is the main engine.
@@ -382,7 +383,7 @@ if __name__ == "__main__":
     manager.register_engine(calibration_engine)
     manager.register_engine(canvas_engine)
     manager.register_engine(sandbox_engine)
-    manager.register_audio_engine(audio_test_engine)
+    manager.register_audio_engine(visualiser_engine)
     Log.info("Server", "Starting Spectraforge server...")
     try:
         if os.name == "nt":

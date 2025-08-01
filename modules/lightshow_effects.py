@@ -18,9 +18,20 @@ def l_effect(effect_type: EffectType):
     """
     def decorator(func):
         func.__effect_type__ = effect_type
+        func.__is_effect__ = True
         return func
     return decorator
 
+def l_filter(effect_type: EffectType):
+    """
+    This decorator is used to mark a function as a lightshow filter. It assigns an `EffectType` to the function, which can be used to categorize or identify the filter.
+    Each lightshow filter must start its params with `frames`, followed by your required params and return a list of frames, where each frame is a list of colors in RGB format.
+    """
+    def decorator(func):
+        func.__effect_type__ = effect_type
+        func.__is_filter__ = True
+        return func
+    return decorator
 
 #@namespace("")
 class LightshowEffects:
