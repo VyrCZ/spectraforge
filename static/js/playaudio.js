@@ -1,6 +1,5 @@
 let playing = false;
 let audioDuration = 0;
-let durationString = "00:00";
 const socket = io();
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -19,9 +18,13 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // audio player is shared for both audio and lightshow
-socket.on('audio_ready', () => {
+socket.on('audio_ready', (data) => {
     console.log('🔥 audio_ready received');
-    fetch(`/audio/${sessionStorage.getItem('audioFile')}`)
+    let storedAudioFile = sessionStorage.getItem('audioFile')
+    if (!storedAudioFile) {
+        storedAudioFile = data.audio_file;
+    }
+    fetch(`/audio/${storedAudioFile}`)
         .then(response => response.blob())
         .then(blob => {
             const audioUrl = URL.createObjectURL(blob);

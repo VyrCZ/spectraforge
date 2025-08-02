@@ -17,11 +17,12 @@ class LightshowEngine(AudioEngine):
         self.lightshow_data = None
         self.active_setup = active_setup
         self.coords = active_setup.coords
+        self.ready_callback = ready_callback
 
     def load_lightshow(self, lightshow_file):
         """Load the lightshow JSON file and extract the audio file path."""
         # get the performance mode
-        performance_mode = Config.get("performance_mode", "normal")
+        performance_mode = Config().config.get("performance_mode", "normal")
         if performance_mode == "low":
             self.FPS = 20
         elif performance_mode == "high":
@@ -35,19 +36,23 @@ class LightshowEngine(AudioEngine):
                 audio_file = data.get("audio_file")
                 if not audio_file:
                     raise ValueError("No audio file specified in the lightshow JSON.")
+                self.frames = self.process_lightshow()
+                Log.debug("LightshowEngine", self.frames)
                 Log.info("LightshowEngine", f"Loaded lightshow: {lightshow_file}")
                 return audio_file
         except Exception as e:
-            Log.error("LightshowEngine", f"Failed to load lightshow file: {e}")
+            Log.error_exc("LightshowEngine", e)
             return None
 
+    @EngineManager.requires_active
     def on_audio_load(self, audio_file: str):
         """Load the lightshow data and prepare for playback."""
+        self._load_effects()
         lightshow_file = os.path.join("lightshows", f"{os.path.splitext(audio_file)[0]}.json")
-        audio_file_path = self.load_lightshow(lightshow_file, )
+        audio_file_path = self.load_lightshow(lightshow_file)
         if audio_file_path:
-            super().on_audio_load(audio_file_path)
             Log.info("LightshowEngine", f"Audio file loaded: {audio_file_path}")
+            self.ready_callback(audio_file_path)
         else:
             Log.error("LightshowEngine", "Failed to load lightshow or audio file.")
 
@@ -56,6 +61,14 @@ class LightshowEngine(AudioEngine):
 
     def on_disable(self):
         Log.info("LightshowEngine", "LightshowEngine disabled.")
+
+    def on_frame(self, current_time):
+        # display the correct frame
+        frame_index = int(current_time * self.FPS)
+        if frame_index < len(self.frames):
+            frame = self.frames[frame_index]
+            # update the colors in the renderer
+            self.renderer.set_colors(frame)
 
     def _load_effects(self):
         EFFECT_DIR = "lightshow_effects"
@@ -98,7 +111,7 @@ class LightshowEngine(AudioEngine):
         for layer in layers:
             layer.sort(key=lambda x: x.get("start", 0))
         # apply effects for now (TODO: add filters, not implemented yet)
-        frames = [[[None] * len(self.coords) for _ in range(self.FPS * self.audio_length)]] # frames filled with None (transparent)
+        frames = [[[None] * len(self.coords) for _ in range(int(self.FPS * self.audio_length))]] # frames filled with None (transparent)
         for layer in layers:
             for item in layer:
                 effect_name = item.get("effect")
@@ -106,11 +119,15 @@ class LightshowEngine(AudioEngine):
                     if effect_name in self.registry:
                         effect_func = self.registry[effect_name]
                         params = item.get("parameters", {})
+                        # convert hex to RGB
+                        for key, value in params.items():
+                            if isinstance(value, str) and value.startswith("#"):
+                                params[key] = tuple(int(value[i:i+2], 16) for i in (1, 3, 5))  # convert hex to RGB tuple
                         # calculate the number of steps
                         start_time = item.get("start", 0)
                         end_time = item.get("end", 0)
                         if end_time <= start_time:
-                            Log.warning("LightshowEngine", f"Effect {effect_name} [{start_time}-{end_time}] has invalid end time, skipping.")
+                            Log.warn("LightshowEngine", f"Effect {effect_name} [{start_time}-{end_time}] has invalid end time, skipping.")
                             continue
                         duration = end_time - start_time
                         steps = int(duration * self.FPS)
@@ -124,9 +141,9 @@ class LightshowEngine(AudioEngine):
                             if start_frame + i < len(frames):
                                 frames[start_frame + i] = frame
                     else:
-                        Log.warning("LightshowEngine", f"Effect {effect_name} not found or not registered.")
+                        Log.warn("LightshowEngine", f"Effect {effect_name} not found or not registered.")
                 else:
-                    Log.warning("LightshowEngine", "No effect key found in item, probably a filter, skipping for now.")
+                    Log.warn("LightshowEngine", "No effect key found in item, probably a filter, skipping for now.")
         # fill None (transparent) with black at the end
         for i in range(len(frames)):
             frames[i] = [color if color is not None else (0, 0, 0) for color in frames[i]]

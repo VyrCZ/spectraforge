@@ -7,10 +7,10 @@ import re
 PARAMETER_TABLE = {
     "solid_color": ["color"],
     "fade": ["color_from", "color_to", "steps"],
-    "flash": ["color_from", "color_to", "frequency"],
-    "flash2": ["color_from", "color_to", "frequency"],
-    "flash_times": ["color_from", "color_to", "times"],
-    "flash2_times": ["color_from", "color_to", "times"],
+    "flash": ["color1", "color2", "frequency"],
+    "flash2": ["color1", "color2", "frequency"],
+    "flash_times": ["color1", "color2", "times"],
+    "flash2_times": ["color1", "color2", "times"],
     "swipe_up": ["color", "width", "steps", "no_clear"],
     "swipe_down": ["color", "width", "steps", "no_clear"],
     "swipe_right": ["color", "width", "steps", "no_clear"],
@@ -24,7 +24,7 @@ PARAMETER_TABLE = {
     "split_vertical": ["color_from", "color_to", "steps", "no_clear"],
 }
 
-input_file = "lightshow/labels/overkill.txt"
+input_file = "legacy/lightshow/labels/overkill.txt"
 output_file = "lightshows/overkill.json"
 
 def parse_color(s):
@@ -50,6 +50,9 @@ def parse_value(s):
             return float(s)
         except ValueError:
             return s
+        
+# params that will be handled differently or are not needed
+invalid_param_list = ["no_clear", "steps"]
 
 def main():
     timeline = []
@@ -78,7 +81,14 @@ def main():
             for i, value_str in enumerate(param_values):
                 if i < len(param_names):
                     param_name = param_names[i]
-                    parameters[param_name] = parse_value(value_str)
+                    if param_name not in invalid_param_list:
+                        parameters[param_name] = parse_value(value_str)
+
+            # Convert all transparent effects to `opaque`
+            if parameters.get("no_clear"):
+                opaque = not parameters["no_clear"]
+            else:
+                opaque = False
 
             # Determine layer
             assigned_layer = -1
@@ -98,7 +108,8 @@ def main():
                 "end": end_time,
                 "effect": effect_name,
                 "parameters": parameters,
-                "layer": assigned_layer
+                "layer": assigned_layer,
+                "opaque": opaque
             }
             timeline.append(effect_obj)
 

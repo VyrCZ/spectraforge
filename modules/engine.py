@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 from modules.setup import Setup
+import threading
+import time
 
 class Engine(ABC):
     """
@@ -40,8 +42,6 @@ class AudioEngine(Engine):
     **When on_audio_load is called, it is strongly recommended to calculate the light states for the whole audio file, due to performance. When your calculation logic is completed, you must call ready_for_playback to let the server know that the engine is finished and ready.**
     """
     def __init__(self, renderer, ready_callback):
-        import threading
-        import time
         self.renderer = renderer
         self.ready_callback = ready_callback
         self.FPS = 60
@@ -79,7 +79,6 @@ class AudioEngine(Engine):
         """
         Called when the audio is played in the player.
         """
-        import threading
         self._stop_flag = False
         if self._runner_thread and self._runner_thread.is_alive():
             self._runner_thread.join()
@@ -104,7 +103,8 @@ class AudioEngine(Engine):
         """
         self._stop_flag = True
         if self._runner_thread and self._runner_thread.is_alive():
-            self._runner_thread.join()
+            if threading.current_thread() != self._runner_thread:
+                self._runner_thread.join()
         self.renderer.fill((0, 0, 0))
         self.renderer.show()
         self.current_time = 0.0

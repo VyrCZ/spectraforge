@@ -17,24 +17,24 @@ class DefaultUniversal(LightshowEffects):
         return frames
 
     @l_effect(EffectType.UNIVERSAL)
-    def fade(self, steps, color1, color2):
-        step_r = (color2[0] - color1[0]) / steps
-        step_g = (color2[1] - color1[1]) / steps
-        step_b = (color2[2] - color1[2]) / steps
+    def fade(self, steps, color_from, color_to):
+        step_r = (color_to[0] - color_from[0]) / steps
+        step_g = (color_to[1] - color_from[1]) / steps
+        step_b = (color_to[2] - color_from[2]) / steps
 
         frames = []
         for step in range(steps):
             intermediate_color = (
-                int(color1[0] + step * step_r),
-                int(color1[1] + step * step_g),
-                int(color1[2] + step * step_b),
+                int(color_from[0] + step * step_r),
+                int(color_from[1] + step * step_g),
+                int(color_from[2] + step * step_b),
             )
             frame = [intermediate_color] * len(self.coords)
             frames.append(frame)
         return frames
 
     @l_effect(EffectType.UNIVERSAL)
-    def flash_full(self, steps, color1, color2):
+    def flash_full(self, steps, color1, color2, frequency=0):
         frames = []
         for step in range(steps):
             if step % 2 == 0:
@@ -45,7 +45,7 @@ class DefaultUniversal(LightshowEffects):
         return frames
 
     @l_effect(EffectType.UNIVERSAL)
-    def flash_individual(self, steps, color1, color2):
+    def flash_individual(self, steps, color1, color2, frequency=0):
         frames = []
         for step in range(steps):
             frame = []
@@ -115,31 +115,31 @@ class DefaultUniversal(LightshowEffects):
 
     @l_effect(EffectType.UNIVERSAL)
     def rainbow(self, steps, speed=10):
-        current_z = 0
+        current_y = 0
         frames = []
         for step in range(steps):
-            current_z += speed
-            if current_z > self.bounds.max_z:
-                current_z = 0
+            current_y += speed
+            if current_y > self.bounds.max_y:
+                current_y = 0
             frame = [None] * len(self.coords)
             for i in range(len(self.coords)):
                 normalized_rgb = list(colorsys.hsv_to_rgb(
-                    mu.normalize(mu.wrap(self.coords[i][2] - current_z, 0, self.bounds.max_z), 0, self.bounds.max_z), 1, 1))
+                    mu.normalize(mu.wrap(self.coords[i][1] - current_y, 0, self.bounds.max_y), 0, self.bounds.max_y), 1, 1))
                 frame[i] = tuple([int(channel * 255) for channel in normalized_rgb])
             frames.append(frame)
         return frames
     
     @l_effect(EffectType.UNIVERSAL)
-    def gradient(self, steps, color1, color2, speed=10):
-        current_z = 0
+    def gradient(self, steps, color_from, color_to, speed=10):
+        current_y = 0
         frames = []
         for step in range(steps):
-            current_z += speed
-            if current_z > self.bounds.max_z:
-                current_z = 0
+            current_y += speed
+            if current_y > self.bounds.max_y:
+                current_y = 0
             frame = [None] * len(self.coords)
             for i in range(len(self.coords)):
-                normalized_rgb = mu.color_lerp(color1, color2, mu.normalize(mu.wrap(self.coords[i][2] - current_z, 0, self.bounds.max_z), 0, self.bounds.max_z))
+                normalized_rgb = mu.color_lerp(color_from, color_to, mu.normalize(mu.wrap(self.coords[i][1] - current_y, 0, self.bounds.max_y), 0, self.bounds.max_y))
                 frame[i] = normalized_rgb
             frames.append(frame)
         return frames
@@ -173,15 +173,15 @@ class DefaultUniversal(LightshowEffects):
         return frames
 
     @l_effect(EffectType.UNIVERSAL)
-    def split_vertical(self, steps, color1, color2):
+    def split_vertical(self, steps, color_from, color_to):
         mid_x = (self.bounds.min_x + self.bounds.max_x) / 2
         frames = []
         for step in range(steps):
             frame = [None] * len(self.coords)
             for i in range(len(self.coords)):
                 if self.coords[i][0] < mid_x:
-                    frame[i] = color1
+                    frame[i] = color_from
                 else:
-                    frame[i] = color2
+                    frame[i] = color_to
             frames.append(frame)
         return frames

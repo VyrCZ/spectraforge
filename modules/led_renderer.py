@@ -66,6 +66,15 @@ class LEDRenderer:
     def __len__(self):
         return self.led_count
     
+    def set_colors(self, colors: list[tuple[int, int, int]]):
+        """
+        Set the colors of the LEDs.
+        :param colors: List of tuples (R, G, B) for each LED.
+        """
+        if len(colors) != self.led_count:
+            raise ValueError(f"Expected {self.led_count} colors, got {len(colors)}")
+        self.leds = colors
+    
     def set_brightness(self, brightness: float):
         """
         Set the brightness of the LEDs.

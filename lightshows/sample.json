@@ -1,10 +1,10 @@
 {
-    "songName": "Centipede",
-    "songArtist": "Knife Party",
-    "editorData": {
+    "song_name": "Centipede",
+    "song_artist": "Knife Party",
+    "editor_data": {
         "bpm": 140,
         "offset": 1750,
-        "createdLayers": 2
+        "created_layers": 2
     },
     "timeline": [
         {

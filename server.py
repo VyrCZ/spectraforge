@@ -330,6 +330,7 @@ def send_audio(filename):
     audio_folder = os.path.join(app.root_path, 'audio')
     return send_from_directory(audio_folder, filename)
 
+# only the loading functions are different, the playback functions are the same
 @socketio.on("audio_client_connected")
 def audio_client_connected(data):
     # get file name from data
@@ -341,9 +342,42 @@ def audio_client_connected(data):
         return
     visualiser_engine.on_audio_load(audio_file)
 
-def audio_engine_ready():
+@app.route("/lightshows")
+def page_lightshows():
+    """Render the lightshows page."""
+    # list all lightshow files which have their audio file in the audio folder
+    lightshow_folder = os.path.join(app.root_path, 'lightshows')
+    if not os.path.exists(lightshow_folder):
+        os.makedirs(lightshow_folder)
+    audio_folder = os.path.join(app.root_path, 'audio')
+    if not os.path.exists(audio_folder):
+        os.makedirs(audio_folder)
+    audio_files = []
+    lightshow_files = []
+    for f in os.listdir(lightshow_folder):
+        # load the json and get audio_file
+        if f.endswith('.json'):
+            Log.debug("Server", f"Checking lightshow file: {f}")
+            with open(os.path.join(lightshow_folder, f), 'r') as json_file:
+                data = json.load(json_file)
+                audio_file = data.get("audio_file")
+                if audio_file:
+                    lightshow_files.append(f[:-5])  # remove file extension
+    return render_template("lightshows.html", lightshow_files=lightshow_files)
+
+@socketio.on("lightshow_client_connected")
+def lightshow_client_connected(data):
+    """Handle client connection for lightshow playback."""
+    lightshow_file = data.get("lightshow_file")
+    if not lightshow_file:
+        Log.warn("LightshowEngine", "No lightshow file provided by client.")
+        emit("lightshow_error", {"status": "error", "message": "Lightshow file is required."})
+        return
+    lightshow_engine.on_audio_load(lightshow_file)
+
+def audio_engine_ready(audio_file = None):
     """Callback for when the audio engine is ready for playback."""
-    socketio.emit("audio_ready")
+    socketio.emit("audio_ready", {"audio_file": audio_file})
 
 @socketio.on("audio_play")
 def on_audio_play():
@@ -375,7 +409,7 @@ if __name__ == "__main__":
     canvas_engine = CanvasEngine(renderer)
     sandbox_engine = SandboxEngine(renderer, manager.active_setup)
     visualiser_engine = VisualiserEngine(renderer, manager.active_setup, audio_engine_ready)
-    lightshow_engine = LightshowEngine(renderer, manager.active_setup)
+    lightshow_engine = LightshowEngine(renderer, manager.active_setup, audio_engine_ready)
 
 
     # IMPORTANT! Always register the effects engine first, as it is the main engine.
@@ -384,6 +418,7 @@ if __name__ == "__main__":
     manager.register_engine(canvas_engine)
     manager.register_engine(sandbox_engine)
     manager.register_audio_engine(visualiser_engine)
+    manager.register_audio_engine(lightshow_engine)
     Log.info("Server", "Starting Spectraforge server...")
     try:
         if os.name == "nt":
