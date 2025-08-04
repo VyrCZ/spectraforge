@@ -37,7 +37,6 @@ class LightshowEngine(AudioEngine):
                 if not audio_file:
                     raise ValueError("No audio file specified in the lightshow JSON.")
                 self.frames = self.process_lightshow()
-                Log.debug("LightshowEngine", self.frames)
                 Log.info("LightshowEngine", f"Loaded lightshow: {lightshow_file}")
                 return audio_file
         except Exception as e:
@@ -51,6 +50,8 @@ class LightshowEngine(AudioEngine):
         lightshow_file = os.path.join("lightshows", f"{os.path.splitext(audio_file)[0]}.json")
         audio_file_path = self.load_lightshow(lightshow_file)
         if audio_file_path:
+            Log.debug("LightshowEngine", self.frames)
+            Log.debug("LightshowEngine", f"Audio length: {self.audio_length}s; Calculated frames: {len(self.frames)}; FPS: {self.FPS}")
             Log.info("LightshowEngine", f"Audio file loaded: {audio_file_path}")
             self.ready_callback(audio_file_path)
         else:
@@ -69,6 +70,7 @@ class LightshowEngine(AudioEngine):
             frame = self.frames[frame_index]
             # update the colors in the renderer
             self.renderer.set_colors(frame)
+        self.renderer.show()
 
     def _load_effects(self):
         EFFECT_DIR = "lightshow_effects"
@@ -100,10 +102,12 @@ class LightshowEngine(AudioEngine):
         4. fill None (transparent) with black at the end
         """
         # sort the timeline by layers
-        layer_count = self.lightshow_data.get("editorData", {}).get("layerCount", 1)
+        layer_count = self.lightshow_data.get("editor_data", {}).get("layer_count", 1)
         layers = [[] for _ in range(layer_count)]
+        timeline = self.lightshow_data.get("timeline", [])
+        self.audio_length = max(item.get("end", 0) for item in timeline) if timeline else 0
         # put all timeline items into their respective layers
-        for item in self.lightshow_data.get("timeline", []):
+        for item in timeline:
             layer_index = item.get("layer", 0)
             if layer_index < layer_count:
                 layers[layer_index].append(item)
@@ -111,7 +115,7 @@ class LightshowEngine(AudioEngine):
         for layer in layers:
             layer.sort(key=lambda x: x.get("start", 0))
         # apply effects for now (TODO: add filters, not implemented yet)
-        frames = [[[None] * len(self.coords) for _ in range(int(self.FPS * self.audio_length))]] # frames filled with None (transparent)
+        frames = [[None] * len(self.coords) for _ in range(int(self.FPS * self.audio_length))] # frames filled with None (transparent)
         for layer in layers:
             for item in layer:
                 effect_name = item.get("effect")
@@ -136,10 +140,13 @@ class LightshowEngine(AudioEngine):
                         effect_output = effect_func(steps, **params)
                         # slice the frames to give the effect function the correct time range
                         start_frame = int(start_time * self.FPS)
-                        # insert output directly into frames (no need for having lists for each layer in this case)
+                        # insert output directly into frames
                         for i, frame in enumerate(effect_output):
-                            if start_frame + i < len(frames):
-                                frames[start_frame + i] = frame
+                            frame_index = start_frame + i
+                            if frame_index < len(frames):
+                                for led_index, color in enumerate(frame):
+                                    if led_index < len(frames[frame_index]) and color is not None:
+                                        frames[frame_index][led_index] = color
                     else:
                         Log.warn("LightshowEngine", f"Effect {effect_name} not found or not registered.")
                 else:

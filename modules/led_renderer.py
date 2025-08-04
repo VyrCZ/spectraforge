@@ -74,6 +74,7 @@ class LEDRenderer:
         if len(colors) != self.led_count:
             raise ValueError(f"Expected {self.led_count} colors, got {len(colors)}")
         self.leds = colors
+        Log.debug("LEDRenderer", f"Set colors: {colors}")
     
     def set_brightness(self, brightness: float):
         """
