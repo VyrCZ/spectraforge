@@ -5,6 +5,8 @@ body {
     height: 100vh;
     overflow: hidden;
     background-color: #333;
+    font-family: "Noto Sans";
+    color: #fff;
 }
 
 #inspector {
@@ -55,6 +57,10 @@ body {
     color: white;
     overflow: auto; /* Changed from 'auto' to handle both directions */
     position: relative;
+}
+
+.vis-text, .vis-label {
+    color: #fff !important;
 }
 
 #timeline_rows_container {

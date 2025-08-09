@@ -9,7 +9,7 @@ class DefaultUniversal(LightshowEffects):
         super().__init__(coords)
 
     @l_effect(EffectType.UNIVERSAL)
-    def solid_color(self, steps, color):
+    def solid_color(self, steps, color: tuple[int, int, int]):
         frames = []
         for _ in range(steps):
             frame = [color] * len(self.coords)

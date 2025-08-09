@@ -3,7 +3,9 @@
 <head>
     <title>Lightshow Creator</title>
     <meta name="color-scheme" content="dark">
-    <script src="main.js" defer></script>
+    <script src="js/dependencies/vis-timeline.js"></script>
+    <!--<script src="js/main.js"></script>-->
+    <script src="js/timeline.js" defer></script>
     <link rel="icon" href="icons/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="style.css">
     <meta name="viewport" content="width=12-00, initial-scale=1">
@@ -19,16 +21,7 @@
 
         </div>
         <div id="preview_resizer"></div>
-        <div id="timeline">
-            <div class="timeline_header">
-                <div class="timeline_ruler"></div>
-            </div>
-            <div id="timeline_rows_container">
-                <div class="timeline_row"></div>
-                <div class="timeline_row"></div>
-                <div class="timeline_row"></div>
-            </div>
-        </div>
+        <div id="timeline"></div>
     </div>
 </body>
 </html>

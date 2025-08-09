@@ -47,3 +47,39 @@ class LightshowEffects:
     def __init__(self, coords):
         self.bounds = mu.Bounds(coords)
         self.coords = coords
+
+class CustomParamTypes:
+    """
+    This class holds custom parameter types that can be used in lightshow effects or filters.
+    **They don't do anything, but can be used as for type annotations**
+    """
+    class Color:
+        """
+        Actually requires tuple[int, int, int] (RGB color)
+        """
+        pass
+
+    class Dropdown:
+        """
+        Actually requires list[str] (list of options)
+        You can add options to a parameter using the `set_options` function.
+        Example:
+        ```python
+        from modules.lightshow_effects.CustomParamTypes import *
+        @l_effect(EffectType.UNIVERSAL)
+        def my_effect(self, steps, color: Color, modes_dropdown: Dropdown):
+            set_options(modes_dropdown, ["Mode 1", "Mode 2", "Mode 3"])
+            # Your effect logic here
+        ```
+        """
+        pass
+
+
+
+def set_options(param, options: list["str"]):
+    """
+    This function is used to set dropdown options for a function parameter in a lightshow effect or filter.
+
+    *It modifies the parameter's `__options__` attribute to include the provided options*
+    """
+    param.__options__ = options
