@@ -17,11 +17,19 @@
     <div id="menu_container">
         {% include 'sidebar_menu.html' %}
     </div>
-    <!-- Sandbox scripts dropdown -->
-    <select id="sandbox_scripts_dropdown" onchange="changeSandboxScript()">
-        {% for file in files %}
-            <option value="{{ file }}">{{ file }}</option>
-        {% endfor %}
-    </select>
+    <div id="effect_header">
+        <h1>Sandbox</h1>
+    </div>
+    <div id="effects_container">
+        <div class="effect_container">
+            <p>Select a script to run</p>
+            <!-- Sandbox scripts dropdown -->
+            <select id="sandbox_scripts_dropdown" onchange="changeSandboxScript()">
+                {% for file in files %}
+                <option value="{{ file }}">{{ file }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
 </body>
 </html>

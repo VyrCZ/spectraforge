@@ -247,7 +247,7 @@ input[type="range"] {
     height: 10px;
     border: 1px solid #333;
     border-radius: 5px;
-    background: #2f2f2f;
+    background: linear-gradient(to right, #1e7a1e 0%, #282828 0%);
     -webkit-transition: .2s;
     transition: opacity .2s;
 }
@@ -265,9 +265,10 @@ input[type="range"]::-moz-range-thumb {
 }
 
 input[type="range"]::-webkit-slider-runnable-track {
-    height: 10px;
-    border-radius: 5px;
-    background: linear-gradient(90deg, #1e7a1e 50%, #282828 50%);
+    -webkit-appearance: none;
+    appearance: none;
+    background: none;
+    border: none;
 }
 
 input[type="range"]::-moz-range-progress {
@@ -329,4 +330,30 @@ input[type="range"]::-ms-fill-lower {
 #audio_time_text {
     color: #fff;
     font-size: 1em;
+}
+
+.setting {
+    width: 90%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #999;
+    background-color: #202020;
+    border-radius: 10px;
+    padding: 10px;
+    margin-top: 20px;
+}
+
+.setting label {
+    font-size: 1.2em;
+    margin-right: 20px;
+}
+
+.setting input[type="range"] {
+    flex-grow: 1;
+}
+
+.setting select {
+    flex-grow: 1;
+    margin-left: 10px;
 }

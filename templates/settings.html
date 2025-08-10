@@ -42,17 +42,19 @@
     <div id="effect_header">
         <h1>Settings</h1>
     </div>
-    <div class="setting">
-        <label for="brightness">Brightness:</label>
-        <input type="range" id="brightness" name="brightness" min="0" max="100" value="{{ brightness }}" oninput="updateBrightness(this.value)">
-    </div>
-    <div class="setting">
-        <label for="performance_mode">Performance Mode:</label>
-        <select id="performance_mode" name="performance_mode" onchange="updatePerformanceMode(this.value)">
-            <option value="high" {% if performance_mode == 'high' %}selected{% endif %}>High</option>
-            <option value="normal" {% if performance_mode == 'normal' %}selected{% endif %}>Normal</option>
-            <option value="low" {% if performance_mode == 'low' %}selected{% endif %}>Low</option>
-        </select>
+    <div id="effects_container">
+        <div class="setting">
+            <label for="brightness">Brightness:</label>
+            <input type="range" id="brightness" name="brightness" min="0" max="100" value="{{ brightness }}" oninput="updateBrightness(this.value)">
+        </div>
+        <div class="setting">
+            <label for="performance_mode">Performance Mode:</label>
+            <select id="performance_mode" name="performance_mode" onchange="updatePerformanceMode(this.value)">
+                <option value="high" {% if performance_mode == 'high' %}selected{% endif %}>High</option>
+                <option value="normal" {% if performance_mode == 'normal' %}selected{% endif %}>Normal</option>
+                <option value="low" {% if performance_mode == 'low' %}selected{% endif %}>Low</option>
+            </select>
+        </div>
     </div>
 </body>
 </html>
