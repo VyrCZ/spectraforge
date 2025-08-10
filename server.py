@@ -14,6 +14,7 @@ from flask_socketio import SocketIO, emit
 from modules.config_manager import Config
 from modules.log_manager import Log
 from modules.led_renderer import LEDRenderer
+import modules.upload_files as upload
 
 # set working directory to the directory of this file
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -399,7 +400,20 @@ def on_audio_seek(data):
     Log.info("Server", "Audio seek requested by user.")
     time_pos = data.get("time")
     manager.active_engine.on_audio_seek(time_pos)
-    
+
+@app.route("/upload")
+def page_upload():
+    """Render the upload page."""
+    return render_template("upload.html")
+
+@app.route("/api/upload", methods=["POST"])
+def upload_file():
+    files = request.files.getlist("files")
+    if not files:
+        return jsonify({"success": False, "error": "No files provided."}), 400
+
+    result = upload.handle_file_upload(files)
+    return jsonify({"success": result})
 
 if __name__ == "__main__":
     manager = EngineManager()

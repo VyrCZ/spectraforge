@@ -1,0 +1,82 @@
+.upload_container {
+    border: 2px dashed #ccc;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    transition: border-color 0.3s;
+    margin: 25px;
+    margin-top: 60px;
+    cursor: pointer; /* Makes the container look clickable */
+}
+
+.upload_container:hover {
+    border-color: #888;
+}
+
+#file_input {
+    display: none; /* Hides the actual file input */
+}
+
+#upload_icon {
+    width: 50px;
+    height: 50px;
+}
+
+.description {
+    font-size: 14px;
+    color: #666;
+    margin-top: 10px;
+}
+
+.upload_toast {
+    background-color: #1e7a1e; /* Match app's green accent */
+    color: #f4f4f4; /* Match app's text color */
+    padding: 5px 10px; /* Adjust padding for a better look */
+    border-radius: 10px; /* Match other elements */
+    border: 1px solid #333; /* Use border instead of box-shadow */
+    display: flex;
+    align-items: center;
+    animation: slideIn 0.25s ease-out;
+    margin-left: 25px;
+    margin-right: 25px;
+}
+
+.slideOut {
+    animation: slideOut 0.25s ease-out forwards;
+}
+
+.upload_toast_icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+}
+.upload_toast_close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    margin-left: auto; /* Pushes the button to the right */
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+}
