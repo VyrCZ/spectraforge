@@ -6,16 +6,13 @@ import colorsys
 class Rainbow(LightEffect):
     def __init__(self, renderer, coords):
         super().__init__(renderer, coords, "Rainbow", EffectType.UNIVERSAL)
-        self.speed = self.add_parameter("Speed", ParamType.SLIDER, 0.1, min=0.5, max=50, step=0.1)
+        self.speed = self.add_parameter("Speed", ParamType.SLIDER, 1, min=1, max=20, step=0.1)
         self.reverse = self.add_parameter("Reverse", ParamType.CHECKBOX, False)
         self.current_y = 0
 
     def update(self):
         #print(f"Running rainbow with speed {self.speed.get()} and reverse {self.reverse.get()}")
-        if self.reverse.get():
-            self.current_y -= self.speed.get()
-        else:
-            self.current_y += self.speed.get()
+        self.current_y += (-1 if self.reverse.get() else 1) * self.speed.get() / 10
         if self.current_y > self.height:
             self.current_y = 0
         for i in range(len(self.renderer.leds)):

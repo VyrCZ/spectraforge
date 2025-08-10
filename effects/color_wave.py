@@ -4,7 +4,7 @@ import modules.mathutils as mu
 class ColorSweep(LightEffect):
     def __init__(self, renderer, coords):
         super().__init__(renderer, coords, "Color Wave", EffectType.UNIVERSAL)
-        self.speed = self.add_parameter("Speed", ParamType.SLIDER, 20, min=5, max=100, step=1)
+        self.speed = self.add_parameter("Speed", ParamType.SLIDER, 100, min=30, max=200, step=1)
         self.active_color = self.add_parameter("Active Color", ParamType.COLOR, "#FF0000")
         self.background_color = self.add_parameter("Background Color", ParamType.COLOR, "#000000")
         self.bounce = self.add_parameter("Bounce", ParamType.CHECKBOX, True)

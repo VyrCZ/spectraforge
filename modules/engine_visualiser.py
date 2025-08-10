@@ -109,20 +109,33 @@ class VisualiserEngine(AudioEngine):
 
             # Logarithmic frequency bands
             max_freq = freqs[-1]
-            log_freq_bands = np.logspace(np.log10(20), np.log10(max_freq), self.bar_count + 1)
+            # Ensure min frequency is not zero for log scale
+            min_freq = max(20, freqs[1]) if len(freqs) > 1 else 20
+            log_freq_bands = np.logspace(np.log10(min_freq), np.log10(max_freq), self.bar_count + 1)
             
             band_intensities = np.zeros((num_frames, self.bar_count))
 
+            # --- START: REVISED AND CORRECTED LOGIC ---
+
+            # For each frequency from the FFT, find which bar it belongs to.
+            # np.digitize is perfect for this "histogram" style binning.
+            band_indices = np.digitize(freqs, log_freq_bands) - 1
+
+            # Now, for each bar, sum the magnitudes of all frequencies that fall into it.
             for i in range(self.bar_count):
-                low_freq = log_freq_bands[i]
-                high_freq = log_freq_bands[i+1]
-                freq_indices = np.where((freqs >= low_freq) & (freqs < high_freq))[0]
-                if len(freq_indices) > 0:
-                    band_intensities[:, i] = np.mean(all_fft_magnitudes[:, freq_indices], axis=1)
+                # Find all FFT frequency indices that belong to the current bar 'i'
+                freq_indices_for_bar = np.where(band_indices == i)[0]
+                
+                if len(freq_indices_for_bar) > 0:
+                    # Sum the magnitudes for each frame to get total energy in the band.
+                    # Using np.sum() instead of np.mean() gives a more balanced visualization.
+                    band_intensities[:, i] = np.sum(all_fft_magnitudes[:, freq_indices_for_bar], axis=1)
+
+            # --- END: REVISED AND CORRECTED LOGIC ---
 
             # Convert to dB scale
             with np.errstate(divide='ignore'):
-                db_intensities = 20 * np.log10(band_intensities + 1e-9)
+                db_intensities = 20 * np.log10(band_intensities + 1e-9) # Add epsilon to avoid log(0)
 
             # Smoothing and Normalization
             smoothed_intensities = np.zeros_like(db_intensities)
