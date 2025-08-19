@@ -171,6 +171,7 @@ class VisualiserEngine(AudioEngine):
             return
         self.ready_callback()
 
+    @EngineManager.requires_active
     def on_frame(self, current_time: float):
         if not self.led_bar_indices:
             return

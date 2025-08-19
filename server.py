@@ -15,6 +15,7 @@ from modules.config_manager import Config
 from modules.log_manager import Log
 from modules.led_renderer import LEDRenderer
 import modules.upload_files as upload
+from modules.placeholder_manager import check as placeholder_check
 
 # set working directory to the directory of this file
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -416,6 +417,7 @@ def upload_file():
     return jsonify({"success": result})
 
 if __name__ == "__main__":
+    placeholder_check()
     manager = EngineManager()
     renderer = LEDRenderer(manager.active_setup)
     effects_engine = EffectsEngine(renderer, manager.active_setup)

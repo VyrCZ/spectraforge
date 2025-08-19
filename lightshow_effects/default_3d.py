@@ -3,7 +3,7 @@ import modules.mathutils as mu
 import colorsys
 from modules.effect import EffectType
 
-@namespace("")
+@namespace("3d")
 class Default3D(LightshowEffects):
     def __init__(self, coords):
         super().__init__(coords)

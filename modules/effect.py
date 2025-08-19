@@ -1,3 +1,5 @@
+from modules.mathutils import Bounds
+
 class Parameter:
     """Class to store parameter metadata and value."""
     def __init__(self, name, param_type, value, **kwargs):
@@ -56,6 +58,14 @@ class LightEffect:
         self.effect_type = effect_type
         self.parameters = {}
         self.height = max([coord[1] for coord in coords]) - min([coord[1] for coord in coords])
+        self.bounds = Bounds(
+            min_x=min(coord[0] for coord in coords),
+            max_x=max(coord[0] for coord in coords),
+            min_y=min(coord[1] for coord in coords),
+            max_y=max(coord[1] for coord in coords),
+            min_z=min(coord[2] for coord in coords),
+            max_z=max(coord[2] for coord in coords)
+        )
         #print(f"Height: {self.height}")
 
     def add_parameter(self, name, param_type, default_value, **kwargs):

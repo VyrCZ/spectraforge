@@ -5,28 +5,74 @@ import time
 
 class Engine(ABC):
     """
-    The engine system is designed to manage individual system that manage the LED effects.
-    Each engine must implement the `on_enable` and `on_disable` methods to handle changing the engines. If you use the setup system, you should also implement the `on_setup_changed` method to handle changes in the setup.
-    The engine can communicate with the app using its own methods, but they all must have a decorator @EngineManager.requres_active, which will ensure that the engine is active before executing the method and disabling another engine, if necessary.
+    Base class for all engines that control LED effects.
+
+    Description:
+        Engines implement effect logic and lifecycle hooks. The engine manager
+        enables/disables engines and ensures only one engine is active at a time.
+        If the engine uses the setup system, implement on_setup_changed to react
+        to setup updates. Callbacks that manipulate lights should be guarded by
+        the EngineManager.requires_active decorator so the manager can ensure the
+        engine is active when invoked.
+
+    Methods:
+        on_enable(): Called when the engine is enabled.
+        on_disable(): Called when the engine is disabled.
+        on_setup_changed(setup): Called when the setup changes.
     """
 
     @abstractmethod
     def on_enable(self):
         """
-        Called when the engine is enabled. **(But not on the startup of the engine)**
+        Called when the engine is enabled.
 
-        Use __init__ to set up the engine
+        Description:
+            Perform any startup work that should occur when this engine becomes
+            active. Heavy initialization that must run once should be done in
+            __init__.
+
+        Args:
+            None
+
+        Returns:
+            None
         """
         pass
 
     @abstractmethod
     def on_disable(self):
-        """Called when the engine is being disabled. *(It is called on the shutdown of the app, but the app is usually not ended gracefully, so do not rely on this method to save the state of the engine)*"""
+        """
+        Called when the engine is being disabled.
+
+        Description:
+            Clean up any resources allocated by the engine and stop ongoing
+            tasks. This will be called when another engine is enabled or when
+            the application requests a shutdown. Do not rely on this method for
+            guaranteed persistent storage as the app may not always shut down
+            gracefully.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
         pass
 
     def on_setup_changed(self, setup: Setup):
         """
-        Called when the setup is changed, regardless if enabled or not **(But not on the init of the engine)**
+        Called when the setup configuration changes.
+
+        Description:
+            Receive the updated Setup instance and adjust internal state to
+            match the new configuration. This is called for all engines whether
+            or not they are currently enabled (not called during engine __init__).
+
+        Args:
+            setup (Setup): The new setup configuration.
+
+        Returns:
+            None
         """
         pass
 
@@ -34,14 +80,37 @@ class Engine(ABC):
 
 class AudioEngine(Engine):
     """
-    AudioEngine is an extension of the regular Engine class, with the callbacks for audio events.
-    It is used to create effects using audio. Playback and loading of the audio is handled by the server, this class is only responsible for the effects and showing the lights.
+    Engine extension for audio-driven effects.
 
-    When the user wants to use the audio engine, it will be automatically enabled with the selected audio file.
-    
-    **When on_audio_load is called, it is strongly recommended to calculate the light states for the whole audio file, due to performance. When your calculation logic is completed, you must call ready_for_playback to let the server know that the engine is finished and ready.**
+    Description:
+        Provides lifecycle and playback hooks for engines that drive lights
+        based on audio playback. The server handles loading and playback; this
+        class provides callbacks for load/play/pause/stop/seek and a regular
+        on_frame callback during playback. When on_audio_load is called, it is
+        recommended to precompute frames for the entire audio track and then
+        call the provided ready_callback to signal readiness for playback.
+
+    Attributes:
+        renderer: Renderer object used to set and show pixel colors.
+        ready_callback (callable): Callback to call when the engine is ready for playback (e.g., after preprocessing).
+        FPS (int): Target frames per second for on_frame callbacks.
+        current_time (float): Current playback position in seconds.
+        audio_length (float): Length of the currently loaded audio in seconds.
+        playback_start_time (float): Monotonic time when playback started.
+        seek_time_at_start (float): Playback position at the moment playback started.
     """
     def __init__(self, renderer, ready_callback):
+        """
+        Initialize the AudioEngine.
+
+        Args:
+            renderer: Renderer instance with fill/show methods to update lights.
+            ready_callback (callable): Function to call when the engine finished
+                preparing for playback (e.g., after precomputing frames).
+
+        Returns:
+            None
+        """
         self.renderer = renderer
         self.ready_callback = ready_callback
         self.FPS = 60
@@ -56,28 +125,72 @@ class AudioEngine(Engine):
     @abstractmethod
     def on_enable(self):
         """
-        Called when the engine is enabled. **(But not on the startup of the engine)**
+        Called when the audio engine is enabled.
 
-        Use __init__ to set up the engine
+        Description:
+            Start or resume any engine-specific resources required for audio
+            effects. Lightweight enable logic belongs here; heavy work should be
+            done in __init__ or on_audio_load.
+
+        Args:
+            None
+
+        Returns:
+            None
         """
         pass
 
     def on_disable(self):
         """
-        Called when the engine is being disabled. *(It is called on the shutdown of the app, but the app is usually not ended gracefully, so do not rely on this method to save the state of the engine)*
+        Called when the audio engine is being disabled.
+
+        Description:
+            Stop playback and clear lights. This will call on_audio_stop to
+            ensure playback loop and rendering are terminated and the renderer
+            is cleared.
+
+        Args:
+            None
+
+        Returns:
+            None
         """
         self.on_audio_stop()
 
     @abstractmethod
     def on_audio_load(self, audio_path: str):
         """
-        Called when the audio is loaded. This is called when the audio is loaded from the file or from the stream.
+        Called when an audio file is loaded for playback.
+
+        Description:
+            Prepare the engine for the provided audio file. It is strongly
+            recommended to precompute any state or frames for the entire audio
+            file here for performance reasons. When preprocessing is complete,
+            call the ready_callback to notify the server that playback can
+            start.
+
+        Args:
+            audio_path (str): Filesystem path or identifier for the audio file.
+
+        Returns:
+            None
         """
         pass
 
     def on_audio_play(self):
         """
-        Called when the audio is played in the player.
+        Called when audio playback starts.
+
+        Description:
+            Starts the internal runner thread that calls on_frame at the target
+            FPS. If a previous runner thread is running, it will be joined
+            before starting a new one.
+
+        Args:
+            None
+
+        Returns:
+            None
         """
         self._stop_flag = False
         if self._runner_thread and self._runner_thread.is_alive():
@@ -91,7 +204,17 @@ class AudioEngine(Engine):
 
     def on_audio_pause(self):
         """
-        Called when the audio is paused in the player.
+        Called when audio playback is paused.
+
+        Description:
+            Signals the runner thread to stop and waits for it to finish so the
+            current_time remains at the paused position.
+
+        Args:
+            None
+
+        Returns:
+            None
         """
         self._stop_flag = True
         if self._runner_thread and self._runner_thread.is_alive():
@@ -99,7 +222,17 @@ class AudioEngine(Engine):
 
     def on_audio_stop(self):
         """
-        Called when the audio is stopped in the player.
+        Called when audio playback stops.
+
+        Description:
+            Stops the playback runner, clears the renderer (sets pixels to
+            black), and resets current_time to the start of the track.
+
+        Args:
+            None
+
+        Returns:
+            None
         """
         self._stop_flag = True
         if self._runner_thread and self._runner_thread.is_alive():
@@ -111,9 +244,18 @@ class AudioEngine(Engine):
 
     def on_audio_seek(self, position: float):
         """
-        Called when the user seeks to a different part of the audio in the player.
+        Called when playback is seeked to a different position.
 
-        Position is in seconds.
+        Description:
+            Update internal playback position. If playback is active the
+            playback_start_time and seek_time_at_start are adjusted so the
+            runner continues from the new position.
+
+        Args:
+            position (float): Target playback position in seconds.
+
+        Returns:
+            None
         """
         self.current_time = position
         if self._runner_thread and self._runner_thread.is_alive():
@@ -123,14 +265,37 @@ class AudioEngine(Engine):
     @abstractmethod
     def on_frame(self, current_time: float):
         """
-        Called on each frame during audio playback.
+        Frame callback invoked repeatedly during audio playback.
+
+        Description:
+            Implement this method to update the renderer for the given playback
+            time. This is called at approximately FPS times per second while
+            playback is active.
 
         Args:
-            current_time (float): The current playback time in seconds.
+            current_time (float): Playback time in seconds for this frame.
+
+        Returns:
+            None
         """
         pass
 
     def _runner(self):
+        """
+        Internal runner loop that advances playback time and invokes on_frame.
+
+        Description:
+            Runs in a background daemon thread while playback is active. The
+            loop updates current_time from monotonic timing and calls on_frame
+            until either the stop flag is set or the audio_length is reached.
+            If playback reaches the end naturally, on_audio_stop is called.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
         while not self._stop_flag:
             elapsed = self._time.monotonic() - self.playback_start_time
             self.current_time = self.seek_time_at_start + elapsed
