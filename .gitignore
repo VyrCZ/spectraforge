@@ -10,6 +10,7 @@ config/**/*.json
 **.jpg
 **.jpeg
 **.png
+!docs/**
 static/js/packages/*.js
 logs/**
 audio/**
