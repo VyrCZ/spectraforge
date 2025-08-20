@@ -1,9 +1,8 @@
-<img src="docs/banner.png" alt="Spectraforge" width="1280"/>
+![Banner](docs/banner.png)
 One app for all your light show needs! It offers space-aware effect and music driven light show capabilities. It dynamically loads effects, so you can create your own and it's built with a modular design using separate *engines*, making it easier to extend.
 
 ## Video Showcase 🎬
-<!--[![Video showcase](https://img.youtube.com/vi/lzU8-Y6aO1Q/0.jpg)](https://www.youtube.com/watch?v=lzU8-Y6aO1Q)-->
-<iframe width="840" height="472" src="https://www.youtube.com/embed/lzU8-Y6aO1Q?si=J5iXhbNWrPnAM5Xi" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+[![Video Showcase](https://img.youtube.com/vi/lzU8-Y6aO1Q/0.jpg)](https://www.youtube.com/watch?v=lzU8-Y6aO1Q)
 
 ## Features ✨
 - **Space-Aware Effects**: Create effects that light up according to the physical positions of the lights.
