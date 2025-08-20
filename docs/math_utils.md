@@ -1,6 +1,6 @@
 # MathUtils Documentation
 
-This module provides a collection of utility functions for mathematical computations commonly used in the xmas-lights project, including interpolation, normalization, color blending, geometry, and vector operations.
+This module provides a collection of math and color functions useful in effects, including interpolation, normalization, color blending, geometry, and vector operations.
 
 Each function below lists its signature, parameters, return value, examples, and any raised exceptions.
 

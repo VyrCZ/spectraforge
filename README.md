@@ -2,7 +2,7 @@
 One app for all your light show needs! It offers space-aware effect and music driven light show capabilities. It dynamically loads effects, so you can create your own and it's built with a modular design using separate *engines*, making it easier to extend.
 
 ## Video Showcase 🎬
-[![Video Showcase](https://img.youtube.com/vi/lzU8-Y6aO1Q/0.jpg)](https://www.youtube.com/watch?v=lzU8-Y6aO1Q)
+[![Video Showcase](https://img.youtube.com/vi/1c16amIw8Dk/0.jpg)](https://youtu.be/1c16amIw8Dk)
 
 ## Features ✨
 - **Space-Aware Effects**: Create effects that light up according to the physical positions of the lights.
