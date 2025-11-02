@@ -3,7 +3,6 @@ from modules.engine_manager import EngineManager
 from modules.log_manager import Log
 
 class CanvasEngine(Engine):
-
     def __init__(self, renderer):
         # the color changes are stored in the state, not directly put into the renderer, so the state can be restored
         self.renderer = renderer
