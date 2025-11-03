@@ -111,6 +111,8 @@ class EngineManager:
                 setup_data = json.load(f)
             setup = Setup.from_json(setup_name, setup_data)
             self.change_setup(setup)
+            Config().config["current_setup"] = setup_name
+            Config().save()
         except FileNotFoundError:
             raise FileNotFoundError(f"Setup {setup_name} not found in {self.SETUPS_FOLDER}.")
         

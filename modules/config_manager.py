@@ -1,5 +1,6 @@
 import json
 from modules.log_manager import Log
+import os
 
 class Config:
     _instance = None
@@ -16,9 +17,14 @@ class Config:
         self.load()
 
     def load(self):
+        if not os.path.exists(Config.CONFIG_PATH):
+            base_data = '{"current_setup": ""}'
+            with open(self.CONFIG_PATH, "+w") as file:
+                file.write(base_data)
         with open(self.CONFIG_PATH, 'r') as file:
             self.config = json.load(file)
             Log.info("Config", "Configuration loaded successfully.")
+        
 
     def save(self):
         with open(self.CONFIG_PATH, 'w') as file:
