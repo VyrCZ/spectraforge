@@ -6,7 +6,7 @@ import colorsys
 
 class Grow(LightEffect):
     def __init__(self, renderer, coords):
-        super().__init__(renderer, coords, "Grow", EffectType.PRIMARILY_3D)
+        super().__init__(renderer, coords, "Grow", EffectType.UNIVERSAL)
         self.active_color = None
         self.growing = False
         self.speed = self.add_parameter("Speed", ParamType.SLIDER, 10, min=1, max=100, step=1)

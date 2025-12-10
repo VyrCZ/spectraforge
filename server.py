@@ -38,6 +38,10 @@ def page_effects():
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static', "icons"), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
+@app.route("/locales/<file_name>")
+def locale_files(file_name):
+    return send_from_directory(os.path.join(app.root_path, 'static', "locales"), file_name)
+
 @app.route("/api/get_state", methods=["GET"])
 def get_state():
     """Return the current state of the LED strip."""

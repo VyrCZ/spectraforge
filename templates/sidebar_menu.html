@@ -1,11 +1,12 @@
+<script src="{{ url_for('static', filename='js/translate.js') }}"></script>
 <div id="menu_header">
-    <h1>Spectraforge</h1>
+    <h1 lan-key="spectraforge">Spectraforge</h1>
 </div>
 <div id="menu_items">
     <a href="/">
         <div class="menu_item">
             <img src="{{ url_for('static', filename='icons/home.svg') }}" class="menu_icon">
-            <p>Home</p>
+            <p lan-key="page_home">Home</p>
         </div>
     </a>
     <a href="/effects">
