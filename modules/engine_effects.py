@@ -67,6 +67,9 @@ class EffectsEngine(Engine):
         Log.debug("EffectsEngine", f"Setup changed to {setup.name}")
         self.setup = setup
         self.coords = setup.coords
+        # reload the runner
+        if(self.running):
+            self.set_effect(Config().config["current_effect"])
 
     def get_effect_name(self, effect):
         for name, eff_class in self.effects.items():

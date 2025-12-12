@@ -115,8 +115,6 @@ class VisualiserEngine(AudioEngine):
             
             band_intensities = np.zeros((num_frames, self.bar_count))
 
-            # --- START: REVISED AND CORRECTED LOGIC ---
-
             # For each frequency from the FFT, find which bar it belongs to.
             # np.digitize is perfect for this "histogram" style binning.
             band_indices = np.digitize(freqs, log_freq_bands) - 1
@@ -130,8 +128,6 @@ class VisualiserEngine(AudioEngine):
                     # Sum the magnitudes for each frame to get total energy in the band.
                     # Using np.sum() instead of np.mean() gives a more balanced visualization.
                     band_intensities[:, i] = np.sum(all_fft_magnitudes[:, freq_indices_for_bar], axis=1)
-
-            # --- END: REVISED AND CORRECTED LOGIC ---
 
             # Convert to dB scale
             with np.errstate(divide='ignore'):

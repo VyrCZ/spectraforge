@@ -9,6 +9,8 @@ from modules.setup import Setup
 import threading
 import json
 import traceback
+from modules.config_manager import Config
+import sys
 
 # set working directory to the directory of this file
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -22,9 +24,11 @@ class LedSimulator:
     To start, run this script and the server. The simulator will hook and display data sent to the hardware.
     """
     def __init__(self):
-        current_setup = "the_wall.json"
-        setup_path = os.path.join("config/setups", current_setup)
-        self.current_setup = Setup.from_json("the_wall", json.load(open(setup_path)))
+        Config().load() # this config doesn't change when the instance running in server.py does, reload here
+        self.current_setup_name = Config().config["current_setup"]
+        self.setup_path = "config/setups/" + self.current_setup_name + ".json"
+        self.current_setup = Setup.from_json(self.current_setup_name, json.load(open(self.setup_path)))
+        self.last_conf_change = os.path.getmtime(Config.CONFIG_PATH)
         self.coords = self.current_setup.coords
         self.num_points = len(self.coords)
 
@@ -41,7 +45,7 @@ class LedSimulator:
         self.cloud = pv.PolyData(self.coords, force_float=False)
         self.cloud["colors"] = np.array(self.colors, dtype=np.uint8)
         self.plotter = pv.Plotter()
-        self.plotter.background_color = "#050505"
+        self.plotter.background_color = "#242424"
         #self.plotter.background_color = "#FFFFFF"
         self.plotter.view_xy()
         #self.plotter.add_axes(interactive=False)
@@ -50,11 +54,28 @@ class LedSimulator:
         self.plotter.reset_camera()
         self.plotter.show(interactive_update=True)
 
+    def check_setup(self):
+        """
+        A function that checks if the setup has changed.
+        """
+        mod_time = os.path.getmtime(Config.CONFIG_PATH)
+        if(mod_time != self.last_conf_change):
+            # setup changed, reload config
+            Config().load()
+            setup_name = Config().config["current_setup"]
+            print(f"{setup_name} | {self.current_setup_name}")
+            sys.stdout.flush()
+            if(setup_name != self.current_setup_name):
+                self.plotter.close()
+                self.__init__()
+
+    #def close_plot(self):
         
 
     def start(self):
         while True:
             try:
+                self.check_setup()
                 self.update_colors()
                 time.sleep(1/60) # 60 fps
             except Exception as e:
