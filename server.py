@@ -9,6 +9,7 @@ from modules.engine_canvas import CanvasEngine
 from modules.engine_sandbox import SandboxEngine
 from modules.engine_visualiser import VisualiserEngine
 from modules.engine_lightshow import LightshowEngine
+from modules.engine_video import VideoEngine
 from modules.setup import SetupType
 from flask_socketio import SocketIO, emit
 from modules.config_manager import Config
@@ -426,6 +427,7 @@ if __name__ == "__main__":
     sandbox_engine = SandboxEngine(renderer, manager.active_setup)
     visualiser_engine = VisualiserEngine(renderer, manager.active_setup, audio_engine_ready)
     lightshow_engine = LightshowEngine(renderer, manager.active_setup, audio_engine_ready)
+    video_engine = VideoEngine(renderer, manager.active_setup)
 
 
     # IMPORTANT! Always register the effects engine first, as it is the main engine.
@@ -435,6 +437,11 @@ if __name__ == "__main__":
     manager.register_engine(sandbox_engine)
     manager.register_audio_engine(visualiser_engine)
     manager.register_audio_engine(lightshow_engine)
+    manager.register_engine(video_engine)
+
+    #video_engine.display_img("test.jpeg")
+    video_engine.display_img("rick.png")
+
     Log.info("Server", "Starting Spectraforge server...")
     try:
         if os.name == "nt":
