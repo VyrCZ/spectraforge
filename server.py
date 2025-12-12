@@ -444,7 +444,9 @@ if __name__ == "__main__":
     manager.register_engine(video_engine)
 
     #video_engine.display_img("test.jpeg")
-    video_engine.display_img("rick.png")
+    #video_engine.display_img("rick.png")
+    #video_engine.display_video("rickroll.mp4")
+    video_engine.display_video("bad-apple.mp4")
 
     Log.info("Server", "Starting Spectraforge server...")
     try:
