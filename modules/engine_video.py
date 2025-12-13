@@ -113,7 +113,7 @@ class VideoEngine(AudioEngine):
             Log.error("VideoEngine", "Video capture not initialized.")
             return
         
-        Log.info("VideoEngine", f"Rendering frame at time: {current_time:.2f}s")
+        #Log.info("VideoEngine", f"Rendering frame at time: {current_time:.2f}s")
 
         # Calculate target frame based on audio time
         target_frame_index = int(current_time * self.video_fps)

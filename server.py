@@ -394,11 +394,32 @@ def get_image_files():
         Log.error_exc("Server", e)
         return jsonify({"status": "error", "message": str(e)}), 500
     
-@app.route("/image/<path:filename>")
-def send_image(filename):
-    """Send an image file from the image directory."""
+@app.route("/api/display_image", methods=["POST"])
+def display_image():
+    """Display an image on the LED setup."""
+    request_data = request.json
+    image_file = request_data.get("image_file")
+    if not image_file:
+        return jsonify({"status": "error", "message": "Image file is required."}), 400
+    try:
+        image_engine.display_image(os.path.join("media", "images", image_file))
+        return jsonify({"status": "success", "message": f"Image '{image_file}' displayed."})
+    except Exception as e:
+        Log.error_exc("ImageEngine", e)
+        return jsonify({"status": "error", "message": str(e)}), 500
+    
+@app.route("/images")
+def page_images():
+    """Render the images page."""
+    # list all image files
     image_folder = os.path.join(app.root_path, 'media', 'images')
-    return send_from_directory(image_folder, filename)
+    if not os.path.exists(image_folder):
+        os.makedirs(image_folder)
+    image_files = []
+    for f in os.listdir(image_folder):
+        if f.lower().endswith(('.png', '.jpg', '.jpeg')):
+            image_files.append(f)
+    return render_template("images.html", image_files=image_files)
     
 @app.route("/api/get_video_files", methods=["GET"])
 def get_video_files():

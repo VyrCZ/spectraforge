@@ -200,7 +200,7 @@ class EffectsEngine(Engine):
             return {"status": "success"}
         return {"status": "error", "message": "Invalid parameter"}
 
-    @EngineManager.requires_active
+    #@EngineManager.requires_active
     def get_effect_data(self):
         """Get data for loaded effects for the frontend.
         Returns a zip of effect names and their types."""

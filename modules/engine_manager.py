@@ -62,10 +62,13 @@ class EngineManager:
     def set_active_engine(self, engine):
         """Set the active engine."""
         if self.active_engine == engine:
+            #Log.debug("EngineManager", f"Engine {engine} is already active.")
             return
         if self.active_engine:
+            Log.info("EngineManager", f"Switching active engine from {self.active_engine} to {engine}.")
             self.active_engine.on_disable()
-        self.active_engine = engine
+            self.active_engine = engine
+            self.active_engine.on_enable()
 
     @staticmethod
     def requires_active(func):
