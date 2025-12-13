@@ -15,6 +15,11 @@ document.addEventListener("DOMContentLoaded", () => {
         effectContainer.style.display = 'none';
         socket.emit('lightshow_client_connected', { lightshow_file: lightshowFileName });
     }
+    else if(sessionStorage.getItem('videoFile')) {
+        const effectContainer = document.getElementById('effect_module_container');
+        effectContainer.style.display = 'none';
+        socket.emit('video_client_connected', { video_file: sessionStorage.getItem('videoFile') });
+    }
 });
 
 // audio player is shared for both audio and lightshow
@@ -24,7 +29,11 @@ socket.on('audio_ready', (data) => {
     if (!storedAudioFile) {
         storedAudioFile = data.audio_file;
     }
-    fetch(`/audio/${storedAudioFile}`)
+    let audioPath = `/audio/${storedAudioFile}`;
+    if(sessionStorage.getItem('videoFile')) {
+        audioPath = "/video_audio/" + sessionStorage.getItem('videoFile') + ".mp3";
+    }
+    fetch(audioPath)
         .then(response => response.blob())
         .then(blob => {
             const audioUrl = URL.createObjectURL(blob);

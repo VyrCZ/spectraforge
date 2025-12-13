@@ -9,6 +9,7 @@ from modules.engine_canvas import CanvasEngine
 from modules.engine_sandbox import SandboxEngine
 from modules.engine_visualiser import VisualiserEngine
 from modules.engine_lightshow import LightshowEngine
+from modules.engine_image import ImageEngine
 from modules.engine_video import VideoEngine
 from modules.setup import SetupType
 from flask_socketio import SocketIO, emit
@@ -382,6 +383,70 @@ def lightshow_client_connected(data):
         return
     lightshow_engine.on_audio_load(lightshow_file)
 
+@app.route("/api/get_image_files", methods=["GET"])
+def get_image_files():
+    """Get a list of available image files."""
+    image_folder = os.path.join(app.root_path, 'media', 'images')
+    try:
+        image_files = [f for f in os.listdir(image_folder) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+        return jsonify({"status": "success", "files": image_files})
+    except Exception as e:
+        Log.error_exc("Server", e)
+        return jsonify({"status": "error", "message": str(e)}), 500
+    
+@app.route("/image/<path:filename>")
+def send_image(filename):
+    """Send an image file from the image directory."""
+    image_folder = os.path.join(app.root_path, 'media', 'images')
+    return send_from_directory(image_folder, filename)
+    
+@app.route("/api/get_video_files", methods=["GET"])
+def get_video_files():
+    """Get a list of available video files."""
+    video_folder = os.path.join(app.root_path, 'media', 'videos')
+    try:
+        video_files = [f for f in os.listdir(video_folder) if f.lower().endswith(('.mp4', '.avi', '.mov', '.mkv'))]
+        return jsonify({"status": "success", "files": video_files})
+    except Exception as e:
+        Log.error_exc("Server", e)
+        return jsonify({"status": "error", "message": str(e)}), 500
+    
+@app.route("/videos")
+def page_videos():
+    """Render the videos page."""
+    # list all video files
+    video_folder = os.path.join(app.root_path, 'media', 'videos')
+    if not os.path.exists(video_folder):
+        os.makedirs(video_folder)
+    video_files = []
+    for f in os.listdir(video_folder):
+        if f.lower().endswith(('.mp4', '.avi', '.mov', '.mkv')):
+            video_files.append(f)
+    return render_template("videos.html", video_files=video_files)
+    
+@app.route("/video/<path:filename>")
+def send_video(filename):
+    """Send a video file from the video directory."""
+    video_folder = os.path.join(app.root_path, 'media', 'videos')
+    return send_from_directory(video_folder, filename)
+
+@app.route("/video_audio/<path:filename>")
+def send_video_audio(filename):
+    """Send an audio channel for a video file from the video directory."""
+    video_audio_folder = os.path.join(app.root_path, 'media', 'videos', 'audio')
+    Log.info("Server", f"Sending video audio file: {video_audio_folder}, {filename}")
+    return send_from_directory(video_audio_folder, filename)
+
+@socketio.on("video_client_connected")
+def video_client_connected(data):
+    """Handle client connection for video playback."""
+    video_file = data.get("video_file")
+    if not video_file:
+        Log.warn("VideoEngine", "No video file provided by client.")
+        emit("video_error", {"status": "error", "message": "Video file is required."})
+        return
+    video_engine.on_audio_load(video_file)
+
 def audio_engine_ready(audio_file = None):
     """Callback for when the audio engine is ready for playback."""
     socketio.emit("audio_ready", {"audio_file": audio_file})
@@ -421,6 +486,7 @@ def upload_file():
     result = upload.handle_file_upload(files)
     return jsonify({"success": result})
 
+
 if __name__ == "__main__":
     placeholder_check()
     manager = EngineManager()
@@ -429,9 +495,10 @@ if __name__ == "__main__":
     calibration_engine = CalibrationEngine(renderer, take_photo_callback, send_image_callback, setup_done_callback)
     canvas_engine = CanvasEngine(renderer)
     sandbox_engine = SandboxEngine(renderer, manager.active_setup)
+    image_engine = ImageEngine(renderer, manager.active_setup)
     visualiser_engine = VisualiserEngine(renderer, manager.active_setup, audio_engine_ready)
     lightshow_engine = LightshowEngine(renderer, manager.active_setup, audio_engine_ready)
-    video_engine = VideoEngine(renderer, manager.active_setup)
+    video_engine = VideoEngine(renderer, manager.active_setup, audio_engine_ready)
 
 
     # IMPORTANT! Always register the effects engine first, as it is the main engine.
@@ -439,14 +506,15 @@ if __name__ == "__main__":
     manager.register_engine(calibration_engine)
     manager.register_engine(canvas_engine)
     manager.register_engine(sandbox_engine)
+    manager.register_engine(image_engine)
     manager.register_audio_engine(visualiser_engine)
     manager.register_audio_engine(lightshow_engine)
-    manager.register_engine(video_engine)
+    manager.register_audio_engine(video_engine)
 
-    #video_engine.display_img("test.jpeg")
-    #video_engine.display_img("rick.png")
-    #video_engine.display_video("rickroll.mp4")
-    video_engine.display_video("bad-apple.mp4")
+    #video_engine.on_audio_load("media/videos/audio/rickroll.mp4.mp3")
+
+    #image_engine.display_image("media/images/test.jpeg")
+    #video_engine.display_video("bad-apple.mp4")
 
     Log.info("Server", "Starting Spectraforge server...")
     try:

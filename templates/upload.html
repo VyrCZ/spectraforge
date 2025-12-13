@@ -17,11 +17,11 @@
         {% include 'sidebar_menu.html' %}
     </div>
     <div class="upload_container">
-        <input type="file" id="file_input" multiple accept=".py,.wav,.ogg,.mp3,.json" style="display: none;" 
+        <input type="file" id="file_input" multiple accept=".py,.wav,.ogg,.mp3,.json,.png,.jpg,.jpeg,.mp4" style="display: none;" 
                onchange="handleFileInputChange(event)">
         <img src="static/icons/upload.svg" id="upload_icon">
         <h2>Drag and drop or click to upload files!</h2>
-        <p class="description">Supported files: Effects (.py), Audio files (.wav, .ogg, .mp3), Lightshows (.json), Lightshow Effects (.py)</p>
+        <p class="description">Supported files: Effects (.py), Audio files (.wav, .ogg, .mp3), Lightshows (.json), Lightshow Effects (.py), Images (.png, .jpg, .jpeg), Videos (.mp4)</p>
     </div>
     <!--<div class="upload_toast">
         <img class="upload_toast_icon" src="static/icons/check_circle.svg">

@@ -1,5 +1,6 @@
 import os
 import ast
+import subprocess
 from werkzeug.utils import secure_filename
 from modules.log_manager import Log
 
@@ -11,6 +12,8 @@ class FileType:
     AUDIO = "audio"
     LIGHTSHOW = "lightshow"
     LIGHTSHOW_EFFECTS = "lightshow_effects"
+    IMAGE = "image"
+    VIDEO = "video"
 
 def recognize_script_type(file_stream) -> FileType | None:
     """Recognizes script type from a file stream."""
@@ -34,13 +37,15 @@ def recognize_script_type(file_stream) -> FileType | None:
 
 def recognize_file_type(file) -> FileType | None:
     """Recognizes file type based on filename and content."""
-    filename = secure_filename(file.filename)
+    filename = secure_filename(file.filename).lower()
     if filename.endswith((".wav", ".ogg", ".mp3")):
         return FileType.AUDIO
     elif filename.endswith(".json"):
         return FileType.LIGHTSHOW
     elif filename.endswith(".py"):
         return recognize_script_type(file.stream)
+    elif filename.endswith((".mp4", ".mkv", ".mov", ".webm", ".avi", ".flv")):
+        return FileType.VIDEO
     return None
 
 
@@ -49,9 +54,45 @@ DESTINATION_DIR = {
     FileType.EFFECT: "effects",
     FileType.AUDIO: "audio",
     FileType.LIGHTSHOW: "lightshows",
-    FileType.LIGHTSHOW_EFFECTS: "lightshow_effects"
+    FileType.LIGHTSHOW_EFFECTS: "lightshow_effects",
+    FileType.IMAGE: "media/images",
+    FileType.VIDEO: "media/videos"
 }
 
+def extract_audio_from_video(video_path: str, output_audio_path: str) -> bool:
+    """
+    Extracts audio from a video file using ffmpeg and writes it to output_audio_path.
+    The output filename will be whatever you pass (we'll create directories as needed).
+    Returns True on success, False otherwise.
+    """
+    os.makedirs(os.path.dirname(output_audio_path), exist_ok=True)
+    cmd = [
+        "ffmpeg",
+        "-y",
+        "-i",
+        video_path,
+        "-vn",
+        "-ar",
+        "44100",
+        "-ac",
+        "2",
+        "-b:a",
+        "192k",
+        output_audio_path,
+    ]
+    try:
+        completed = subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        Log.info("FileUpload", f"Extracted audio to {output_audio_path}")
+        return True
+    except subprocess.CalledProcessError as e:
+        # ffmpeg returned a non-zero exit status
+        stderr = e.stderr.decode("utf-8", errors="ignore") if e.stderr else ""
+        Log.warning("FileUpload", f"ffmpeg failed extracting audio from {video_path}: {stderr}")
+        return False
+    except FileNotFoundError:
+        # ffmpeg is not installed / not on PATH
+        Log.warning("FileUpload", "ffmpeg not found on PATH — cannot extract audio. Install ffmpeg.")
+        return False
 
 def handle_file_upload(files) -> bool:
     """Handles file uploads, recognizes their types, and saves them."""
@@ -67,7 +108,20 @@ def handle_file_upload(files) -> bool:
         if dest_dir:
             # Ensure the destination directory exists
             os.makedirs(dest_dir, exist_ok=True)
-            file.save(os.path.join(dest_dir, filename))
+            saved_path = os.path.join(dest_dir, filename)
+            file.save(saved_path)
+            Log.info("FileUpload", f"Saved uploaded file to {saved_path}")
+
+            # If it's a video, attempt to extract audio into media/videos/audio/<filename>.mp4.mp3
+            if file_type == FileType.VIDEO:
+                audio_dir = os.path.join(dest_dir, "audio")
+                os.makedirs(audio_dir, exist_ok=True)
+                # Create the requested filename with the original full name plus .mp3 appended
+                audio_filename = filename + ".mp3"
+                audio_path = os.path.join(audio_dir, audio_filename)
+                if not extract_audio_from_video(saved_path, audio_path):
+                    Log.warning("FileUpload", f"Failed to extract audio for {filename}")
+                    all_successful = False
         else:
             Log.warning("FileUpload", f"Could not determine file type for {filename}. Skipping.")
             all_successful = False

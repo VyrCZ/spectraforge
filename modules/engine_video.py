@@ -1,195 +1,174 @@
-from modules.engine import Engine
+from modules.engine import AudioEngine
 from modules.engine_manager import EngineManager
 from modules.log_manager import Log
 import modules.mathutils as mu
+import modules.display_utils as du
 
-from typing import Tuple, List, Optional
+from typing import Optional
 from PIL import Image
 import cv2
-import threading
-import time
+import os
 
-class VideoEngine(Engine):
+class VideoEngine(AudioEngine):
     """
-    A self-driving video engine.
-    It spawns its own background thread to process video frames, 
-    so it works even if the main thread is blocked by a Server.
+    VideoEngine inherits from AudioEngine.
+    It plays video frames synchronized to the audio clock provided by the base class.
     """
 
-    def __init__(self, renderer, setup):
-        Log.info("EngineVideo", "EngineVideo initialized.")
-        self.renderer = renderer
+    VIDEO_DIR = "media/videos/"
+    VIDEO_AUDIO_DIR = "media/videos/audio/"
+
+    def __init__(self, renderer, setup, ready_callback):
+        Log.info("EngineVideo", "Initializing EngineVideo.")
+        super().__init__(renderer, ready_callback)
         
-        # Threading & Playback State
-        self._playback_thread: Optional[threading.Thread] = None
-        self._stop_event = threading.Event()
-        self.video_cap = None
+        Log.info("VideoEngine", "VideoEngine initialized.")
+        self.video_cap: Optional[cv2.VideoCapture] = None
         
-        # Config (Updated default)
-        self.current_mode = "fill"  # Renamed from "cover"
+        # Display settings
+        self.current_mode = "fill"
         self.current_radius = 1
-        self.target_fps = 30.0
+        self.video_fps = 30.0
+        self.total_frames = 0
         
         self.on_setup_changed(setup)
 
+    def on_enable(self):
+        Log.info("VideoEngine", "Enabled.")
+
     def on_setup_changed(self, setup):
-        Log.debug("EngineVideo", f"Setup changed to {setup.name}")
         self.setup = setup
         self.coords = setup.coords
         self.bounds = mu.Bounds(setup.coords)
 
-    def on_enable(self):
-        Log.info("EngineVideo", "EngineVideo enabled.")
+    # --- AudioEngine Lifecycle Overrides ---
 
-    def on_disable(self):
-        Log.info("EngineVideo", "EngineVideo disabled. Stopping playback.")
-        self._stop_playback()
-
-    # --- INTERNAL HELPERS ---
-
-    def _stop_playback(self):
+    @EngineManager.requires_active
+    def on_audio_load(self, video_filename: str) -> None:
         """
-        Stops the background thread and releases video resources.
-        This is a blocking call to ensure clean shutdown.
+        1. Infers video path from audio path.
+        2. Loads OpenCV capture.
+        3. Signals ready.
         """
-        # 1. Signal thread to stop
-        if self._playback_thread and self._playback_thread.is_alive():
-            Log.debug("EngineVideo", "Stopping background video thread...")
-            self._stop_event.set()
-            self._playback_thread.join(timeout=2.0)
-            if self._playback_thread.is_alive():
-                 Log.warn("EngineVideo", "Thread did not stop gracefully!")
+        Log.info("VideoEngine", f"Loading video context: {video_filename}")
+        
+        # 1. Resolve Video Path
+        # Structure: media/videos/video.mp4 AND media/videos/audio/video.mp4.mp3
+        try:
+            video_path = os.path.join(self.VIDEO_DIR, video_filename)  # .../media/videos
+            
+            audio_filename = video_filename + ".mp3" # video.mp4.mp3
+            # Remove the last .mp3 extension to get video filename
+            audio_path = os.path.join(self.VIDEO_AUDIO_DIR, audio_filename)
+        
+        except Exception as e:
+            Log.error("VideoEngine", f"Path parsing error: {e}")
+            return
+
+        if not os.path.exists(video_path):
+            Log.error("VideoEngine", f"Video file not found at calculated path: {video_path}")
+            return
+
+        # 2. Initialize Video Capture
+        if self.video_cap:
+            self.video_cap.release()
+            
+        self.video_cap = cv2.VideoCapture(video_path)
+        
+        if not self.video_cap.isOpened():
+            Log.error("VideoEngine", f"Failed to open video: {video_path}")
+            return
+
+        # Read video properties
+        self.video_fps = float(self.video_cap.get(cv2.CAP_PROP_FPS) or 30.0)
+        if self.video_fps <= 0:
+            self.video_fps = 30.0
+
+        self.total_frames = int(self.video_cap.get(cv2.CAP_PROP_FRAME_COUNT) or 0)
+
+        # drive the AudioEngine runner at video fps
+        self.FPS = max(1, int(round(self.video_fps)))
+
+        # IMPORTANT: this is why on_frame wasn't firing
+        if self.total_frames > 0:
+            self.audio_length = self.total_frames / self.video_fps
+        else:
+            self.audio_length = float("inf")
+            Log.warn("VideoEngine", "Frame count unknown; will run until stopped.")
+
+        self.current_time = 0.0
+
+        Log.info("VideoEngine", f"Video loaded. FPS: {self.video_fps}, Frames: {self.total_frames}")
+
+        # 3. Signal AudioEngine that we are ready to play
+        if self.ready_callback:
+            self.ready_callback(audio_filename)
+
+    @EngineManager.requires_active
+    def on_frame(self, current_time: float) -> None:
+        """
+        Called by AudioEngine loop. Syncs video to current_time.
+        """
+        if not self.video_cap or not self.video_cap.isOpened():
+            Log.error("VideoEngine", "Video capture not initialized.")
+            return
+        
+        Log.info("VideoEngine", f"Rendering frame at time: {current_time:.2f}s")
+
+        # Calculate target frame based on audio time
+        target_frame_index = int(current_time * self.video_fps)
+
+        # Safety clamp
+        if target_frame_index >= self.total_frames:
+            target_frame_index = self.total_frames - 1
+
+        # Optimization: Only seek if we drifted significantly.
+        # Otherwise just read() next frame which is faster.
+        # However, for AudioEngine sync, explicit set is safer for seeking/looping support.
+        # We try to set position strictly to ensure audio/video sync.
+        
+        try:
+            self.video_cap.set(cv2.CAP_PROP_POS_FRAMES, target_frame_index)
+            ret, frame = self.video_cap.read()
+
+            if ret:
+                # Convert BGR (OpenCV) to RGB (PIL)
+                frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                pil_img = Image.fromarray(frame_rgb)
+
+                # Use the shared utility to map to LEDs
+                du.map_image_to_leds(
+                    pil_img, 
+                    self.renderer, 
+                    self.coords, 
+                    self.bounds, 
+                    self.current_mode, 
+                    self.current_radius
+                )
+                self.renderer.show()
             else:
-                 Log.debug("EngineVideo", "Thread stopped.")
-        
-        self._playback_thread = None
-        
-        # 2. Release OpenCV
+                # Handle end of video stream if audio is longer than video
+                pass
+                
+        except Exception as e:
+            Log.error("VideoEngine", f"Frame error: {e}")
+
+    def on_audio_stop(self) -> None:
+        """Called when playback stops completely."""
         if self.video_cap:
             self.video_cap.release()
             self.video_cap = None
+        self.renderer.clear()
+        self.renderer.show()
 
-    def _map_image_internal(self, img, mode, radius):
-        """Internal mapping logic (same as before)."""
-        if not self.coords: return
+    def on_disable(self) -> None:
+        """Engine disabled."""
+        self.on_audio_stop()
+        super().on_disable()
 
-        img_w, img_h = img.size
-        pixels = img.load()
+    # --- Configuration API ---
 
-        x_min, x_max = self.bounds.min_x, self.bounds.max_x
-        y_min, y_max = self.bounds.min_y, self.bounds.max_y
-        
-        led_width = max(1.0, x_max - x_min)
-        led_height = max(1.0, y_max - y_min)
-        
-        led_center_x = (x_min + x_max) / 2.0
-        led_center_y = (y_min + y_max) / 2.0
-        img_center_x, img_center_y = img_w / 2.0, img_h / 2.0
-
-        scale_w = img_w / led_width
-        scale_h = img_h / led_height
-        
-        # Updated Logic Check: Use 'fill' and 'fit'
-        if mode == "fill":
-            scale = min(scale_w, scale_h) # Fill/Cover strategy
-        elif mode == "fit":
-            scale = max(scale_w, scale_h) # Fit/Contain strategy
-        else:
-             raise ValueError("mode must be 'fill' or 'fit'")
-
-        leds = self.renderer.leds
-        count = min(len(leds), len(self.coords))
-
-        for i in range(count):
-            coord = self.coords[i]
-            u = int(img_center_x + ((coord[0] - led_center_x) * scale))
-            v = int(img_center_y + (-(coord[1] - led_center_y) * scale)) # Flip Y
-            u = max(0, min(u, img_w - 1))
-            v = max(0, min(v, img_h - 1))
-
-            if radius <= 0:
-                leds[i] = pixels[u, v]
-            else:
-                r, g, b, c = 0, 0, 0, 0
-                for pu in range(max(0, u - radius), min(img_w, u + radius + 1)):
-                    for pv in range(max(0, v - radius), min(img_h, v + radius + 1)):
-                        pr, pg, pb = pixels[pu, pv]
-                        r += pr; g += pg; b += pb; c += 1
-                if c > 0: leds[i] = (r//c, g//c, b//c)
-
-    def _video_loop(self):
-        """The main loop that runs in the background thread."""
-        Log.info("EngineVideo", "Video thread started.")
-        
-        frame_interval = 1.0 / self.target_fps
-        
-        while not self._stop_event.is_set():
-            start_time = time.time()
-            
-            if self.video_cap and self.video_cap.isOpened():
-                ret, frame = self.video_cap.read()
-                
-                if not ret:
-                    # Loop video
-                    self.video_cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-                    continue
-                
-                # Process Frame
-                try:
-                    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                    pil_img = Image.fromarray(frame_rgb)
-                    self._map_image_internal(pil_img, self.current_mode, self.current_radius)
-                    
-                    # PUSH TO HARDWARE
-                    self.renderer.show()
-                except Exception as e:
-                    Log.error("EngineVideo", f"Error processing frame: {e}")
-            
-            # FPS Control
-            elapsed = time.time() - start_time
-            sleep_time = max(0.0, frame_interval - elapsed)
-            time.sleep(sleep_time)
-
-        Log.info("EngineVideo", "Video thread exiting.")
-
-    # --- PUBLIC API ---
-
-    @EngineManager.requires_active
-    def display_img(self, path: str, mode: str = "fill", sample_radius: int = 1):
-        """Stops any video and displays a static image."""
-        self._stop_playback() # Ensure no video thread fights us
-        
-        try:
-            img = Image.open(path).convert("RGB")
-            self._map_image_internal(img, mode, sample_radius)
-            self.renderer.show()
-            Log.info("EngineVideo", f"Static image displayed: {path} (mode={mode})")
-        except Exception as e:
-            Log.error("EngineVideo", f"Failed to load image: {e}")
-
-    @EngineManager.requires_active
-    def display_video(self, path: str, mode: str = "fill", sample_radius: int = 1):
-        """Stops any current media and starts the video thread."""
-        # 1. Clean up old thread/video
-        self._stop_playback()
-        
-        # 2. Setup new video
-        Log.info("EngineVideo", f"Opening video: {path}")
-        self.video_cap = cv2.VideoCapture(path)
-        if not self.video_cap.isOpened():
-            Log.error("EngineVideo", f"Failed to open video: {path}")
-            return
-
-        # 3. Configure State (uses new default 'fill')
+    def set_display_config(self, mode="fill", radius=1):
+        """Allows configuring display style before or during playback."""
         self.current_mode = mode
-        self.current_radius = sample_radius
-        self.target_fps = self.video_cap.get(cv2.CAP_PROP_FPS) or 30.0
-        
-        # Cap FPS for RPi performance (optional, remove if you want full speed)
-        if self.target_fps > 30: 
-            self.target_fps = 30.0
-
-        # 4. Launch Thread
-        self._stop_event.clear()
-        self._playback_thread = threading.Thread(target=self._video_loop, daemon=True)
-        self._playback_thread.start()
+        self.current_radius = radius
