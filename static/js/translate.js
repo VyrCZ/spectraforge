@@ -1,4 +1,4 @@
-const langs = ["en", "cz", "cn"];
+var langs = ["en", "cn", "no", "😎"];
 
 async function setLanguage(lang) {
     // If the language is English, do nothing, as the page is already in English.
@@ -33,7 +33,7 @@ function changeLanguage(){
 }
 
 // Detect browser language or default to 'en'
-const userLang = getLanguage();
+var userLang = getLanguage();
 
 // You can add a language switcher to let users change the language.
 // For now, we'll just use the detected language.

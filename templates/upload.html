@@ -6,6 +6,7 @@
     <meta name="color-scheme" content="dark">
     <script src="static/js/main.js"></script>
     <script src="static/js/upload.js"></script>
+    <script src="static/js/translate.js"></script>
     <link rel="icon" href="static/icons/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="static/css/style.css">
     <link rel="stylesheet" href="static/css/upload.css">
@@ -20,8 +21,8 @@
         <input type="file" id="file_input" multiple accept=".py,.wav,.ogg,.mp3,.json,.png,.jpg,.jpeg,.mp4" style="display: none;" 
                onchange="handleFileInputChange(event)">
         <img src="static/icons/upload.svg" id="upload_icon">
-        <h2>Drag and drop or click to upload files!</h2>
-        <p class="description">Supported files: Effects (.py), Audio files (.wav, .ogg, .mp3), Lightshows (.json), Lightshow Effects (.py), Images (.png, .jpg, .jpeg), Videos (.mp4)</p>
+        <h2 lan-key="upload_header">Drag and drop or click to upload files!</h2>
+        <p class="description" lan-key="upload_description">Supported files: Effects (.py), Audio files (.wav, .ogg, .mp3), Lightshows (.json), Lightshow Effects (.py), Images (.png, .jpg, .jpeg), Videos (.mp4)</p>
     </div>
     <!--<div class="upload_toast">
         <img class="upload_toast_icon" src="static/icons/check_circle.svg">

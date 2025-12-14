@@ -7,6 +7,7 @@
     <script src="{{ url_for('static', filename='js/packages/socket.io.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script src="{{ url_for('static', filename='js/setup.js') }}"></script>
+    <script src="static/js/translate.js"></script>
     <link rel="icon" href="{{ url_for('static', filename='icons/favicon.ico') }}" type="image/x-icon">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
@@ -16,61 +17,55 @@
         {% include 'sidebar_menu.html' %}
     </div>
     <div id="effect_header">
-        <h1>New Setup</h1>
+        <h1 lan-key="setup_header_new">New Setup</h1>
     </div>
     <div class="setup_step" id="setup_step_1">
         <form id="setup_form">
             <div class="setup_form_item">
-                <label for="setup_name">Setup Name (no spaces):</label>
+                <label for="setup_name" lan-key="setup_label_name">Setup Name (no spaces):</label>
                 <input type="text" id="setup_name" name="setup_name" required>
             </div>
             <div class="setup_form_item">
-                <label for="setup_type">Setup Type:</label>
+                <label for="setup_type" lan-key="setup_label_type">Setup Type:</label>
                 <select id="setup_type" name="setup_type" required>
-                    <option value="2D">2D</option>
-                    <option value="3D">3D</option>
+                    <option value="2D" lan-key="option_2d">2D</option>
+                    <option value="3D" lan-key="option_3d">3D</option>
                 </select>
             </div>
             <div class="setup_form_item">
-                <label for="led_count">Number of LEDs:</label>
+                <label for="led_count" lan-key="setup_label_led_count">Number of LEDs:</label>
                 <input id="led_count" type="number">
             </div>
-            <button type="button" id="next_step_button" class="square" onclick="nextStep()">
-                Next
-            </button>
+            <button type="button" id="next_step_button" class="square" onclick="nextStep()" lan-key="setup_button_next">Next</button>
         </form>
-        <p>Welcome to the setup wizard! Here you can calibrate your lights and create a new setup.
-            <br>Make sure go through this wizard on a computer! 
+        <p lan-key="setup_welcome">Welcome to the setup wizard! Here you can calibrate your lights and create a new setup.
+            <br>Make sure go through this wizard on a computer!
             <br>This process will take about 20-30 minutes and you need a webcam in front of the lights.
             <br>In case you don't have a webcam, you can use a phone app like DroidCam to use your phone as a webcam.
             <br>Click next to start the setup process.
         </p>
     </div>
     <div class="setup_step" id="setup_step_2" style="display: none;">
-        <h2>Setup Instructions</h2>
-        <p>Follow these steps to set up your lights:</p>
+        <h2 lan-key="setup_instruction_header">Setup Instructions</h2>
+        <p lan-key="setup_instruction_intro">Follow these steps to set up your lights:</p>
         <ol>
-            <li>Place the lights in the desired position.</li>
-            <li>Ensure the webcam is securely mounted in a position to capture all lights.</li>
-            <li class="instruction_3d">For a 3D setup, make sure to mark the position of the object you mount the lights on, so you don't move sideways it while rotating.</li>
-            <li>Click "Start Calibration" to begin the calibration process.</li>
+            <li lan-key="setup_instruction_place_lights">Place the lights in the desired position.</li>
+            <li lan-key="setup_instruction_mount_webcam">Ensure the webcam is securely mounted in a position to capture all lights.</li>
+            <li class="instruction_3d" lan-key="setup_instruction_3d">For a 3D setup, make sure to mark the position of the object you mount the lights on, so you don't move sideways it while rotating.</li>
+            <li lan-key="setup_instruction_click_start">Click "Start Calibration" to begin the calibration process.</li>
         </ol>
-        <button type="button" id="start_calibration_button" class="square" onclick="nextStep()">
-            Start Calibration
-        </button>
+        <button type="button" id="start_calibration_button" class="square" onclick="nextStep()" lan-key="setup_button_start_calibration">Start Calibration</button>
     </div>
     <div class="setup_step" id="setup_step_3" style="display: none;">
         <div id="webcam_container">
             <video id="webcam_video" autoplay></video>
             <canvas id="webcam_canvas"></canvas>
-        <button type="button" id="capture_button" class="square" onclick="takePhoto()">
-            Debug Capture
-        </button>
+            <button type="button" id="capture_button" class="square" onclick="takePhoto()" lan-key="setup_webcam_debug_capture">Debug Capture</button>
         </div>
     </div>
     <div class="setup_step" id="setup_step_4" style="display: none;">
         <canvas id="led_pos_canvas"></canvas>
-        <button type="button" id="send_led_position_button" onclick="sendLedPosition()">Confirm</button>
+        <button type="button" id="send_led_position_button" onclick="sendLedPosition()" lan-key="setup_button_confirm">Confirm</button>
     </div>
 </body>
 </html>

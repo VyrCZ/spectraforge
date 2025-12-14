@@ -9,6 +9,7 @@
     <script src="static/js/effects.js"></script>
     <script src="static/js/playaudio.js"></script>
     <script src="static/js/audio.js"></script>
+    <script src="static/js/translate.js"></script>
     <script>
         if(!isAudioEngineSelected()){
             document.addEventListener("DOMContentLoaded", getState);
@@ -24,7 +25,7 @@
     </div>
     <div id="center_container">
         <img src="static/icons/spectraforge-no-bg-white.svg" id="index_logo" alt="Spectraforge Logo">
-        <p style="font-size: 2em">Lights are active!</p>
+        <p style="font-size: 2em" lan-key="home_lights">Lights are active!</p>
         
         <div class="active effect_container" style="cursor: pointer;" onclick="document.location.href='/effects'">
             <p>Active Effect Name</p>
@@ -33,7 +34,7 @@
             </div>
         </div>
         <div id="effect_module_container" class="index_content_container">
-            <h2>Parameters</h2>
+            <h2 lan-key="parameters_header">Parameters</h2>
             <div id="parameters"></div>
         </div>
         <div id="audio_modules_container" style="display: none;">

@@ -6,6 +6,7 @@
     <script src="{{ url_for('static', filename='js/packages/iro.js') }}"></script>
     <script src="static/js/main.js"></script>
     <script src="static/js/effects.js"></script>
+    <script src="static/js/translate.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             getState(false);
@@ -21,7 +22,7 @@
         {% include 'sidebar_menu.html' %}
     </div>
     <div id="effect_header">
-        <h1>Effects</h1>
+        <h1 lan-key="page_effects">Effects</h1>
         <div class="active effect_container">
             <p>Active Effect Name</p>
             <div class="effect_tag debug_border">

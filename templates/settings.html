@@ -36,6 +36,12 @@
         function updateLan(value){
             setLanguage(value)
         }
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            // Set the language dropdown to the current language
+            const currentLan = getLanguage();
+            document.getElementById('selected_lan').value = currentLan;
+        });
     </script>
 </head>
 
@@ -45,27 +51,28 @@
         {% include 'sidebar_menu.html' %}
     </div>
     <div id="effect_header">
-        <h1>Settings</h1>
+        <h1 lan-key="page_settings">Settings</h1>
     </div>
     <div id="effects_container">
         <div class="setting">
-            <label for="brightness">Brightness:</label>
+            <label for="brightness" lan-key="settings_brightness">Brightness:</label>
             <input type="range" id="brightness" name="brightness" min="0" max="100" value="{{ brightness }}" oninput="updateBrightness(this.value)">
         </div>
         <div class="setting">
-            <label for="performance_mode">Performance Mode:</label>
+            <label for="performance_mode" lan-key="settings_performance_mode">Performance Mode:</label>
             <select id="performance_mode" name="performance_mode" onchange="updatePerformanceMode(this.value)">
-                <option value="high" {% if performance_mode == 'high' %}selected{% endif %}>High</option>
-                <option value="normal" {% if performance_mode == 'normal' %}selected{% endif %}>Normal</option>
-                <option value="low" {% if performance_mode == 'low' %}selected{% endif %}>Low</option>
+                <option value="high" {% if performance_mode == 'high' %}selected{% endif %} lan-key="settings_performance_mode_high">High</option>
+                <option value="normal" {% if performance_mode == 'normal' %}selected{% endif %} lan-key="settings_performance_mode_medium">Normal</option>
+                <option value="low" {% if performance_mode == 'low' %}selected{% endif %} lan-key="settings_performance_mode_low">Low</option>
             </select>
         </div>
         <div class="setting">
-            <label for="selected_lan">Language:</label>
+            <label for="selected_lan" lan-key="settings_language">Language:</label>
             <select id="selected_lan" name="selected_lan" onchange="updateLan(this.value)">
-                <option value="en" {% if selected_lan == 'en' %}selected{% endif %}>English</option>
-                <option value="cz" {% if selected_lan == 'cz' %}selected{% endif %}>Czech</option>
-                <option value="cn" {% if selected_lan == 'cn' %}selected{% endif %}>Chinese (Traditional)</option>
+                <option value="en">English</option>
+                <option value="cn">Chinese (Traditional)</option>
+                <option value="no">Norwegian</option>
+                <option value="😎">Emoji</option>
             </select>
         </div>
     </div>
