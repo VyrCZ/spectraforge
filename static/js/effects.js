@@ -1,5 +1,6 @@
 function changeEffect(effectName) {
     // Update the server about the selected effect
+    clearAudioSelection();
     fetch(`/api/set_effect`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -105,3 +106,20 @@ function getState(handleParams = true) {
 }
 
 // Functions are called straight from the HTML
+
+
+
+// util functions
+function clearAudioSelection() {
+    sessionStorage.removeItem('audioFile');
+    sessionStorage.removeItem('lightshowFile');
+    sessionStorage.removeItem('videoFile');
+}
+
+function isAudioEngineSelected() {
+    return (
+        sessionStorage.getItem('audioFile') !== null ||
+        sessionStorage.getItem('lightshowFile') !== null ||
+        sessionStorage.getItem('videoFile') !== null
+    )
+}

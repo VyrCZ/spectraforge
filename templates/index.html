@@ -8,8 +8,11 @@
     <script src="static/js/main.js"></script>
     <script src="static/js/effects.js"></script>
     <script src="static/js/playaudio.js"></script>
+    <script src="static/js/audio.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", getState);
+        if(!isAudioEngineSelected()){
+            document.addEventListener("DOMContentLoaded", getState);
+        }
     </script>
     <link rel="icon" href="{{ url_for('static', filename='icons/favicon.ico')}}" type="image/x-icon">
     <link rel="stylesheet" href="static/css/style.css">
