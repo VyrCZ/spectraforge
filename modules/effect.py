@@ -24,12 +24,13 @@ class ParamType:
     """Define parameter types
     COLOR: Color picker, returns RGB tuple.
     SLIDER: Slider - returns float. Additional values: min, max, step
-    BOOL: Checkbox - returns a boolean.
+    CHECKBOX: Checkbox - returns a boolean.
+    BUTTON: Button - triggers passed onClick function.
     """
     COLOR = "color"
     SLIDER = "slider"
     CHECKBOX = "checkbox"
-    INPUT = "input"
+    BUTTON = "button"
 
 class EffectType:
     ONLY_2D = "only_2d"
@@ -62,7 +63,20 @@ class LightEffect:
         #print(f"Height: {self.height}")
 
     def add_parameter(self, name, param_type, default_value, **kwargs):
-        """Add a configurable parameter."""
+        """Add a configurable parameter.
+        # Values for each parameter:
+
+        **COLOR**: None
+
+        **SLIDER**:
+        - min (float)
+        - max (float)
+        - step (float)
+
+        **CHECKBOX**: None,
+
+        **BUTTON**: pass None into default value and 'onClick=...' function in kwargs.
+        """
         self.parameters[name] = Parameter(name, param_type, default_value, **kwargs)
         return self.parameters[name]
 

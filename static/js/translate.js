@@ -2,7 +2,7 @@ var langs = ["en", "cn", "no", "😎"];
 
 async function setLanguage(lang) {
     // If the language is English, do nothing, as the page is already in English.
-    const response = await fetch(`locales/${lang}.json`);
+    const response = await fetch(`/locales/${lang}.json`);
     const translations = await response.json();
 
     document.querySelectorAll("[lan-key]").forEach(elem => {

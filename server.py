@@ -22,6 +22,8 @@ from modules.placeholder_manager import check as placeholder_check
 # set working directory to the directory of this file
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
+os.environ["PATH"] = r"C:\Users\vojtech.vyroubal\AppData\Roaming\ffmpeg\bin;" + os.environ["PATH"]
+
 
 app = Flask(__name__)
 app.jinja_env.globals.update(zip=zip) # allows using zip in Jinja templates
@@ -74,7 +76,7 @@ def set_parameter():
     request_data = request.json
     param_name = request_data.get("name")
     value = request_data.get("value")
-    print(f"Setting parameter {param_name} to {value}")
+    Log.info("Server", f"Setting parameter {param_name} to {value}")
     result = effects_engine.set_parameter(param_name, value)
     if result["status"] == "success":
         return jsonify(result)

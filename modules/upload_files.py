@@ -44,6 +44,8 @@ def recognize_file_type(file) -> FileType | None:
         return FileType.LIGHTSHOW
     elif filename.endswith(".py"):
         return recognize_script_type(file.stream)
+    elif filename.endswith((".png", ".jpg", "jpeg")):
+        return FileType.IMAGE
     elif filename.endswith((".mp4", ".mkv", ".mov", ".webm", ".avi", ".flv")):
         return FileType.VIDEO
     return None
