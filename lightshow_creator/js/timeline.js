@@ -30,11 +30,13 @@ var items = new vis.DataSet([
 // create visualization
 var container = document.getElementById("timeline");
 var options = {
-    // option groupOrder can be a property name or a sort function
-    // the sort function must compare two groups and return a value
-    //     > 0 when a > b
-    //     < 0 when a < b
-    //       0 when a == b
+    // 1. PREVENT NEGATIVE TIME
+    // The 'min' property strictly restricts navigation past this date/number.
+    min: 0, 
+    
+    // (Optional) Set a max limit if the song has a fixed length
+    // max: 200000, 
+
     groupOrder: function (a, b) {
         return a.value - b.value;
     },
@@ -50,51 +52,71 @@ var options = {
         container.insertAdjacentElement("afterBegin", label);
         return container;
     },
-    // snap to .25
+    
     snap: function (date, scale) {
         var ms = date.getTime();
-        var step = 250; // 0.25 seconds in milliseconds
+        var step = 250; 
         var remainder = ms % step;
         if (remainder < step / 2) {
-            ms -= remainder; // round down
+            ms -= remainder; 
         } else {
-            ms += step - remainder; // round up
+            ms += step - remainder; 
         }
         return new Date(ms);
     },
+    
     orientation: "both",
     editable: true,
     groupEditable: false,
 
     onAdd: function (item, callback) {
-        item.content = "New Effect"; // Set default content for the new item.
-        item.end = new Date(item.start.getTime() + 1000); // Set an end time 1 second after the start time.
-        callback(item); // Add the modified item to the timeline.
+        item.content = "New Effect"; 
+        item.end = new Date(item.start.getTime() + 1000); 
+        callback(item); 
     },
 
     start: 0,
-    end: 10000, // Increased end time to show more labels
+    end: 10000, 
+    
+    // 2. DISPLAY BEATS (Bar.Beat)
+    showMajorLabels: false, 
+    showMinorLabels: true,
+    
+    // We lock the scale to seconds and step to 0.25 (250ms) so the grid aligns with beats
+    timeAxis: { scale: "second", step: 0.25 },
+
     format: {
         minorLabels: function (date, scale, step) {
-            // When using a number range, 'date' is a number in milliseconds.
-            // Show labels only for whole seconds (multiples of 1000 ms).
-            if (date % 1000 === 0) {
-                var totalSeconds = date / 1000;
-                var minutes = Math.floor(totalSeconds / 60);
-                var seconds = totalSeconds % 60;
-                return String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0");
-            }
-            return "";
+            // Convert the date object to milliseconds
+            var ms = date.valueOf();
+            
+            // CONFIGURATION:
+            // Based on your snap of 250ms, we assume:
+            // 250ms = 1 Beat
+            // 4 Beats = 1 Bar (Standard 4/4 time)
+            var msPerBeat = 250;
+            var beatsPerBar = 4;
+
+            // Calculate total beats elapsed since time 0
+            // We use Math.round to avoid floating point errors (e.g. 249.9999)
+            var totalBeats = Math.round(ms / msPerBeat);
+
+            // Calculate which Bar we are in (1-based index)
+            var bar = Math.floor(totalBeats / beatsPerBar) + 1;
+            
+            // Calculate which Beat we are on (1-based index)
+            var beat = (totalBeats % beatsPerBar) + 1;
+
+            // Return string "1.1", "1.2", "1.3", "1.4", "2.1", etc.
+            return bar + "." + beat;
         },
         majorLabels: {
-            day: "",
-            month: "",
-            year: ""
+             // You can leave this blank or return empty strings since we disabled major labels above
+            second: "",
+            minute: "",
+            hour: ""
         }
-    },
-    showMajorLabels: false,
-    showMinorLabels: true,
-    timeAxis: { scale: "second", step: 0.25 }
+    }
 };
 
 var timeline = new vis.Timeline(container);
