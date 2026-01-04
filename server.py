@@ -22,7 +22,8 @@ from modules.placeholder_manager import check as placeholder_check
 # set working directory to the directory of this file
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-os.environ["PATH"] = r"C:\Users\vojtech.vyroubal\AppData\Roaming\ffmpeg\bin;" + os.environ["PATH"]
+# school ffmpeg fix
+#os.environ["PATH"] = r"C:\Users\vojtech.vyroubal\AppData\Roaming\ffmpeg\bin;" + os.environ["PATH"]
 
 
 app = Flask(__name__)

@@ -10,8 +10,10 @@ PORT = 65432
 # Number of LEDs
 NUM_LEDS = 200
 
+IMG_SAVE_PATH = "images/right/"
+
 # Ensure the directory for saving images exists
-os.makedirs("images/left", exist_ok=True)
+os.makedirs(IMG_SAVE_PATH, exist_ok=True)
 
 try:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
@@ -41,7 +43,7 @@ try:
                 continue
 
             # Save the captured image
-            save_path = f"images/left/{i}.jpg"
+            save_path = os.path.join(IMG_SAVE_PATH, f"{i}.jpg")
             cv.imwrite(save_path, image)
             print(f"Saved frame {i} to {save_path}")
 

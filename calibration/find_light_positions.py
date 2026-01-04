@@ -3,10 +3,10 @@ import numpy as np
 import os
 # Directory for images and output file
 image_paths = [
-    "images/front/",
-    "images/right/",
-    "images/back/",
-    "images/left/"
+    "imgs_rotated/front/",
+    "imgs_rotated/right/",
+    "imgs_rotated/back/",
+    "imgs_rotated/left/"
 ]
 selected_view = 0
 output_file = "coordinates.txt"
