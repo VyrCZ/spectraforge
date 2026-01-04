@@ -3,11 +3,18 @@ import inspect
 import importlib.util
 import sys
 from typing import Dict, List, Any
+from modules.config_manager import Config
 
 # Assuming these are defined elsewhere in your project, but needed for type checks
 # from your_project import LightshowEffects, EffectType, CustomParamType
 
-LIGHTSHOW_EFFECTS_DIR = r"C:\Users\vojta\Code\python\spectraforge\lightshow_effects"
+SPECTRAFORGE_DIR = r"C:\Users\vojta\Code\python\spectraforge"
+
+LIGHTSHOW_EFFECTS_DIR = "lightshow_effects"
+SETUPS_DIR = "config/setups"
+
+lightshow_effects_path = os.path.join(SPECTRAFORGE_DIR, LIGHTSHOW_EFFECTS_DIR)
+setups_path = os.path.join(SPECTRAFORGE_DIR, SETUPS_DIR)
 
 def get_type_name(annotation) -> str:
     """Helper to convert type annotations to readable strings."""
@@ -24,16 +31,16 @@ def list_effects() -> Dict[str, List[Dict[str, Any]]]:
     effects_data = []
     
     # Ensure the directory exists
-    if not os.path.exists(LIGHTSHOW_EFFECTS_DIR):
-        print(f"Warning: Directory {LIGHTSHOW_EFFECTS_DIR} not found.")
+    if not os.path.exists(lightshow_effects_path):
+        print(f"Warning: Directory {lightshow_effects_path} not found.")
         return {"effects": []}
 
     # 1. Scan for python files
-    for filename in os.listdir(LIGHTSHOW_EFFECTS_DIR):
+    for filename in os.listdir(lightshow_effects_path):
         if filename.endswith(".py") and not filename.startswith("__"):
             
             module_name = filename[:-3]
-            file_path = os.path.join(LIGHTSHOW_EFFECTS_DIR, filename)
+            file_path = os.path.join(lightshow_effects_path, filename)
             
             # 2. Dynamically import the module
             spec = importlib.util.spec_from_file_location(module_name, file_path)
@@ -108,6 +115,22 @@ def list_effects() -> Dict[str, List[Dict[str, Any]]]:
                             effects_data.append(effect_entry)
 
     return {"effects": effects_data}
+
+def get_active_setup() -> str:
+    """
+    Return the currently active setup in the system as a JSON string.
+    """
+    current_setup_name = Config().config.get("current_setup", "")
+    # load current_setup_name.json from setups_path
+    setup_file = os.path.join(setups_path, f"{current_setup_name}.json")
+    if not os.path.exists(setup_file):
+        for filename in os.listdir(setups_path):
+            if filename.endswith(".json"):
+                setup_file = os.path.join(setups_path, filename)
+    with open(setup_file, "r", encoding="utf-8") as f:
+        return f.read()
+    return "{}"  # Return empty JSON if fails
+
 
 def get_effects_json() -> str:
     """Returns the effects data as a JSON string."""

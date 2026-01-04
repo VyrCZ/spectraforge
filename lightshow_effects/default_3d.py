@@ -1,7 +1,7 @@
 from modules.lightshow_effects import *
 import modules.mathutils as mu
 import colorsys
-from modules.effect import EffectType, CustomParamType
+from modules.effect import EffectType
 
 @namespace("3d")
 class Default3D(LightshowEffects):

@@ -2,7 +2,6 @@ from modules.lightshow_effects import *
 import modules.mathutils as mu
 import colorsys
 from modules.effect import EffectType
-from typing import List, Optional, Tuple  # added typing imports
 
 @namespace("")
 class DefaultUniversal(LightshowEffects):
