@@ -2,6 +2,7 @@ from modules.lightshow_effects import *
 import modules.mathutils as mu
 import colorsys
 from modules.effect import EffectType
+from typing import List, Optional, Tuple  # added typing imports
 
 @namespace("")
 class DefaultUniversal(LightshowEffects):
@@ -9,7 +10,7 @@ class DefaultUniversal(LightshowEffects):
         super().__init__(coords)
 
     @l_effect(EffectType.UNIVERSAL)
-    def solid_color(self, steps, color: tuple[int, int, int]):
+    def solid_color(self, steps: int, color: CustomParamType.Color):
         frames = []
         for _ in range(steps):
             frame = [color] * len(self.coords)
@@ -17,7 +18,7 @@ class DefaultUniversal(LightshowEffects):
         return frames
 
     @l_effect(EffectType.UNIVERSAL)
-    def fade(self, steps, color_from, color_to):
+    def fade(self, steps: int, color_from: CustomParamType.Color, color_to: CustomParamType.Color):
         step_r = (color_to[0] - color_from[0]) / steps
         step_g = (color_to[1] - color_from[1]) / steps
         step_b = (color_to[2] - color_from[2]) / steps
@@ -34,7 +35,7 @@ class DefaultUniversal(LightshowEffects):
         return frames
 
     @l_effect(EffectType.UNIVERSAL)
-    def flash_full(self, steps, color1, color2, frequency=0):
+    def flash_full(self, steps: int, color1: CustomParamType.Color, color2: CustomParamType.Color, frequency: int = 0):
         frames = []
         for step in range(steps):
             if step % 2 == 0:
@@ -45,7 +46,7 @@ class DefaultUniversal(LightshowEffects):
         return frames
 
     @l_effect(EffectType.UNIVERSAL)
-    def flash_individual(self, steps, color1, color2, frequency=0):
+    def flash_individual(self, steps: int, color1: CustomParamType.Color, color2: CustomParamType.Color, frequency: int = 0):
         frames = []
         for step in range(steps):
             frame = []
@@ -58,7 +59,7 @@ class DefaultUniversal(LightshowEffects):
         return frames
 
     @l_effect(EffectType.UNIVERSAL)
-    def swipe_up(self, steps, color, width=100):
+    def swipe_up(self, steps: int, color: CustomParamType.Color, width: int = 100):
         current_z = 0 - width
         frames = []
         for step in range(steps):
@@ -72,7 +73,7 @@ class DefaultUniversal(LightshowEffects):
         return frames
     
     @l_effect(EffectType.UNIVERSAL)
-    def swipe_down(self, steps, color, width=100):
+    def swipe_down(self, steps: int, color: CustomParamType.Color, width: int = 100):
         current_z = self.bounds.max_z + width
         frames = []
         for step in range(steps):
@@ -86,7 +87,7 @@ class DefaultUniversal(LightshowEffects):
         return frames
 
     @l_effect(EffectType.UNIVERSAL)
-    def swipe_right(self, steps, color, width=50):
+    def swipe_right(self, steps: int, color: CustomParamType.Color, width: int = 50):
         current_x = self.bounds.min_x - width
         frames = []
         for step in range(steps):
@@ -100,7 +101,7 @@ class DefaultUniversal(LightshowEffects):
         return frames
 
     @l_effect(EffectType.UNIVERSAL)
-    def swipe_left(self, steps, color, width=50):
+    def swipe_left(self, steps: int, color: CustomParamType.Color, width: int = 50):
         current_x = self.bounds.max_x + width
         frames = []
         for step in range(steps):
@@ -114,7 +115,7 @@ class DefaultUniversal(LightshowEffects):
         return frames
 
     @l_effect(EffectType.UNIVERSAL)
-    def rainbow(self, steps, speed=10):
+    def rainbow(self, steps: int, speed: float = 10):
         current_y = 0
         frames = []
         for step in range(steps):
@@ -128,9 +129,9 @@ class DefaultUniversal(LightshowEffects):
                 frame[i] = tuple([int(channel * 255) for channel in normalized_rgb])
             frames.append(frame)
         return frames
-    
+
     @l_effect(EffectType.UNIVERSAL)
-    def gradient(self, steps, color_from, color_to, speed=10):
+    def gradient(self, steps: int, color_from: CustomParamType.Color, color_to: CustomParamType.Color, speed: float = 10):
         current_y = 0
         frames = []
         for step in range(steps):
@@ -145,7 +146,7 @@ class DefaultUniversal(LightshowEffects):
         return frames
 
     @l_effect(EffectType.UNIVERSAL)
-    def string_up(self, steps, color, trail_length=25):
+    def string_up(self, steps: int, color: CustomParamType.Color, trail_length: int = 25):
         current_pixel = -trail_length
         frames = []
         for step in range(steps):
@@ -157,9 +158,9 @@ class DefaultUniversal(LightshowEffects):
                     frame[pos] = mu.color_lerp((0, 0, 0), color, mu.normalize(i, 0, trail_length))
             frames.append(frame)
         return frames
-    
+
     @l_effect(EffectType.UNIVERSAL)
-    def string_down(self, steps, color, trail_length=25):
+    def string_down(self, steps: int, color: CustomParamType.Color, trail_length: int = 25):
         current_pixel = len(self.coords) + trail_length
         frames = []
         for step in range(steps):
@@ -173,7 +174,7 @@ class DefaultUniversal(LightshowEffects):
         return frames
 
     @l_effect(EffectType.UNIVERSAL)
-    def split_vertical(self, steps, color_from, color_to):
+    def split_vertical(self, steps: int, color_from: CustomParamType.Color, color_to: CustomParamType.Color):
         mid_x = (self.bounds.min_x + self.bounds.max_x) / 2
         frames = []
         for step in range(steps):
