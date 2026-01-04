@@ -21,9 +21,6 @@ function changeEffect(effectName) {
 // Update a specific parameter on the server
 function updateParameter(name, value, type) {
     console.log(`Updating parameter: ${name} with value: ${value} of type: ${type}`);
-    /*if (type === "checkbox") {
-        
-    }*/
     fetch("/api/set_parameter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -87,20 +84,65 @@ function getState(handleParams = true) {
                         input = document.createElement("input");
                         input.type = "checkbox";
                         input.checked = parameters[name];
+                    } else if (param.param_type === "button") {
+                        input = document.createElement("button");
+                        input.type = "button";
+                        input.className = "param-button";
+                        // Use label text for the button
+                        input.textContent = param.options && param.options.label ? param.options.label : name;
+
+                        const sendState = (state) => {
+                            updateParameter(name, state, param.param_type);
+                        };
+
+                        // Pointer events cover mouse and touch
+                        input.addEventListener("pointerdown", (e) => {
+                            e.preventDefault();
+                            sendState(true);
+                        });
+                        input.addEventListener("pointerup", (e) => {
+                            e.preventDefault();
+                            sendState(false);
+                        });
+                        input.addEventListener("pointercancel", () => sendState(false));
+                        // In case pointer leaves the button while pressed
+                        input.addEventListener("pointerleave", (e) => {
+                            if (e.pressure && e.pressure > 0) {
+                                // some platforms may use pressure; ensure release is sent
+                                sendState(false);
+                            }
+                        });
+                        // Keyboard accessibility (Space / Enter)
+                        input.addEventListener("keydown", (e) => {
+                            if (e.key === " " || e.key === "Enter") {
+                                e.preventDefault();
+                                sendState(true);
+                            }
+                        });
+                        input.addEventListener("keyup", (e) => {
+                            if (e.key === " " || e.key === "Enter") {
+                                e.preventDefault();
+                                sendState(false);
+                            }
+                        });
                     } else {
                         input = document.createElement("input");
                         input.type = "text";
                         input.value = parameters[name]; // Set value from state
                     }
 
-                    input.onchange = () => updateParameter(name, (input.type === "checkbox") ? input.checked : input.value, param.param_type);
+                    // Only attach onchange handler for inputs that support it (not the button)
+                    if (!(param.param_type === "button")) {
+                        input.onchange = () => updateParameter(name, (input.type === "checkbox") ? input.checked : input.value, param.param_type);
+                    }
+
                     parametersDiv.appendChild(container);
                     container.appendChild(label);
                     container.appendChild(input);
                     //parametersDiv.appendChild(document.createElement("br"));
                 }
             })
-            .catch(error => console.error("Error fetching parameters:", error));[]
+            .catch(error => console.error("Error fetching parameters:", error));
         })
         .catch(error => console.error("Error fetching current effect:", error));
 }

@@ -1,4 +1,5 @@
 from modules.mathutils import Bounds
+from modules.log_manager import Log
 
 class Parameter:
     """Class to store parameter metadata and value."""
@@ -10,6 +11,25 @@ class Parameter:
 
     def set(self, value):
         self.value = value
+        # Special handling for BUTTON type
+        if self.param_type == ParamType.BUTTON:
+            # 1. Handle "Down" (Press)
+            if value is True:
+                on_down = self.options.get("onDown")
+                if on_down:
+                    on_down()
+            
+            # 2. Handle "Up" (Release) AND "Click"
+            elif value is False:
+                # Trigger Up event
+                on_up = self.options.get("onUp")
+                if on_up:
+                    on_up()
+                
+                # Trigger Click event (Standard behavior: fire on release)
+                on_click = self.options.get("onClick")
+                if on_click:
+                    on_click()
 
     def get(self):
         if self.param_type == ParamType.COLOR:
@@ -75,14 +95,55 @@ class LightEffect:
 
         **CHECKBOX**: None,
 
-        **BUTTON**: pass None into default value and 'onClick=...' function in kwargs.
+        **BUTTON**: pass None into default value and 'onClick=function' in kwargs.
         """
+        if param_type == ParamType.BUTTON:
+            if 'onClick' not in kwargs:
+                Log.warn("EffectEngine", f"Button parameter '{name}' created without onClick handler.")
+            if 'onDown' not in kwargs:
+                kwargs['onDown'] = None
+            if 'onUp' not in kwargs:
+                kwargs['onUp'] = None
+            
+            if default_value is None:
+                default_value = False  # Buttons start unpressed
+                
         self.parameters[name] = Parameter(name, param_type, default_value, **kwargs)
         return self.parameters[name]
 
     def get_parameters(self):
-        """Return all parameters."""
-        return {name: param.__dict__ for name, param in self.parameters.items()}
+        """Return all parameters in a JSON-serializable form."""
+        def serialize_param(param: Parameter):
+            # Use the Parameter.get() for typed values where applicable
+            if param.param_type == ParamType.COLOR:
+                value = param.get()
+                # return as hex string the frontend likely expects (e.g. "#rrggbb")
+                value = "#{:02x}{:02x}{:02x}".format(*value)
+            elif param.param_type == ParamType.SLIDER:
+                value = param.get()
+            elif param.param_type == ParamType.CHECKBOX:
+                value = param.get()
+            else:
+                # For BUTTON and fallback types, keep the stored value (could be None)
+                value = param.value
+
+            # Serialize options but don't attempt to send callables (methods/functions)
+            options_serialized = {}
+            for k, v in (param.options or {}).items():
+                if callable(v):
+                    # indicate presence of a handler without sending the function
+                    options_serialized[k] = True
+                else:
+                    options_serialized[k] = v
+
+            return {
+                "name": param.name,
+                "param_type": param.param_type,
+                "value": value,
+                "options": options_serialized
+            }
+
+        return {name: serialize_param(param) for name, param in self.parameters.items()}
 
     def update(self):
         """Update the LED effect (override in subclasses)."""
