@@ -61,8 +61,15 @@ def process_lightshow(registry: RegistryInstance, lightshow_data: dict, settings
     # sort the timeline by layers
     layer_count = lightshow_data.get("editor_data", {}).get("layer_count", 1)
     layers = [[] for _ in range(layer_count)]
+    # timeline is stored in beats now; convert lengths to seconds using bpm
     timeline = lightshow_data.get("timeline", [])
-    audio_length = max(item.get("end", 0) for item in timeline) if timeline else 0
+    bpm = lightshow_data.get("bpm", 120) or 120
+    if bpm == 0:
+        Log.warn("LightshowEngine", "BPM is 0, defaulting to 120")
+        bpm = 120
+    # compute audio length (in beats -> seconds)
+    audio_length_beats = max(item.get("end", 0) for item in timeline) if timeline else 0
+    audio_length = audio_length_beats * (60.0 / bpm)
     # put all timeline items into their respective layers
     for item in timeline:
         layer_index = item.get("layer", 0)
@@ -85,11 +92,13 @@ def process_lightshow(registry: RegistryInstance, lightshow_data: dict, settings
                     for key, value in params.items():
                         if isinstance(value, str) and value.startswith("#"):
                             params[key] = tuple(int(value[i:i+2], 16) for i in (1, 3, 5))  # convert hex to RGB tuple
-                    # calculate the number of steps
-                    start_time = item.get("start", 0)
-                    end_time = item.get("end", 0)
+                    # calculate the number of steps (start/end are in beats -> convert to seconds)
+                    start_beats = item.get("start", 0)
+                    end_beats = item.get("end", 0)
+                    start_time = start_beats * (60.0 / bpm)
+                    end_time = end_beats * (60.0 / bpm)
                     if end_time <= start_time:
-                        Log.warn("LightshowEngine", f"Effect {effect_name} [{start_time}-{end_time}] has invalid end time, skipping.")
+                        Log.warn("LightshowEngine", f"Effect {effect_name} [{start_beats}-{end_beats}] has invalid end time, skipping.")
                         continue
                     duration = end_time - start_time
                     steps = int(duration * settings.FPS)
