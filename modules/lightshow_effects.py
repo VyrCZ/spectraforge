@@ -54,8 +54,10 @@ class CustomParamType:
     **They don't do anything, but can be used as for type annotations**
     """
     class Color:
+        transparent = (0, 0, 0, 0)
+        white = (255, 255, 255, 255)
         """
-        Actually requires tuple[int, int, int] (RGB color)
+        Actually requires tuple[int, int, int, int] (RGBA color)
         """
         pass
 

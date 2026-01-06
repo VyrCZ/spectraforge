@@ -3,13 +3,16 @@ import modules.mathutils as mu
 import colorsys
 from modules.effect import EffectType
 
+# not typing CustomParamType.Color 100 times
+Color = CustomParamType.Color
+
 @namespace("3d")
 class Default3D(LightshowEffects):
     def __init__(self, coords):
         super().__init__(coords)
 
     @l_effect(EffectType.ONLY_3D)
-    def swipe_forward(self, steps, color: CustomParamType.Color, width: int = 50):
+    def swipe_forward(self, steps, color: Color, width: int = 50):
         current_y = self.bounds.min_y - width
         frames = []
         for step in range(steps):
@@ -23,7 +26,7 @@ class Default3D(LightshowEffects):
         return frames
 
     @l_effect(EffectType.ONLY_3D)
-    def swipe_backward(self, steps, color: CustomParamType.Color, width: int = 50):
+    def swipe_backward(self, steps, color: Color, width: int = 50):
         current_y = self.bounds.max_y + width
         frames = []
         for step in range(steps):
