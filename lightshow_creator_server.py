@@ -3,7 +3,8 @@ import inspect
 import importlib.util
 import sys
 from typing import Dict, List, Any
-from modules.config_manager import Config
+import json
+from modules.lightshow_manager import RegistryInstance, LightshowSettings, process_lightshow
 
 # Assuming these are defined elsewhere in your project, but needed for type checks
 # from your_project import LightshowEffects, EffectType, CustomParamType
@@ -12,9 +13,21 @@ SPECTRAFORGE_DIR = r"C:\Users\vojta\Code\python\spectraforge"
 
 LIGHTSHOW_EFFECTS_DIR = "lightshow_effects"
 SETUPS_DIR = "config/setups"
+CONFIG_FILE = "config/server_config.json"
 
 lightshow_effects_path = os.path.join(SPECTRAFORGE_DIR, LIGHTSHOW_EFFECTS_DIR)
 setups_path = os.path.join(SPECTRAFORGE_DIR, SETUPS_DIR)
+config_path = os.path.join(SPECTRAFORGE_DIR, CONFIG_FILE)
+
+# 1. Force Working Directory
+# If we are running from C#, we are likely in bin/Debug. 
+# We must switch to the Python source dir so relative paths inside RegistryInstance work.
+if os.getcwd() != SPECTRAFORGE_DIR:
+    try:
+        os.chdir(SPECTRAFORGE_DIR)
+        print(f"[Python] Changed working dir to: {os.getcwd()}")
+    except Exception as e:
+        print(f"[Python] Error changing directory: {e}")
 
 def get_type_name(annotation) -> str:
     """Helper to convert type annotations to readable strings."""
@@ -116,24 +129,55 @@ def list_effects() -> Dict[str, List[Dict[str, Any]]]:
 
     return {"effects": effects_data}
 
+def _get_setup_data(setup_name: str = "") -> Dict[str, Any]:
+    """Helper to load a setup JSON file by name."""
+    if not setup_name:
+        with open(config_path, "r", encoding="utf-8") as f:
+            config_data = json.load(f)
+            setup_name = config_data.get("current_setup", "")
+        if not setup_name:
+            # get the first setup available
+            for filename in os.listdir(setups_path):
+                if filename.endswith(".json"):
+                    setup_name = os.path.splitext(filename)[0]
+                    break
+    setup_file = os.path.join(setups_path, f"{setup_name}.json")
+    if not os.path.exists(setup_file):
+        raise FileNotFoundError(f"Setup file {setup_file} not found.")
+    with open(setup_file, "r", encoding="utf-8") as f:
+        setup_data = json.load(f)
+        setup_data["name"] = setup_name
+        return setup_data
+
 def get_active_setup() -> str:
     """
     Return the currently active setup in the system as a JSON string.
     """
-    current_setup_name = Config().config.get("current_setup", "")
-    # load current_setup_name.json from setups_path
-    setup_file = os.path.join(setups_path, f"{current_setup_name}.json")
-    if not os.path.exists(setup_file):
-        for filename in os.listdir(setups_path):
-            if filename.endswith(".json"):
-                setup_file = os.path.join(setups_path, filename)
-    with open(setup_file, "r", encoding="utf-8") as f:
-        return f.read()
-    return "{}"  # Return empty JSON if fails
+    setup_data = _get_setup_data()
+    return json.dumps(setup_data, indent=4)
 
-
+def compile_lightshow(lightshow_json: str) -> str:
+    print("Compiling lightshow...")
+    settings = LightshowSettings(fps=60)
+    setup_data = _get_setup_data()
+    registry = RegistryInstance(setup_data["coordinates"])
+    frames = process_lightshow(registry, json.loads(lightshow_json), settings)
+    return json.dumps(frames)
+    
 def get_effects_json() -> str:
     """Returns the effects data as a JSON string."""
     import json
     effects = list_effects()
     return json.dumps(effects, indent=4)
+
+if(__name__ == "__main__"):
+    # test compile_lightshow
+    # load overkill.json
+    with open("lightshows/test2.json", "r", encoding="utf-8") as f:
+        lightshow_json = f.read()
+    compiled = compile_lightshow(lightshow_json)
+    print(f"Compiled lightshow frames: {len(json.loads(compiled))}")
+    #save to file
+    with open("compiled_lightshow.json", "w", encoding="utf-8") as f:
+        f.write(json.dumps(json.loads(compiled), indent=4))
+    
