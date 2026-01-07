@@ -173,11 +173,15 @@ def get_effects_json() -> str:
 if(__name__ == "__main__"):
     # test compile_lightshow
     # load overkill.json
-    with open("lightshows/test2.json", "r", encoding="utf-8") as f:
+    """with open("lightshows/test2.json", "r", encoding="utf-8") as f:
         lightshow_json = f.read()
     compiled = compile_lightshow(lightshow_json)
     print(f"Compiled lightshow frames: {len(json.loads(compiled))}")
     #save to file
     with open("compiled_lightshow.json", "w", encoding="utf-8") as f:
-        f.write(json.dumps(json.loads(compiled), indent=4))
+        f.write(json.dumps(json.loads(compiled), indent=4))"""
+    
+    # test get_effects_json
+    effects_json = get_effects_json()
+    print(f"Effects JSON:\n{effects_json}")
     

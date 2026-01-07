@@ -10,7 +10,6 @@ Color = CustomParamType.Color
 class DefaultUniversal(LightshowEffects):
     def __init__(self, coords):
         super().__init__(coords)
-        # removed instance background_color; each effect receives it as a parameter
 
     @l_effect(EffectType.UNIVERSAL)
     def solid_color(self, steps: int, color: Color = Color.white):
