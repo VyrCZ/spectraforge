@@ -2,6 +2,7 @@ from modules.lightshow_effects import LightshowEffects, l_effect, namespace, Cus
 import modules.mathutils as mu
 import colorsys
 from modules.effect import EffectType
+import math
 
 # not typing CustomParamType.Color 100 times
 Color = CustomParamType.Color
@@ -280,4 +281,79 @@ class DefaultUniversal(LightshowEffects):
                 else:
                     frame[i] = (color_to[0], color_to[1], color_to[2], color_to[3])
             frames.append(frame)
+        return frames
+    
+    
+    @l_effect(EffectType.UNIVERSAL)
+    def grow_sphere(self, steps: int, color: Color = Color.white, bg_color: Color = Color.transparent, reverse: bool = False, aa_width: float = 0.0):
+        """
+        Expands a sphere of light from the geometric center of the installation.
+        Added antialiasing: LEDs near the spherical boundary are alpha-blended
+        between bg_color and color based on distance to the boundary.
+        aa_width: optional soft-edge width in same spatial units as coords.
+                If 0.0 (default) a small automatic edge is used based on max_dist.
+        """
+        frames = []
+        n_leds = len(self.coords)
+        
+        # 1. Calculate the geometric center (centroid) of all coordinates
+        # assuming coords are tuples/lists of (x, y, z)
+        if n_leds == 0: return []
+        
+        center_x = sum(c[0] for c in self.coords) / n_leds
+        center_y = sum(c[1] for c in self.coords) / n_leds
+        center_z = sum(c[2] for c in self.coords) / n_leds
+        center = (center_x, center_y, center_z)
+
+        # 2. Pre-calculate distances for every LED to the center
+        # We assume self.coords contains (x,y,z) tuples
+        distances = []
+        for c in self.coords:
+            dist = math.sqrt((c[0]-center[0])**2 + (c[1]-center[1])**2 + (c[2]-center[2])**2)
+            distances.append(dist)
+        
+        # 3. Determine maximum distance to normalize the expansion
+        max_dist = max(distances) if distances else 0.0
+
+        # determine antialias edge width: use provided aa_width or auto-scale from max_dist
+        if aa_width is None:
+            aa_width = 0.0
+        edge = aa_width if aa_width > 0.0 else max(0.5, max_dist * 0.02)
+
+        for step in range(steps):
+            frame = [bg_color] * n_leds
+            
+            # Calculate current radius threshold based on progress
+            progress = step / (steps - 1) if steps > 1 else 1.0
+            
+            # current radius (same meaning for reverse or normal)
+            if reverse:
+                current_radius = max_dist * (1.0 - progress)
+            else:
+                current_radius = max_dist * progress
+
+            # Precompute half-edge for easier math
+            half_edge = edge / 2.0
+
+            for i in range(n_leds):
+                # distance from LED to the sphere boundary (positive outside, negative inside)
+                delta = distances[i] - current_radius
+
+                # full inside (definitely lit)
+                if delta <= -half_edge:
+                    frame[i] = color
+                # full outside (definitely background)
+                elif delta >= half_edge:
+                    # already bg_color by default
+                    continue
+                else:
+                    # within soft edge: compute blend factor t in [0,1]
+                    # t -> 1 when fully inside; 0 when fully outside
+                    # map delta from [-half_edge, half_edge] -> [1, 0]
+                    t = mu.normalize(half_edge - delta, 0.0, edge)
+                    # blend bg_color -> color by t, leveraging alpha in color tuples
+                    frame[i] = mu.color_lerp(bg_color, (color[0], color[1], color[2], color[3]), t)
+            
+            frames.append(frame)
+            
         return frames
