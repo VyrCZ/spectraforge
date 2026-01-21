@@ -161,30 +161,37 @@ class ChillEffects(LightshowEffects):
             self.norm_coords.append((nx, ny, nz))
 
     def _hsv_to_rgba(self, h, s, v, a=255):
+        """Converts 0.0-1.0 HSV to 0-255 RGBA."""
         r, g, b = colorsys.hsv_to_rgb(h % 1.0, s, v)
         return (int(r * 255), int(g * 255), int(b * 255), int(a))
 
+    def _get_base_hsv(self, color_tuple):
+        """Converts input (r,g,b,a) 0-255 to (h,s,v) 0.0-1.0."""
+        # Normalize 0-255 to 0-1
+        r = color_tuple[0] / 255.0
+        g = color_tuple[1] / 255.0
+        b = color_tuple[2] / 255.0
+        return colorsys.rgb_to_hsv(r, g, b)
+
     @l_effect(EffectType.UNIVERSAL)
-    def aurora_borealis(self, steps: int, speed: float = 0.05, wave_density: float = 2.0):
+    def aurora_borealis(self, steps: int, color: Color = (0, 255, 128, 255), speed: float = 0.05, wave_density: float = 2.0):
         """
-        Smooth, waving curtains of light (Teal/Green/Purple)
+        Waving curtains of light based on the input color.
+        The hue shifts slightly as it goes up vertically.
         """
+        base_h, base_s, base_v = self._get_base_hsv(color)
+        
         frames = []
         for step in range(steps):
             t = step * speed
             frame = []
             for nx, ny, nz in self.norm_coords:
-                # Create the "curtain" shape using sine waves on X and Z
-                # We calculate a 'center' line that moves over time
+                # Curtain shape math
                 curve_x = math.sin(nz * wave_density + t) * 0.3 + 0.5
-                
-                # Distance from the curtain center (horizontal distance)
                 dist = abs(nx - curve_x)
-                
-                # Thickness of the curtain (tapering off at edges)
                 intensity = max(0, 1.0 - (dist * 4.0)) 
                 
-                # Aurora usually fades out at the very top and bottom slightly
+                # Vertical fade
                 vertical_fade = math.sin(ny * math.pi)
                 final_brightness = intensity * vertical_fade
                 
@@ -192,74 +199,51 @@ class ChillEffects(LightshowEffects):
                     frame.append((0, 0, 0, 0))
                     continue
 
-                # Color logic: Map Y height to hue (Green at bottom, Purple at top)
-                hue = 0.45 + (ny * 0.3)
+                # COLOR LOGIC:
+                # Take base hue and shift it by +0.2 (20% of color wheel) based on height.
+                hue_shift = ny * 0.2
+                current_hue = (base_h + hue_shift) % 1.0
                 
-                # Add a little shimmer based on time
+                # Add shimmer to brightness
                 val = final_brightness * (0.8 + 0.2 * math.sin(t * 3 + nx * 5))
                 
-                frame.append(self._hsv_to_rgba(hue, 0.9, val))
+                # Use the saturation from the input color, but clamp it slightly
+                frame.append(self._hsv_to_rgba(current_hue, base_s, val * base_v))
             frames.append(frame)
         return frames
 
     @l_effect(EffectType.UNIVERSAL)
-    def breathing_nebula(self, steps: int, speed: float = 0.03, cloud_scale: float = 2.5):
+    def breathing_nebula(self, steps: int, color: Color = (255, 0, 255, 255), speed: float = 0.03, cloud_scale: float = 2.5):
         """
-        Volumetric clouds that drift and pulse.
-        Very "tame" palette: Blues, Pinks, Violets.
+        Volumetric clouds based on input color.
+        Denser parts of the cloud shift slightly in hue.
         """
+        base_h, base_s, base_v = self._get_base_hsv(color)
+
         frames = []
         for step in range(steps):
             t = step * speed
             frame = []
             for nx, ny, nz in self.norm_coords:
-                # Sum of Sines to create a cloud-like noise pattern
+                # 3D Noise math
                 n1 = math.sin(nx * cloud_scale + t)
                 n2 = math.sin(ny * cloud_scale - t * 0.5)
                 n3 = math.sin(nz * cloud_scale + t * 0.2)
                 
-                # Normalize noise -1.5 to 1.5 -> 0.0 to 1.0
                 noise_val = (n1 + n2 + n3 + 3) / 6.0
                 
-                # Add a "breathing" global pulse
+                # Breathing pulse
                 pulse = (math.sin(t * 2) + 1) / 2.0
                 brightness = noise_val * (0.5 + 0.5 * pulse)
                 
-                # Color Gradient: Deep Blue (0.6) to Pink/Magenta (0.9)
-                hue = 0.6 + (noise_val * 0.3)
+                # COLOR LOGIC:
+                # Shift hue based on density (noise_val).
+                hue_shift = (noise_val - 0.5) * 0.1
+                current_hue = (base_h + hue_shift) % 1.0
                 
-                sat = 0.8
+                # We reduce saturation slightly (0.9 mult) to keep the "foggy" look
+                final_s = min(1.0, base_s * 0.9)
                 
-                frame.append(self._hsv_to_rgba(hue, sat, brightness))
-            frames.append(frame)
-        return frames
-
-    @l_effect(EffectType.UNIVERSAL)
-    def ghost_ripples(self, steps: int, speed: float = 0.1, ripples: int = 3):
-        """
-        Soft, horizontal rings rising slowly upward.
-        """
-        frames = []
-        for step in range(steps):
-            t = step * speed
-            frame = []
-            for nx, ny, nz in self.norm_coords:
-                # Calculate radial distance from center (cylinder shape)
-                r = math.sqrt((nx - 0.5)**2 + (nz - 0.5)**2)
-                
-                # The wave function: 
-                wave = math.sin(10 * r - ny * 5 + t * 5)
-                
-                # Sharpen the wave slightly, then clamp
-                intensity = (wave + 1) / 2.0
-                intensity = intensity ** 4
-                
-                # Fade out as it gets higher (dissipating smoke)
-                height_fade = 1.0 - ny
-                final_val = intensity * height_fade
-                
-                # Color: Gold/Orange warmth
-                rgba = self._hsv_to_rgba(0.08, 1.0, final_val)
-                frame.append(rgba)
+                frame.append(self._hsv_to_rgba(current_hue, final_s, brightness * base_v))
             frames.append(frame)
         return frames

@@ -1,0 +1,18 @@
+{
+  "song_name": "",
+  "song_artist": "",
+  "song_path": "",
+  "bpm": 140,
+  "timeline": [
+    {
+      "effect": "fade",
+      "parameters": {
+        "color_from": "#FF0000FF",
+        "color_to": "#000000FF"
+      },
+      "start": 0,
+      "end": 8,
+      "layer": 0
+    }
+  ]
+}

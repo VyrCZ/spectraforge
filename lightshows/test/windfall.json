@@ -1,0 +1,33 @@
+{
+  "song_name": "Windfall",
+  "song_artist": "TheFatRat",
+  "song_path": "C:\\Users\\vojta\\Code\\python\\spectraforge\\audio\\Windfall.mp3",
+  "bpm": 102,
+  "timeline": [
+    {
+      "effect": "swipe_right",
+      "parameters": {},
+      "start": 0,
+      "end": 4,
+      "layer": 0
+    },
+    {
+      "effect": "swipe_right",
+      "parameters": {},
+      "start": 4,
+      "end": 8,
+      "layer": 0
+    },
+    {
+      "effect": "grow_sphere",
+      "parameters": {
+        "color": "#0BFF00FF",
+        "aa_width": 100,
+        "reverse": true
+      },
+      "start": 8,
+      "end": 16,
+      "layer": 0
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "song_name": "",
+  "song_artist": "",
+  "song_path": "",
+  "bpm": 140,
+  "timeline": [
+    {
+      "effect": "lsd:aurora_borealis",
+      "parameters": {},
+      "start": 0,
+      "end": 16,
+      "layer": 1
+    },
+    {
+      "effect": "rainbow",
+      "parameters": {},
+      "start": 0,
+      "end": 16,
+      "layer": 0
+    }
+  ]
+}

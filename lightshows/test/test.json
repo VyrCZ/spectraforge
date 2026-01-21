@@ -1,0 +1,95 @@
+{
+  "song_name": "",
+  "song_artist": "",
+  "song_path": "",
+  "bpm": 140,
+  "timeline": [
+    {
+      "effect": "rainbow",
+      "parameters": {},
+      "start": 1,
+      "end": 9,
+      "layer": 0
+    },
+    {
+      "effect": "fade",
+      "parameters": {
+        "color_from": "#FFFFFF00",
+        "color_to": "#000000B5"
+      },
+      "start": 1,
+      "end": 2,
+      "layer": 1
+    },
+    {
+      "effect": "fade",
+      "parameters": {
+        "color_from": "#FFFFFF00",
+        "color_to": "#000000CF"
+      },
+      "start": 2,
+      "end": 3,
+      "layer": 1
+    },
+    {
+      "effect": "fade",
+      "parameters": {
+        "color_from": "#FFFFFF00",
+        "color_to": "#000000B4"
+      },
+      "start": 3,
+      "end": 4,
+      "layer": 1
+    },
+    {
+      "effect": "fade",
+      "parameters": {
+        "color_from": "#FFFFFF00",
+        "color_to": "#000000B4"
+      },
+      "start": 4,
+      "end": 5,
+      "layer": 1
+    },
+    {
+      "effect": "fade",
+      "parameters": {
+        "color_from": "#FFFFFF00",
+        "color_to": "#000000B4"
+      },
+      "start": 5,
+      "end": 6,
+      "layer": 1
+    },
+    {
+      "effect": "fade",
+      "parameters": {
+        "color_from": "#FFFFFF00",
+        "color_to": "#000000B4"
+      },
+      "start": 6,
+      "end": 7,
+      "layer": 1
+    },
+    {
+      "effect": "fade",
+      "parameters": {
+        "color_from": "#FFFFFF00",
+        "color_to": "#000000B4"
+      },
+      "start": 7,
+      "end": 8,
+      "layer": 1
+    },
+    {
+      "effect": "fade",
+      "parameters": {
+        "color_from": "#FFFFFF00",
+        "color_to": "#000000B4"
+      },
+      "start": 8,
+      "end": 9,
+      "layer": 1
+    }
+  ]
+}

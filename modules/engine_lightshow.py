@@ -21,7 +21,7 @@ class LightshowEngine(AudioEngine):
         self.ready_callback = ready_callback
         self.registry = None
 
-    def load_lightshow(self, lightshow_file):
+    def compile_lightshow(self, lightshow_file):
         """Load the lightshow JSON file and extract the audio file path."""
         # get the performance mode
         # init the registry/manager for effects for this setup
@@ -54,7 +54,7 @@ class LightshowEngine(AudioEngine):
     def on_audio_load(self, audio_file: str):
         """Load the lightshow data and prepare for playback."""
         lightshow_file = os.path.join("lightshows", f"{os.path.splitext(audio_file)[0]}.json")
-        audio_file_path = self.load_lightshow(lightshow_file)
+        audio_file_path = self.compile_lightshow(lightshow_file)
         if audio_file_path:
             Log.debug("LightshowEngine", self.frames)
             Log.debug("LightshowEngine", f"Audio length: {self.audio_length}s; Calculated frames: {len(self.frames)}; FPS: {self.FPS}")

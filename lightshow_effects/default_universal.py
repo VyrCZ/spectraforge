@@ -65,28 +65,32 @@ class DefaultUniversal(LightshowEffects):
 
     @l_effect(EffectType.UNIVERSAL)
     def swipe_up(self, steps: int, color: Color = Color.white, width: int = 100, background_color: Color = Color.transparent):
-        current_z = 0 - width
+        # move tip along Y (up) axis
+        current_y = self.bounds.min_y - width
         frames = []
+        step_delta = (self.bounds.max_y - self.bounds.min_y + 2 * width) / steps
         for step in range(steps):
-            current_z += (self.bounds.max_z + 2 * width) / steps
+            current_y += step_delta
             frame = [background_color] * len(self.coords)
             for i in range(len(self.coords)):
-                dist = abs(self.coords[i][2] - current_z)
+                dist = abs(self.coords[i][1] - current_y)
                 if dist < width / 2:
                     lerp_color = mu.color_lerp(background_color, (color[0], color[1], color[2], color[3]), mu.normalize(dist, 0, width / 2))
                     frame[i] = lerp_color
             frames.append(frame)
         return frames
-    
+
     @l_effect(EffectType.UNIVERSAL)
     def swipe_down(self, steps: int, color: Color = Color.white, width: int = 100, background_color: Color = Color.transparent):
-        current_z = self.bounds.max_z + width
+        # move tip along Y (down) axis
+        current_y = self.bounds.max_y + width
         frames = []
+        step_delta = (self.bounds.max_y - self.bounds.min_y + 2 * width) / steps
         for step in range(steps):
-            current_z -= (self.bounds.max_z + 2 * width) / steps
+            current_y -= step_delta
             frame = [background_color] * len(self.coords)
             for i in range(len(self.coords)):
-                dist = abs(self.coords[i][2] - current_z)
+                dist = abs(self.coords[i][1] - current_y)
                 if dist < width / 2:
                     lerp_color = mu.color_lerp((color[0], color[1], color[2], color[3]), background_color, mu.normalize(dist, 0, width / 2))
                     frame[i] = lerp_color
@@ -126,20 +130,22 @@ class DefaultUniversal(LightshowEffects):
     # swipe_arrow effects: pointy lead (arrow head)
     @l_effect(EffectType.UNIVERSAL)
     def swipe_arrow_up(self, steps: int, color: Color = Color.white, width: int = 100, head_length: int = 50, background_color: Color = Color.transparent):
-        current_z = 0 - width
+        # tip moves along Y (up); lateral plane is X-Z
+        current_y = self.bounds.min_y - width
         center_x = (self.bounds.min_x + self.bounds.max_x) / 2
-        center_y = (self.bounds.min_y + self.bounds.max_y) / 2
+        center_z = (self.bounds.min_z + self.bounds.max_z) / 2
         frames = []
+        step_delta = (self.bounds.max_y - self.bounds.min_y + 2 * width) / steps
         for step in range(steps):
-            current_z += (self.bounds.max_z + 2 * width) / steps
+            current_y += step_delta
             frame = [background_color] * len(self.coords)
             for i in range(len(self.coords)):
-                dz = current_z - self.coords[i][2]  # distance behind tip
-                if dz >= 0 and dz <= head_length:
-                    allowed_radius = (dz / head_length) * (width / 2)
-                    lateral = ((self.coords[i][0] - center_x) ** 2 + (self.coords[i][1] - center_y) ** 2) ** 0.5
+                dy = current_y - self.coords[i][1]  # distance behind tip along Y
+                if dy >= 0 and dy <= head_length:
+                    allowed_radius = (dy / head_length) * (width / 2)
+                    lateral = ((self.coords[i][0] - center_x) ** 2 + (self.coords[i][2] - center_z) ** 2) ** 0.5
                     if lateral <= allowed_radius:
-                        strength = 1.0 - mu.normalize(dz, 0, head_length)  # tip strongest
+                        strength = 1.0 - mu.normalize(dy, 0, head_length)  # tip strongest
                         lerp_color = mu.color_lerp(background_color, (color[0], color[1], color[2], color[3]), strength)
                         frame[i] = lerp_color
             frames.append(frame)
@@ -147,20 +153,22 @@ class DefaultUniversal(LightshowEffects):
 
     @l_effect(EffectType.UNIVERSAL)
     def swipe_arrow_down(self, steps: int, color: Color = Color.white, width: int = 100, head_length: int = 50, background_color: Color = Color.transparent):
-        current_z = self.bounds.max_z + width
+        # tip moves along Y (down); lateral plane is X-Z
+        current_y = self.bounds.max_y + width
         center_x = (self.bounds.min_x + self.bounds.max_x) / 2
-        center_y = (self.bounds.min_y + self.bounds.max_y) / 2
+        center_z = (self.bounds.min_z + self.bounds.max_z) / 2
         frames = []
+        step_delta = (self.bounds.max_y - self.bounds.min_y + 2 * width) / steps
         for step in range(steps):
-            current_z -= (self.bounds.max_z + 2 * width) / steps
+            current_y -= step_delta
             frame = [background_color] * len(self.coords)
             for i in range(len(self.coords)):
-                dz = self.coords[i][2] - current_z  # distance behind tip
-                if dz >= 0 and dz <= head_length:
-                    allowed_radius = (dz / head_length) * (width / 2)
-                    lateral = ((self.coords[i][0] - center_x) ** 2 + (self.coords[i][1] - center_y) ** 2) ** 0.5
+                dy = self.coords[i][1] - current_y  # distance behind tip along Y
+                if dy >= 0 and dy <= head_length:
+                    allowed_radius = (dy / head_length) * (width / 2)
+                    lateral = ((self.coords[i][0] - center_x) ** 2 + (self.coords[i][2] - center_z) ** 2) ** 0.5
                     if lateral <= allowed_radius:
-                        strength = 1.0 - mu.normalize(dz, 0, head_length)
+                        strength = 1.0 - mu.normalize(dy, 0, head_length)
                         lerp_color = mu.color_lerp(background_color, (color[0], color[1], color[2], color[3]), strength)
                         frame[i] = lerp_color
             frames.append(frame)
