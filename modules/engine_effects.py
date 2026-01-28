@@ -100,16 +100,16 @@ class EffectsEngine(Engine):
         Log.info("EffectsEngine", "Loading and validating effects...")
         self.effects = {}
         cached_hashes = []
+        # get hashed of previously cached validated effects
+        cache_data = cache.get_cache_by_name("effects_engine", "valid_effects")
+        if cache_data:
+            cached_hashes = list(json.loads(cache_data))
         for filename in os.listdir(folder):
             if filename.endswith(".py") and not filename.startswith("__"):
                 module_name = filename[:-3]
                 module = importlib.import_module(f"{folder}.{module_name}")
                 for attr in dir(module):
                     cls = getattr(module, attr)
-                    # get hashed of previously cached validated effects
-                    cache_data = cache.get_cache_by_name("effects_engine", "valid_effects")
-                    if cache_data:
-                        cached_hashes = list(json.loads(cache_data))
                     if hasattr(module, "LightEffect") and isinstance(cls, type) and issubclass(cls, module.LightEffect) and cls is not module.LightEffect:
                         module_hash = cache.hash_module(cls)
                         if module_hash in cached_hashes:

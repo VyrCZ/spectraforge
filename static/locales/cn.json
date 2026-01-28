@@ -57,5 +57,6 @@
     "settings_performance_mode_low": "低",
     "settings_performance_mode_medium": "中",
     "settings_performance_mode_high": "高",
-    "settings_language": "語言："
+    "settings_language": "語言：",
+    "settings_enhance_colors": "增強色彩："
 }

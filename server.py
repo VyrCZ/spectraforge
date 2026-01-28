@@ -271,13 +271,13 @@ def set_sandbox_file():
 @app.route("/settings")
 def page_settings():
     """Render the settings page."""
-    return render_template("settings.html", brightness=Config().config.get("brightness", 1)*100, performance_mode=Config().config.get("performance_mode", "normal"))
+    return render_template("settings.html", brightness=Config().config.get("brightness", 1)*100, performance_mode=Config().config.get("performance_mode", "normal"), enhance_colors=Config().config.get("enhance_colors", False))
 
 @app.route("/api/settings/set_setting", methods=["POST"])
 def set_setting():
     """Set a specific setting in the server."""
     request_data = request.json
-    valid_settings = ["brightness", "performance_mode"]
+    valid_settings = ["brightness", "performance_mode", "enhance_colors"]
     for setting_name, setting_value in request_data.items():
         Log.debug("Server", f"Setting {setting_name} to {setting_value}")
         if setting_name not in valid_settings:
@@ -296,6 +296,14 @@ def set_setting():
                 Config().config["performance_mode"] = setting_value
                 Config().save()
                 return jsonify({"status": "success", "message": f"Performance mode set to {setting_value}."})
+            except Exception as e:
+                Log.error_exc("CalibrationEngine", e)
+                return jsonify({"status": "error", "message": str(e)}), 500
+        elif setting_name == "enhance_colors":
+            try:
+                Config().config["enhance_colors"] = bool(setting_value)
+                Config().save()
+                return jsonify({"status": "success", "message": f"Enhance Colors set to {setting_value}."})
             except Exception as e:
                 Log.error_exc("CalibrationEngine", e)
                 return jsonify({"status": "error", "message": str(e)}), 500

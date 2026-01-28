@@ -57,5 +57,6 @@
     "settings_performance_mode_low": "Lav",
     "settings_performance_mode_medium": "Middels",
     "settings_performance_mode_high": "Høy",
-    "settings_language": "Språk:"
+    "settings_language": "Språk:",
+    "settings_enhance_colors": "Forbedre farger:"
 }

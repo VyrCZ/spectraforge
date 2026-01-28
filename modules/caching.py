@@ -1,6 +1,7 @@
 import os
 import zlib
 import inspect
+from modules.log_manager import Log
 
 CACHE_DIR = ".cache"
 
@@ -29,6 +30,7 @@ def set_cache_by_name(path: str, name: str, cache_data: str):
     """
     Set a cache value by name in the specified path.
     """
+    Log.info("Caching", f"Setting cache for {name} in {path}: {cache_data}")
     dir_path = os.path.join(CACHE_DIR, path)
     os.makedirs(dir_path, exist_ok=True)
     with open(os.path.join(CACHE_DIR, path, f"{name}.cache"), "w") as f:

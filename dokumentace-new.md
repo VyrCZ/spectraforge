@@ -1,34 +1,29 @@
 # Teoretická část
 
-## 0. LED Projekce a světelné show
-### 0.1 Velkoškálové zobrazení (na budovy atd)
+## 1. Moderní světelné systémy
+### 1.1 Historie a vývoj LED technologie
+### 1.2 LED mapping vs. projekce
 
-## 1. Adresovatelná LED světla
-### 1.1 Historie
-### 1.2 WB12
-### 1.3 Adafruit
+## 2. Technologie adresovatelných LED
+### 2.1 Princip fungování (čipy WS281x, SK6812)
+### 2.2 Komunikační protokoly a časování
+### 2.3 Problematika napájení a distribuce signálu
 
-## 2. Python
-### 2.1 Flask (+ Flask SocketIO)
-### 2.2 Neopixel
-### 2.3 PyVista
-### 2.4 PyDub
+## 3. Hardwarová platforma
+### 3.1 Architektura Raspberry Pi (proč jsem si ho vybral)
+### 3.2 Způsoby nasazení softwaru
+### 3.3 Konfigurace bezhlavého (headless) systému a AP
 
-## 3. Web aplikace
-### 3.1 HTML
-### 3.2 CSS
-### 3.3 JS
-#### 3.3.1 Frameworky
-### 3.4 Moduly
-#### 3.4.1 SocketIO
-#### 3.4.2 Iro
+## 4. Softwarové řešení (Backend)
+### 4.1 Jazyk Python v embedded systémech
+### 4.2 Knihovna NeoPixel a přímý přístup k DMA
+### 4.3 Zpracování multimédií (FFmpeg, PyDub)
+### 4.4 3D vizualizace dat pomocí PyVista
 
-## 4. ffmpeg
-
-## 5. Raspberry pi
-### 5.1 Historie
-### 5.2 zero 2w my beloved
-### 5.3 deployment IoT aplikace do linux prostředí
+## 5. Řídicí rozhraní (Frontend)
+### 5.1 Architektura klient-server (Flask)
+### 5.2 Real-time komunikace pomocí WebSockets (Socket.IO)
+### 5.3 Uživatelské rozhraní (HTML/CSS/JS)
 
 ---
 
@@ -38,7 +33,7 @@
 ### 1.1 Prerekvizice
 ### 1.2 Instalace
 
-## 2. Získání LED pozic v prostoru
+## 2. Způsoby LED pozic v prostoru
 ### 2.1 2D Režim
 ### 2.2 3D Režim
 
@@ -51,3 +46,9 @@
 ## 5. Systém efektů
 ### 5.1 Dynamické načítání scriptů
 ### 5.2 Nevýhody (bezpečnostní rizika)
+
+---
+
+# Praktická část
+
+# 1. Instalace

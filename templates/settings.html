@@ -37,6 +37,17 @@
             setLanguage(value)
         }
 
+        function updateEnhanceColors(checked) {
+            // Update the enhance colors setting in the backend
+            fetch('/api/settings/set_setting', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ enhance_colors: checked })
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', (event) => {
             // Set the language dropdown to the current language
             const currentLan = getLanguage();
@@ -74,6 +85,10 @@
                 <option value="no">Norwegian</option>
                 <option value="😎">Emoji</option>
             </select>
+        </div>
+        <div class="setting">
+            <label for="enhance_colors" lan-key="settings_enhance_colors">Enhance Colors (Gamma Correction):</label>
+            <input type="checkbox" id="enhance_colors" name="enhance_colors" {% if enhance_colors %}checked{% endif %} onchange="updateEnhanceColors(this.checked)">
         </div>
     </div>
 </body>
