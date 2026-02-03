@@ -29,6 +29,8 @@
 
 # Praktická část
 
+## 0. Úvod
+
 ## 1. Instalace
 ### 1.1 Prerekvizice
 ### 1.2 Instalace
@@ -38,7 +40,8 @@
 ### 2.2 3D Režim
 
 ## 3. Zobrazování barev na LED diodách
-### 
+### 3.1 Oddělení barevné logiky od hardwarové vrstvy (`LEDRenderer`)
+### 3.2 Simulace LED diod na obrazovce
 
 ## 4. Modulární struktura (`Engine`)
 ### 4.1 `EngineManager`
@@ -47,8 +50,35 @@
 ### 5.1 Dynamické načítání scriptů
 ### 5.2 Nevýhody (bezpečnostní rizika)
 
----
+## 6. Webové rozhraní
+### 6.1 Flask API (HTTP requesty)
+### 6.2 Nahrávání souborů (audio, video, 3D modely)
 
-# Praktická část
+## 7. Efekty založené na zvuku
+### 7.1 Zpracování zvukového souboru `AudioEngine`
+### 7.2 Synchronizace světel se zvukem
+#### 7.2.1 Ovládání přehrávače (play, pause, stop)
+### 7.3 Příklad modulu: `VisualizerEngine`
 
-# 1. Instalace
+## 8. `LightshowEngine`: Naaranžovaná světelná show
+- zmínit historii formátu
+### 8.1 Formát souboru
+- zmínit vrstvy, RGBA
+### 8.2 Definice lightshow efektů
+
+## 9. Další příklady engine modulů
+### 9.1 `CanvasEngine`
+### 9.2 `VideoEngine`
+
+## 10. Optimalizace a výkonnostní testy
+### 10.1 Limitace hardwaru (Raspberry Pi Zero 2W)
+### 10.2 Měření snímkovací frekvence (FPS)
+### 10.3 Profilování kódu a úzká hrdla (Bottlenecks)
+### 10.4 Latence sítě při ovládání v reálném čase
+
+## 11. Závěr a budoucí rozvoj
+### 11.1 Shrnutí dosažených cílů
+### 11.2 Možnosti rozšíření (nové hardwarové platformy, ESP32)
+
+
+#

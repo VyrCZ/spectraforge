@@ -95,7 +95,7 @@ class LightEffect:
 
         **CHECKBOX**: None,
 
-        **BUTTON**: pass None into default value and 'onClick=function' in kwargs.
+        **BUTTON**: pass None into default value and 'onClick=function' in kwargs, alternatively 'onDown=function' and 'onUp=function' for press/release events.
         """
         if param_type == ParamType.BUTTON:
             if 'onClick' not in kwargs:

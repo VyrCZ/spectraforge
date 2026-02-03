@@ -21,7 +21,7 @@ function updateInstructions() {
 }
 
 currentStep = 1;
-setupType = null;
+//setupType = null;
 function nextStep() {
     if (currentStep === 1) {
         // Validate the first step
@@ -35,7 +35,7 @@ function nextStep() {
             alert('Please enter a valid number of LEDs.');
             return;
         }
-        setupType = document.querySelector('#setup_type').value;
+        //setupType = document.querySelector('#setup_type').value;
         fetch('/api/calibration/new_setup', {
             method: 'POST',
             headers: {
@@ -43,7 +43,7 @@ function nextStep() {
             },
             body: JSON.stringify({
                 name: name,
-                type: setupType,
+                type: "2D",
                 led_count: parseInt(ledCount)
             })
         })
