@@ -37,14 +37,22 @@ function getState(handleParams = true) {
     fetch('/api/get_state')
     .then(response => response.json())
     .then(data => {
-        const { current_effect, parameters } = data;
-        // set the name of the current effect
+        console.log("Fetched state:", data);
+        const { current_effect, parameters, effect_type } = data;
+        // set the display elements of the current effect
         const effectText = document.querySelector(".active.effect_container").querySelector("p");
         if (effectText) {
             effectText.textContent = current_effect;
             console.log(`Setting current effect to: ${current_effect}`);
         } else {
             console.error("No active effect container found.");
+        }
+        const effectTag = document.querySelector(".active.effect_container").querySelector(".effect_tag");
+        if (effectTag) {
+            effectTag.textContent = effect_type;
+            colorizeTags();
+        } else {
+            console.error("No effect tag found.");
         }
         if (!handleParams){
             return; // Exit if we are not handling parameters

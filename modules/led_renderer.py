@@ -97,18 +97,23 @@ class LEDRenderer:
     def _gamma_correct(self, led: tuple[int, int, int], gamma: float = 2.8) -> tuple[int, int, int]:
         corrected = tuple(int((c / 255) ** gamma * 255) for c in led)
         return corrected
+    
+    def _apply_filters(self, leds_ref: list[tuple[int, int, int]]) -> list[tuple[int, int, int]]:
+        leds = leds_ref.deepcopy()
+        gamma_enabled = Config().config.get("enhance_colors", True)
+        for i in range(len(leds)):
+            # apply brightness
+            led = tuple(int(c * self.brightness) for c in leds[i])
+            # check if gamma correction is enabled
+            if gamma_enabled:
+                leds[i] = self._gamma_correct(led)
+            else:
+                leds[i] = led
+        return leds
 
     def show(self):
         # Apply filters like brightness and gamma correction
-        absolute_leds = self.leds.copy()
-        gamma_enabled = Config().config.get("enhance_colors", True)
-        for i in range(self.led_count):
-            led = tuple(int(c * self.brightness) for c in absolute_leds[i])
-            # check if gamma correction is enabled
-            if gamma_enabled:
-                absolute_leds[i] = self._gamma_correct(led)
-            else:
-                absolute_leds[i] = led
+        absolute_leds = self._apply_filters(absolute_leds)
         if os.name == 'nt':
             if self._clients:
             # Send the current LED colors to all connected clients

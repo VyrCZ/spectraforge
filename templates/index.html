@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="static/css/style.css">
 </head>
 <body>
-    <img src="static/icons/menu.svg" id="menu_icon" onclick="toggleMenu()">
+    <img src="static/icons/menu.svg" id="toggle_menu_icon" onclick="toggleMenu()">
     <div id="menu_container">
         {% include 'sidebar_menu.html' %}
     </div>
@@ -27,7 +27,7 @@
         <img src="static/icons/spectraforge-no-bg-white.svg" id="index_logo" alt="Spectraforge Logo">
         <p style="font-size: 2em" lan-key="home_lights">Lights are active!</p>
         
-        <div class="active effect_container" style="cursor: pointer;" onclick="document.location.href='/effects'">
+        <div class="active effect_container" style="cursor: pointer; width: 100%;" onclick="document.location.href='/effects'">
             <p>Active Effect Name</p>
             <div class="effect_tag">
                 Universal

@@ -5,73 +5,97 @@
 <div id="menu_items">
     <a href="/">
         <div class="menu_item">
-            <img src="{{ url_for('static', filename='icons/home.svg') }}" class="menu_icon">
+            <svg class="menu_icon">
+                <use href='{{ url_for("static", filename="icons/sprites.svg") }}#home'></use>
+            </svg>
             <p lan-key="page_home">Home</p>
         </div>
     </a>
     <a href="/effects">
         <div class="menu_item">
-            <img src="{{ url_for('static', filename='icons/lightbulb.svg') }}" class="menu_icon">
+            <svg class="menu_icon">
+                <use href='{{ url_for("static", filename="icons/sprites.svg") }}#lightbulb'></use>
+            </svg>
             <p lan-key="page_effects">Effects</p>
         </div>
     </a>
     <a href="/audio">
         <div class="menu_item">
-            <img src="{{ url_for('static', filename='icons/music_note.svg') }}" class="menu_icon">
+            <svg class="menu_icon">
+                <use href='{{ url_for("static", filename="icons/sprites.svg") }}#music_note'></use>
+            </svg>
             <p lan-key="page_audio">Audio Files</p>
         </div>
     </a>
     <a href="/lightshows">
         <div class="menu_item">
-            <img src="{{ url_for('static', filename='icons/flare.svg') }}" class="menu_icon">
+            <svg class="menu_icon">
+                <use href='{{ url_for("static", filename="icons/sprites.svg") }}#flare'></use>
+            </svg>
             <p lan-key="page_lightshows">Lightshows</p>
         </div>
     </a>
     <a href="/canvas">
         <div class="menu_item">
-            <img src="{{ url_for('static', filename='icons/brush.svg') }}" class="menu_icon">
+            <svg class="menu_icon">
+                <use href='{{ url_for("static", filename="icons/sprites.svg") }}#brush'></use>
+            </svg>
             <p lan-key="page_canvas">Canvas</p>
         </div>
     </a>
     <a href="/images">
         <div class="menu_item">
-            <img src="{{ url_for('static', filename='icons/image.svg') }}" class="menu_icon">
+            <svg class="menu_icon">
+                <use href='{{ url_for("static", filename="icons/sprites.svg") }}#image'></use>
+            </svg>
             <p lan-key="page_images">Images</p>
         </div>
     </a>
     <a href="/videos">
         <div class="menu_item">
-            <img src="{{ url_for('static', filename='icons/movie.svg') }}" class="menu_icon">
+            <svg class="menu_icon">
+                <use href='{{ url_for("static", filename="icons/sprites.svg") }}#movie'></use>
+            </svg>
             <p lan-key="page_videos">Videos</p>
         </div>
     </a>
     <a href="/sandbox">
         <div class="menu_item">
-            <img src="{{ url_for('static', filename='icons/package.svg') }}" class="menu_icon">
+            <svg class="menu_icon">
+                <use href='{{ url_for("static", filename="icons/sprites.svg") }}#package'></use>
+            </svg>
             <p lan-key="page_sandbox">Sandbox</p>
         </div>
     </a>
     <a href="/setup">
         <div class="menu_item">
-            <img src="{{ url_for('static', filename='icons/wrench.svg') }}" class="menu_icon">
+            <svg class="menu_icon">
+                <use href='{{ url_for("static", filename="icons/sprites.svg") }}#wrench'></use>
+            </svg>
             <p lan-key="page_setup">Setup</p>
         </div>
     </a>
     <a href="/upload">
         <div class="menu_item">
-            <img src="{{ url_for('static', filename='icons/upload_folder.svg') }}" class="menu_icon">
+            <svg class="menu_icon">
+                <use href='{{ url_for("static", filename="icons/sprites.svg") }}#upload_folder'></use>
+            </svg>
             <p lan-key="page_upload">Upload Files</p>
         </div>
     </a>
     <a href="/settings">
         <div class="menu_item">
-            <img src="{{ url_for('static', filename='icons/settings.svg') }}" class="menu_icon">
+            <svg class="menu_icon">
+                <use href='{{ url_for("static", filename="icons/sprites.svg") }}#settings'></use>
+            </svg>
             <p lan-key="page_settings">Settings</p>
         </div>
     </a>
     <a href="/logs">
         <div class="menu_item">
-            <img src="{{ url_for('static', filename='icons/logs.svg') }}" class="menu_icon">
+            <svg class="menu_icon">
+                <use href='{{ url_for("static", filename="icons/sprites.svg") }}#logs'></use>
+            </svg>
             <p lan-key="page_logs">Log</p>
         </div>
     </a>

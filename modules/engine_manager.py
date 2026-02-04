@@ -57,7 +57,7 @@ class EngineManager:
         if not isinstance(audio_engine, AudioEngine):
             raise TypeError("Audio engine must be an instance of AudioEngine.")
         self.register_engine(audio_engine)
-        Log.info("EngineManager", f"Audio engine {audio_engine} registered.")
+        #Log.info("EngineManager", f"Audio engine {audio_engine} registered.")
 
     def set_active_engine(self, engine):
         """Set the active engine."""

@@ -7,11 +7,12 @@ function toggleMenu() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+function colorizeTags(){
     const itemTags = document.querySelectorAll('.effect_tag');
     itemTags.forEach(element => {
         const tagText = element.textContent.trim();
         console.log(tagText);
+        element.classList.remove('tag_2d', 'tag_3d', 'tag_other');
         if (tagText.includes("2D")){
             element.classList.add('tag_2d');
         }
@@ -22,5 +23,9 @@ document.addEventListener('DOMContentLoaded', () => {
             element.classList.add('tag_other');
         }
     });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    colorizeTags();
 });
 // Functions are called straight from the HTML

@@ -18,6 +18,8 @@ from modules.log_manager import Log
 from modules.led_renderer import LEDRenderer
 import modules.upload_files as upload
 from modules.placeholder_manager import check as placeholder_check
+import time
+from flask import g
 
 # set working directory to the directory of this file
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -518,6 +520,20 @@ def upload_file():
     result = upload.handle_file_upload(files)
     return jsonify({"success": result})
 
+# Performance logging
+"""@app.before_request
+def start_timer():
+    g.start = time.time()
+
+@app.after_request
+def log_request(response):
+    if hasattr(g, 'start'):
+        diff = (time.time() - g.start) * 1000
+        if diff > 100: 
+            print(f"SLOW: {request.path} took {diff:.1f}ms")
+        else:
+            print(f"FAST: {request.path} took {diff:.2f}ms")
+    return response"""
 
 if __name__ == "__main__":
     placeholder_check()
@@ -543,15 +559,11 @@ if __name__ == "__main__":
     manager.register_audio_engine(lightshow_engine)
     manager.register_audio_engine(video_engine)
 
-    #video_engine.on_audio_load("media/videos/audio/rickroll.mp4.mp3")
-
-    #image_engine.display_image("media/images/test.jpeg")
-    #video_engine.display_video("bad-apple.mp4")
 
     Log.info("Server", "Starting Spectraforge server...")
     try:
         if os.name == "nt":
-            app.run(host="0.0.0.0", port=5000)
+            app.run(host="0.0.0.0", port=5000, threaded=True)
         else:            
             app.run(host="0.0.0.0", port=5000, ssl_context=('cert.pem', 'key.pem'))
     finally:

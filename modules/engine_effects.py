@@ -141,18 +141,21 @@ class EffectsEngine(Engine):
         if not self.current_effect and self.effects:
             return {
                 "current_effect": list(self.effects.keys())[0],
-                "parameters": None
+                "parameters": None,
+                "effect_type": None
             }
         
         if self.current_effect:
             return {
                 "current_effect": self.get_effect_name(self.current_effect),
-                "parameters": {name: param.get() for name, param in self.current_effect.parameters.items()}
+                "parameters": {name: param.get() for name, param in self.current_effect.parameters.items()},
+                "effect_type": EffectType.display_name(self.current_effect.effect_type)
             }
         
         return {
             "current_effect": None,
-            "parameters": None
+            "parameters": None,
+            "effect_type": None
         }
 
     @EngineManager.requires_active
