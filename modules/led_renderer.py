@@ -99,7 +99,7 @@ class LEDRenderer:
         return corrected
     
     def _apply_filters(self, leds_ref: list[tuple[int, int, int]]) -> list[tuple[int, int, int]]:
-        leds = leds_ref.deepcopy()
+        leds = copy.deepcopy(leds_ref)
         gamma_enabled = Config().config.get("enhance_colors", True)
         for i in range(len(leds)):
             # apply brightness
@@ -113,7 +113,7 @@ class LEDRenderer:
 
     def show(self):
         # Apply filters like brightness and gamma correction
-        absolute_leds = self._apply_filters(absolute_leds)
+        absolute_leds = self._apply_filters(self.leds)
         if os.name == 'nt':
             if self._clients:
             # Send the current LED colors to all connected clients

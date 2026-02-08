@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <img src="{{ url_for('static', filename='icons/menu.svg') }}" id="menu_icon" onclick="toggleMenu()">
+    <img src="{{ url_for('static', filename='icons/menu.svg') }}" id="toggle_menu_icon" onclick="toggleMenu()">
     <div id="menu_container">
         {% include 'sidebar_menu.html' %}
     </div>
