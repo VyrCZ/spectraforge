@@ -52,7 +52,7 @@
 
 ## 6. Webové rozhraní
 ### 6.1 Flask API (HTTP requesty)
-### 6.2 Nahrávání souborů (audio, video, 3D modely)
+### 6.2 Nahrávání souborů (audio, video, lightshow)
 
 ## 7. Efekty založené na zvuku
 ### 7.1 Zpracování zvukového souboru `AudioEngine`
