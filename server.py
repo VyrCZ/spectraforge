@@ -273,7 +273,26 @@ def set_sandbox_file():
 @app.route("/settings")
 def page_settings():
     """Render the settings page."""
-    return render_template("settings.html", brightness=Config().config.get("brightness", 1)*100, performance_mode=Config().config.get("performance_mode", "normal"), enhance_colors=Config().config.get("enhance_colors", False))
+    current_setup_name = Config().config.get("current_setup", "None")
+    current_setup_type = "Unknown"
+    
+    # Get the setup type from the setup file
+    if current_setup_name != "None":
+        setup_file_path = os.path.join(effects_engine.SETUP_FOLDER, f"{current_setup_name}.json")
+        if os.path.exists(setup_file_path):
+            try:
+                with open(setup_file_path, "r") as f:
+                    setup_data = json.load(f)
+                    current_setup_type = setup_data.get("type", "Unknown")
+            except:
+                pass
+    
+    return render_template("settings.html", 
+                         brightness=Config().config.get("brightness", 1)*100, 
+                         performance_mode=Config().config.get("performance_mode", "normal"), 
+                         enhance_colors=Config().config.get("enhance_colors", False),
+                         current_setup_name=current_setup_name,
+                         current_setup_type=current_setup_type)
 
 @app.route("/api/settings/set_setting", methods=["POST"])
 def set_setting():

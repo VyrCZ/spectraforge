@@ -66,6 +66,12 @@
     </div>
     <div id="effects_container">
         <div class="setting">
+            <label lan-key="settings_current_setup">Current Setup:</label>
+            <a href="/setup" style="color: var(--accent-color); text-decoration: none;">
+                {{ current_setup_name }} <span class="effect_tag">{{ current_setup_type }}</span>
+            </a>
+        </div>
+        <div class="setting">
             <label for="brightness" lan-key="settings_brightness">Brightness:</label>
             <input type="range" id="brightness" name="brightness" min="0" max="100" value="{{ brightness }}" oninput="updateBrightness(this.value)">
         </div>

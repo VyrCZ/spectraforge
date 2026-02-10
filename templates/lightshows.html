@@ -10,77 +10,7 @@
     <link rel="icon" href="static/icons/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="static/css/style.css">
     <link rel="stylesheet" href="static/css/tag_colors.css">
-    <style>
-        .effect_container {
-            position: relative;
-        }
-        .effect_container.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        .status-icon {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 24px;
-            height: 24px;
-        }
-        .status-icon.warning {
-            filter: invert(66%) sepia(85%) saturate(500%) hue-rotate(1deg) brightness(105%) contrast(101%);
-        }
-        .status-icon.error {
-            filter: invert(23%) sepia(98%) saturate(7426%) hue-rotate(357deg) brightness(99%) contrast(118%);
-        }
-        .error-modal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #2a2a2a;
-            border: 2px solid #ff4444;
-            border-radius: 8px;
-            padding: 20px;
-            width: 80vw;
-            z-index: 1000;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-            box-sizing: border-box; /* include padding in width calculation */
-            max-width: 800px; /* prevent excessively wide modals on large screens */
-            max-height: 70vh; /* limit height so it can scroll vertically */
-            overflow-y: auto; /* allow vertical scrolling if content is tall */
-        }
-        .error-modal.active {
-            display: block;
-        }
-        .error-modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 999;
-        }
-        .error-modal-overlay.active {
-            display: block;
-        }
-        .error-modal-close {
-            float: right;
-            cursor: pointer;
-            font-size: 24px;
-            font-weight: bold;
-            color: #fff;
-        }
-        #error-message {
-            margin: 0;
-            white-space: pre-wrap; /* preserve newlines but allow wrapping */
-            overflow-wrap: anywhere; /* break long words/URLs if necessary */
-            word-break: break-word;
-            word-wrap: break-word;
-        }
-    </style>
+    <link rel="stylesheet" href="static/css/lightshows.css">
     <script>
         function showError(message) {
             document.getElementById("error-message").textContent = message;
