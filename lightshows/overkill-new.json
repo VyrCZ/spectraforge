@@ -1035,7 +1035,7 @@
     {
       "start": 276.0,
       "end": 279.9375,
-      "effect": "swipe_backward",
+      "effect": "3d:swipe_backward",
       "parameters": {
         "color": "#ff0000"
       },
@@ -1045,7 +1045,7 @@
     {
       "start": 280.0,
       "end": 283.9375,
-      "effect": "swipe_forward",
+      "effect": "3d:swipe_forward",
       "parameters": {
         "color": "#9b00ff"
       },
@@ -1134,7 +1134,7 @@
     {
       "start": 300.0,
       "end": 301.0,
-      "effect": "swipe_backward",
+      "effect": "3d:swipe_backward",
       "parameters": {
         "color": "#ffac00"
       },
@@ -1144,7 +1144,7 @@
     {
       "start": 301.0,
       "end": 302.0,
-      "effect": "swipe_forward",
+      "effect": "3d:swipe_forward",
       "parameters": {
         "color": "#ffac00",
         "width": 50
@@ -1333,7 +1333,7 @@
     {
       "start": 336.0,
       "end": 336.9375,
-      "effect": "swipe_forward",
+      "effect": "3d:swipe_forward",
       "parameters": {
         "color": "#ff7474"
       },
@@ -1724,7 +1724,7 @@
     {
       "start": 400.0,
       "end": 400.9375,
-      "effect": "swipe_forward",
+      "effect": "3d:swipe_forward",
       "parameters": {
         "color": "#ff7474"
       },
@@ -2033,7 +2033,7 @@
     {
       "start": 456.0,
       "end": 458.0,
-      "effect": "swipe_forward",
+      "effect": "3d:swipe_forward",
       "parameters": {
         "color": "#ff0000"
       },
@@ -2129,7 +2129,7 @@
     {
       "start": 488.0,
       "end": 490.0,
-      "effect": "swipe_forward",
+      "effect": "3d:swipe_forward",
       "parameters": {
         "color": "#ff0000"
       },

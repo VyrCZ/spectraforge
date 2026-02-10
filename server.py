@@ -367,24 +367,8 @@ def audio_client_connected(data):
 def page_lightshows():
     """Render the lightshows page."""
     # list all lightshow files which have their audio file in the audio folder
-    lightshow_folder = os.path.join(app.root_path, 'lightshows')
-    if not os.path.exists(lightshow_folder):
-        os.makedirs(lightshow_folder)
-    audio_folder = os.path.join(app.root_path, 'audio')
-    if not os.path.exists(audio_folder):
-        os.makedirs(audio_folder)
-    audio_files = []
-    lightshow_files = []
-    for f in os.listdir(lightshow_folder):
-        # load the json and get audio_file
-        if f.endswith('.json'):
-            Log.debug("Server", f"Checking lightshow file: {f}")
-            with open(os.path.join(lightshow_folder, f), 'r') as json_file:
-                data = json.load(json_file)
-                audio_file = data.get("audio_file")
-                if audio_file:
-                    lightshow_files.append(f[:-5])  # remove file extension
-    return render_template("lightshows.html", lightshow_files=lightshow_files)
+    lightshow_file_data = lightshow_engine.get_lightshow_file_data()
+    return render_template("lightshows.html", lightshow_files=lightshow_file_data.values())
 
 @socketio.on("lightshow_client_connected")
 def lightshow_client_connected(data):

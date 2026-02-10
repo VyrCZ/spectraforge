@@ -99,7 +99,14 @@ def process_lightshow(registry: RegistryInstance, lightshow_data: dict, settings
         # Convert Hex params to RGB tuples
         for key, value in params.items():
             if isinstance(value, str) and value.startswith("#"):
-                params[key] = tuple(int(value[i:i+2], 16) for i in (1, 3, 5, 7)) if len(value) == 9 else tuple(int(value[i:i+2], 16) for i in (1, 3, 5))
+                # hex to RGBA; if alpha is not provided, default to 255 (fully opaque)
+                hex_value = value.lstrip("#")
+                if len(hex_value) == 6:  # RRGGBB
+                    r, g, b = tuple(int(hex_value[i:i+2], 16) for i in (0, 2, 4))
+                    params[key] = (r, g, b, 255)  # Add full opacity
+                elif len(hex_value) == 8:  # RRGGBBAA
+                    r, g, b, a = tuple(int(hex_value[i:i+2], 16) for i in (0, 2, 4, 6))
+                    params[key] = (r, g, b, a)
 
         # Calculate Timing
         start_beats = item.get("start", 0)
@@ -114,11 +121,15 @@ def process_lightshow(registry: RegistryInstance, lightshow_data: dict, settings
         steps = int(duration * settings.FPS)
         start_frame_index = int(start_time * settings.FPS)
 
-        Log.info("LightshowEngine", f"Blending effect {effect_name} at layer {item.get('layer',0)}")
+        #Log.info("LightshowEngine", f"Blending effect {effect_name} at layer {item.get('layer',0)}")
 
         # --- 3. GENERATE EFFECT FRAMES ---
         # The effect should now ideally return RGBA: (r, g, b, alpha 0.0-1.0)
-        effect_output = effect_func(steps, **params)
+        try:
+            effect_output = effect_func(steps, **params)
+        except Exception as e:
+            Log.error_exc(f"LightshowEngine/{effect_name}", e)
+            continue
 
         # --- 4. THE COMPOSITOR (BLENDING) ---
         for i, src_frame in enumerate(effect_output):
