@@ -14,36 +14,6 @@ class SandboxEngine(Engine):
     This is useful for testing and development of effects without needing to restart the entire application.
     """
     SANDBOX_PATH = "sandbox"
-    # default script to create if no scripts are present
-    DEFAULT_SCRIPT =\
-"""from modules.effect import LightEffect, ParamType, EffectType
-import modules.mathutils as mu
-import time
-
-class Breathing(LightEffect):
-    def __init__(self, renderer, coords):
-        # Init the effect
-        super().__init__(renderer, coords, "Breathing", EffectType.UNIVERSAL)
-        # Parameters will work in sandbox, however only the default values will be used and can't be changed at the moment
-        self.fade_speed = self.add_parameter("Fade Speed", ParamType.SLIDER, 50, min=1, max=500, step=1)
-        self.color = self.add_parameter("Color", ParamType.COLOR, "#FF0000")
-        self.off_time = 0.5 # Time to wait when the effect is fully faded out
-        self.t = 0 # The timer variable
-        self.dir = 1 # Direction of the breathing effect (1 for fading in, -1 for fading out)
-
-    def update(self):
-        # Update the time variable
-        self.t += self.dir * self.fade_speed.get() / 10000
-        # Change direction if the breathing effect is fully faded in or out
-        if self.t >= 1:
-            self.dir = -1
-        elif self.t <= 0:
-            self.dir = 1
-            time.sleep(self.off_time)
-        # Update the leds and the renderer
-        for i in range(len(self.renderer)):
-            self.renderer[i] = [mu.clamp(int(channel * self.t), 0, 255) for channel in self.color.get()]
-        self.renderer.show()"""
 
     def __init__(self, renderer, active_setup: Setup):
         self.opened_file = None
@@ -54,12 +24,6 @@ class Breathing(LightEffect):
         self.current_effect_instance = None
         self.running = False
         self.active_setup = active_setup
-        if not os.path.exists(self.SANDBOX_PATH):
-            os.makedirs(self.SANDBOX_PATH)
-            # Create a default script if no scripts are present
-            with open(os.path.join(self.SANDBOX_PATH, "breathing.py"), "w") as f:
-                f.write(self.DEFAULT_SCRIPT)
-            Log.info("SandboxEngine", "No scripts are present. Created a default script (breathing.py).")
         Log.info("SandboxEngine", "Sandbox Engine initialized.")
 
     def on_enable(self):
@@ -87,7 +51,7 @@ class Breathing(LightEffect):
         """
         if not self.file_name:
             return
-        file_path = os.path.join(self.SANDBOX_PATH, self.file_name)
+        file_path = os.path.join(self.SANDBOX_PATH, self.file_name + ".py")
         Log.debug("SandboxEngine", f"Watching file for changes: {file_path}")
         last_modified = os.path.getmtime(file_path)
         while self.running:
@@ -118,8 +82,7 @@ class Breathing(LightEffect):
                 Log.debug("SandboxEngine", "Stopping current effect instance.")
                 self.current_effect_instance = None
             
-            module_name = self.file_name.replace(".py", "")
-            full_module_name = f"{self.SANDBOX_PATH}.{module_name}"
+            full_module_name = f"{self.SANDBOX_PATH}.{self.file_name}"
             
             # Invalidate caches to ensure the module is re-read from disk
             Log.debug("SandboxEngine", "Invalidating import caches.")
@@ -186,7 +149,10 @@ class Breathing(LightEffect):
 
         Log.debug("SandboxEngine", f"Listing files in sandbox directory: {sandbox_dir}")
         Log.debug("SandboxEngine", f"Files found: {os.listdir(sandbox_dir)}")
-        files = [f for f in os.listdir(sandbox_dir) if f.endswith('.py')]
+        files = []
+        for file in os.listdir(sandbox_dir):
+            if file.endswith(".py"):
+                files.append(file[:-3]) # Remove .py extension
         return files
 
     @EngineManager.requires_active

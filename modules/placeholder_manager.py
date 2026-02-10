@@ -10,7 +10,8 @@ def check():
     functions = [
         _check_setup,
         _check_effects,
-        _check_sandbox
+        _check_sandbox,
+        _check_config
     ]
 
     for func in functions:
@@ -54,6 +55,31 @@ class Breathing(LightEffect):
             self.renderer[i] = [mu.clamp(int(channel * self.t), 0, 255) for channel in self.color.get()]
         self.renderer.show()"""
 
+def _generate_default_effect():
+    if not os.path.exists(EFFECTS_DIR):
+        os.makedirs(EFFECTS_DIR, exist_ok=True)
+    with open(os.path.join(EFFECTS_DIR, "breathing.py"), "w") as f:
+        f.write(DEFAULT_EFFECT)
+
+def _generate_default_sandbox():
+    if not os.path.exists(SANDBOX_DIR):
+        os.makedirs(SANDBOX_DIR, exist_ok=True)
+    with open(os.path.join(SANDBOX_DIR, "default.py"), "w") as f:
+        f.write(DEFAULT_EFFECT)
+
+def _generate_default_setup():
+    if not os.path.exists(SETUP_DIR):
+        os.makedirs(SETUP_DIR, exist_ok=True)
+    coordinates = []
+    for x in range(10):
+        for y in range(10):
+            coordinates.append([x, y, 0])
+    default_setup = {
+        "type": "2d",
+        "coordinates": coordinates
+    }
+    with open(os.path.join(SETUP_DIR, "default_setup.json"), "w") as f:
+        json.dump(default_setup, f, indent=4)
 
 def _check_setup():
     """
@@ -67,19 +93,8 @@ def _check_setup():
             if file.endswith(".json"):
                 return
     # no valid setup file found, create a default one
-    Log.info("No setup file found, creating a default one.")
-    coordinates = []
-    for x in range(10):
-        for y in range(10):
-            coordinates.append([x, y, 0])
-    default_setup = {
-        "type": "2d",
-        "coordinates": coordinates
-    }
-    with open(os.path.join(SETUP_DIR, "default_setup.json"), "w") as f:
-        json.dump(default_setup, f, indent=4)
-    # set the current setup to the default one
-    Config().config["current_setup"] = "default_setup"
+    Log.info("PlaceholderManager", "No setup file found, creating a default one.")
+    _generate_default_setup()
 
 def _check_effects():
     if not os.path.exists(EFFECTS_DIR):
@@ -90,10 +105,8 @@ def _check_effects():
             if file.endswith(".py"):
                 return
     # no valid effect file found, create a default one
-    Log.info("No effect file found, creating a default one.")
-    with open(os.path.join(EFFECTS_DIR, "breathing.py"), "w") as f:
-        f.write(DEFAULT_EFFECT)
-    Config().config["current_effect"] = "breathing"
+    Log.info("PlaceholderManager", "No effect file found, creating a default one.")
+    _generate_default_effect()
 
 def _check_sandbox():
     if not os.path.exists(SANDBOX_DIR):
@@ -104,6 +117,34 @@ def _check_sandbox():
             if file.endswith(".py"):
                 return
     # no valid sandbox file found, create a default one
-    Log.info("No sandbox file found, creating a default one.")
-    with open(os.path.join(SANDBOX_DIR, "default.py"), "w") as f:
-        f.write(DEFAULT_EFFECT)
+    Log.info("PlaceholderManager", "No sandbox file found, creating a default one.")
+    _generate_default_sandbox()
+
+def _pick_first_file_or_default(directory, file_extension, default_name):
+    if not os.path.exists(directory):
+        return default_name
+    for file in os.listdir(directory):
+        if file.endswith(file_extension):
+            return file[:-len(file_extension)]
+    return default_name
+
+def _check_config():
+    folder_selections = {
+        "current_setup": (SETUP_DIR, ".json", "default_setup"),
+        "current_effect": (EFFECTS_DIR, ".py", "breathing"),
+        "sandbox_opened_file": (SANDBOX_DIR, ".py", "default")
+    }
+    for key, (directory, extension, default_name) in folder_selections.items():
+        if key not in Config().config:
+            Log.info("PlaceholderManager", f"Config key '{key}' not found, setting it to a default value.")
+            Config().config[key] = _pick_first_file_or_default(directory, extension, default_name)
+    placeholder_values = {
+        "brightness": 1.0,
+        "performance_mode": "high",
+        "enhance_colors": True
+    }
+    for key, value in placeholder_values.items():
+        if key not in Config().config:
+            Log.info("PlaceholderManager", f"Config key '{key}' not found, setting it to a default value.")
+            Config().config[key] = value
+    Config().save()

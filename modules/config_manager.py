@@ -46,6 +46,7 @@ class Config:
         Log.warn("Config", f"Config load failed (keeping previous): {last_err}")
 
     def save(self):
+        Log.info("Config", "Saving configuration...")
         os.makedirs(os.path.dirname(self.CONFIG_PATH), exist_ok=True)
         tmp_path = self.CONFIG_PATH + ".tmp"
         with open(tmp_path, "w", encoding="utf-8") as file:
