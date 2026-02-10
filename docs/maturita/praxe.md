@@ -168,7 +168,7 @@ Třída `AudioEngine` poskytuje kostru pro moduly pracující se zvukem. Obsahuj
 - `on_audio_seek(position)` - Voláno při skoku na jinou pozici v souboru.
 - `on_frame(current_time)` - Volá se každý snímek během přehrávání s aktuálním časem.
 
-Samotné přehrávání audio probíhá v prohlížeči pomocí HTML5 `<audio>` elementu. Server pouze přijímá WebSocket zprávy o změnách stavu přehrávání (play, pause, seek) a reaguje na ně spuštěním příslušných metod v `AudioEngine`. Toto řešení má několik výhod:
+Samotné přehrávání audio probíhá v prohlížeči pomocí HTML5 `<audio>` prvku. Server pouze přijímá WebSocket zprávy o změnách stavu přehrávání (play, pause, seek) a reaguje na ně spuštěním příslušných metod v `AudioEngine`. Toto řešení má několik výhod:
 
 - Není nutné řešit audio output na serveru (Raspberry Pi nemusí mít reproduktor)
 - Uživatel může ovládat hlasitost přímo v prohlížeči
@@ -326,136 +326,26 @@ def set_pixels(self, pixel_list):
     self.renderer.show()
 ````
 
-Frontend pak poskytuje canvas element, kde jsou LED pozice vykresleny jako klikatelné body. Při kliknutí na bod se odešle WebSocket zpráva se seznamem všech barev, které se nastaví na serveru.
+Frontend pak poskytuje implementuje <div>, ve kterém jsou LED pozice vykresleny jako klikatelné body. Při kliknutí na bod se odešle požadavek přes HTTP API pro aktualizaci barvy dané LED diody. 
 
 ### 9.2 `VideoEngine`
 `VideoEngine` umožňuje přehrávat video soubory na LED instalaci. Video je rozloženo do prostoru podle pozic LED diod - každá LED zobrazuje barvu pixelu, který se nachází na její pozici ve videu.
 
-Proces přehrávání:
-1. **Extrakce audio** - FFmpeg extrahuje audio stopu z videa do samostatného souboru
-2. **Dekódování snímků** - Video je dekódováno frame by frame pomocí OpenCV
-3. **Mapování pixelů** - Pro každý snímek se projdou všechny LED a přiřadí se jim barva z odpovídající pozice ve video snímku
-4. **Předvýpočet** - Všechny snímky jsou předpočítány a uloženy v paměti
-5. **Synchronizace** - Přehrávání video snímků je synchronizováno s audio přehráváním v prohlížeči
+Nejdříve je třeba implementovat systém pro zobrazení obrázku na LED instalaci. Tento projekt obsahuje modul `display_utils.py`, který poskytuje funkci `map_image_to_leds(image, coords)`, která vezme 2D obraz formátu knihovny Pillow se seznamem souřadnic LED diod a vrátí seznam barev pro každou LED diodu podle barvy pixelu na pozici LED v obrázku. Funkce hledá nejbližší pixel v obrazu pro každou LED diodu a použije jednoduché vzorkování pomocí box filtru (průměr barev pixelů v okolí LED diody) pro hladší a výstižnější zobrazení. Tato funkcionalita umožňuje zobrazit libovolný obrázek na LED instalaci, i když rozlišení LED diod je mnohem nižší než rozlišení videa. Pro přehrávání videa se tento proces opakuje pro každý snímek videa, čímž se vytvoří animace, společně s audio stopou pro synchronizaci. Posun ve videu se dá ovládat pomocí <audio> prvku poskytnutý modulem AudioEngine.
 
-Výhodou tohoto přístupu je možnost přehrávat libovolné video bez nutnosti ho předem konvertovat do specifického formátu. Video je automaticky "vzorkováno" podle pozic LED diod.
-
-````python
-def on_audio_load(self, video_file):
-    video_path = os.path.join("media", "videos", video_file)
-    
-    # Extract audio with FFmpeg
-    audio_output = os.path.join("media", "videos", "audio", f"{video_name}_audio.mp3")
-    subprocess.run(["ffmpeg", "-i", video_path, "-vn", "-acodec", "mp3", audio_output])
-    
-    # Process video frames
-    cap = cv2.VideoCapture(video_path)
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            break
-        # Map pixels to LED positions
-        led_colors = self.map_frame_to_leds(frame)
-        self.frames.append(led_colors)
-    
-    self.ready_callback(f"{video_name}_audio.mp3")
-````
+`VideoEngine` tudíž dědí z `AudioEngine`. Vzhledem k výpočetní náročnosti práce s video soubory, audio část je extrahována předem již při nahrávání videa pomocí podstránky pro nahrávání souborů, která využívá FFmpeg pro extrakci audio stopy z videa a uložení jako samostatný MP3 soubor. Video soubor je při načítání zpracován pomocí knihovny ImageIO, která je lehčí a efektivnější oproti jiným knihovnám, a pro každý snímek se zavolá funkce ze zmiňovaného `display_utils.py` pro získání barev pro LED diody. Tyto barvy jsou uloženy v paměti jako seznam snímků, které se pak během přehrávání pouze čtou a odesílají na LED diody.
 
 Nevýhodou je vysoká spotřeba paměti při delších videích, protože každý snímek musí být uložen v paměti. Pro video v délce 3 minuty při 30 FPS a 200 LED to představuje cca 10 MB RAM (3×60×30×200×3 bajtů).
 
-## 10. Optimalizace a výkonnostní testy
-Výkon aplikace je kritický pro plynulé přehrávání efektů. Raspberry Pi, i když je výkonné pro svou velikost, má výrazně nižší výpočetní výkon než desktopové počítače.
+## 10. Config, logování, cache
+### 10.1 Config
+Konfigurace celého projektu leží v souboru config/server_config.json, který obsahuje nastavení pro různé části aplikace, jako je poslední zapnutý efekt, všechny hodnoty z nastavení, aktuální rozložení LED diod a zvolené hodnoty pro všechny parametry efektů. Tento soubor je načítán při startu serveru a spravován modulem `config_manager.py`, který poskytuje funkce pro získání a aktualizaci jednotlivých nastavení. Data ze souboru jsou uchovány v instanci třídě Config, která je implementována jako singleton, což zajišťuje, že všechny části aplikace pracují se stejnou jedinou instancí konfigurace. Modul je velmi jednoduchý, umožňuje interakci s daty přímo ve slovníku `Config().config[]` a vyžaduje explicitní volání `Config().save()` pro uložení změn do souboru. Na ukládání a načítání používá modul vestavěnou knihovnu `json` pro práci s JSON formátem. 
 
-### 10.1 Limitace hardwaru (Raspberry Pi Zero 2W)
-Raspberry Pi Zero 2W obsahuje čtyřjádrový ARM Cortex-A53 procesor na frekvenci 1 GHz a 512 MB RAM. Hlavní limitace:
+### 10.2 Logování
+Pro sledování chodu aplikace a usnadnění ladění je implementován vlastní systém logování v modulu `log_manager.py`. Modul je staticky implementován, proto umožňuje volat funkce pro logování z libovolné části kódu bez nutnosti předávání instance loggeru. Logovací funkce (info, warn - varování, error - chyba, debug - zpráva pro ladění) přijímají název zdroje (například název modulu nebo funkce) a zprávu, kterou chtějí zalogovat. Logy jsou ukládány do složky logs s názvem souboru odpovídajícím datu a času spuštění serveru. Každý log obsahuje časovou značku, úroveň logu, název zdroje a samotnou zprávu. Frontend také poskytuje zobrazení logů, barevně označené a filtrovatelné podle zdroje. Vše je samozdřejmě viditelné v konzoli pro snadný přístup během vývoje.
 
-**CPU výkon:**
-- Python interpretace je pomalejší než kompilované jazyky
-- GIL (Global Interpreter Lock) omezuje využití více jader
-- Floating point operace jsou pomalejší než na x86 architektuře
-
-**Paměť:**
-- 512 MB RAM musí být sdíleno s operačním systémem
-- Předvýpočtené snímky pro dlouhé lightshow mohou vyčerpat dostupnou paměť
-- Swap na SD kartě je extrémně pomalý
-
-**I/O:**
-- SD karta má omezenou rychlost čtení/zápisu
-- Wi-Fi má vyšší latenci než ethernet
-
-### 10.2 Měření snímkovací frekvence (FPS)
-Pro měření výkonu je implementován jednoduchý FPS counter v modulu `EffectsEngine`:
-
-````python
-frame_count = 0
-start_time = time.time()
-
-while self.running:
-    if self.current_effect:
-        self.current_effect.update()
-        frame_count += 1
-        
-        if frame_count % 100 == 0:
-            elapsed = time.time() - start_time
-            fps = frame_count / elapsed
-            Log.debug("EffectsEngine", f"FPS: {fps:.1f}")
-````
-
-Typické hodnoty FPS pro různé typy efektů:
-- **Jednoduché efekty** (solid color, breathing): 200-300 FPS
-- **Středně složité** (rainbow, color sweep): 60-120 FPS
-- **Komplexní** (particle systems, 3D transformace): 30-60 FPS
-
-Pro audio/video přehrávání je cílová frekvence nastavena na 30-60 FPS podle výkonu modu v nastavení. Toto je dostatečné pro plynulý vjem, protože lidské oko vnímá změny v osvětlení méně citlivě než video obsah.
-
-### 10.3 Profilování kódu a úzká hrdla (Bottlenecks)
-Pro identifikaci úzkých hrdel byl použit Python `cProfile` modul:
-
-````python
-import cProfile
-import pstats
-
-profiler = cProfile.Profile()
-profiler.enable()
-
-# Run effect for 100 frames
-for _ in range(100):
-    effect.update()
-
-profiler.disable()
-stats = pstats.Stats(profiler)
-stats.sort_stats('cumulative')
-stats.print_stats(20)
-````
-
-Hlavní zjištěné bottlenecky:
-
-**1. Renderer.show()** - Odesílání dat na LED pomocí DMA zabírá 5-10 ms na 200 LED. Toto je hardwarové omezení a nelze optimalizovat.
-
-**2. Matematické operace** - Výpočty vzdáleností, normalizace, barevné konverze. Optimalizace: použití NumPy pro vektorizované operace kde je to možné.
-
-**3. Barevné konverze** - HSV↔RGB konverze pomocí `colorsys.hsv_to_rgb()` je pomalá. Optimalizace: vlastní implementace nebo lookup table pro často používané hodnoty.
-
-**4. Garbage collector** - Python GC se občas spustí během přehrávání. Optimalizace: předalokace bufferů, minimalizace vytváření dočasných objektů.
-
-### 10.4 Latence sítě při ovládání v reálném čase
-Při ovládání přes webové rozhraní je důležitá nízká latence mezi akcí uživatele a změnou na LED.
-
-**Měření latence:**
-Pomocí browser console a `performance.now()` byl změřen čas od kliknutí na tlačítko po příjem WebSocket odpovědi:
-
-- **Lokální síť (WiFi)**: 20-50 ms
-- **Přístupový bod (AP mode)**: 10-30 ms
-- **Přes internet (tunel)**: 100-300 ms (závislé na spojení)
-
-**Optimalizace:**
-- WebSockets místo HTTP polling (eliminace overhead spojení)
-- Debouncing pro slider parametry (neposílat každou hodnotu při tazhání)
-- Přednostní zpracování real-time zpráv (play/pause/stop) před méně kritickými (nahrávání souborů)
-
-Pro běžné použití v domácí síti je latence prakticky neznatelná (<50 ms), což je méně než reakční doba člověka.
+### 10.3 Cache
+Jeden z nejdůležitějších optimalizačních mechanismů je bez pochyby cache. Vzhledem k tomu, že některé operace, jako je validace efektů nebo načítání lightshow, mohou být velmi náročné na výkon, implementoval jsem systém cache pro ukládání výsledků těchto operací. Modul `caching.py` umožňuje ukládání a čtení souborů podle jména, které jsou modulem ukládány do složky `.cache/`. Soubory mají stanovenou příponu .cache, ale jsou to jednoduché textové soubory a data jsou do nich ukládána ve formátu JSON pro snadnou manipulaci. Nejvýznamnější využití cache je při načítání efektů, kde se ukládá seznam hashů ověřených efektů.
 
 ## 11. Závěr a budoucí rozvoj
 
@@ -484,7 +374,6 @@ Ačkoliv je současná implementace plně funkční, existuje prostor pro budouc
 - **DMX512 protokol** - Přidání podpory pro DMX512 by umožnilo ovládat profesionální stage lighting hardware.
 
 **Softwarové vylepšení:**
-- **Lightshow editor desktop** - Samostatná aplikace (např. v Electronu) s timeline editorem podobným video editorům, usnadňující tvorbu složitých lightshow.
 - **Cloud synchronizace** - Možnost sdílet efekty a lightshow mezi více zařízeními.
 - **MIDI vstup** - Řízení efektů pomocí MIDI kontrolérů pro live performance.
 - **Generativní efekty** - Integrace AI modelů pro automatické generování efektů na základě hudby.
