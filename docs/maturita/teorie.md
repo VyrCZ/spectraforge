@@ -1,139 +1,103 @@
-# Teoretická část
+Zde je návrh teoretické části. Text je psán odborným, akademickým stylem, který odpovídá úrovni maturitní práce, a plynule navazuje na praktickou část.
 
-Tato kapitola shrnuje teoretická východiska nutná pro pochopení problematiky moderních světelných systémů, hardwarové architektury a softwarového inženýrství použitého v praktické části práce.
+---
+
+# Teoretická část
 
 ## 1. Moderní světelné systémy
 
+Osvětlovací technika prošla v posledních dekádách revoluční proměnou, která posunula vnímání světla z pouhého funkčního prvku na klíčový nástroj uměleckého vyjádření a designu. Moderní systémy již nejsou omezeny na statické svícení, ale stávají se dynamickými instalacemi schopnými reagovat na okolní podněty, hudbu či interakci s uživatelem.
+
 ### 1.1 Historie a vývoj LED technologie
 
-Technologie LED (Light Emitting Diode) prošla od svého objevu v první polovině 20. století dramatickým vývojem. První prakticky využitelnou LED diodu emitující viditelné červené spektrum vyvinul v roce 1962 Nick Holonyak Jr. Po desetiletí byly diody omezeny pouze na červenou a později zelenou barvu s nízkou svítivostí, což je předurčovalo pouze pro indikační účely.
-
-Zlom nastal v 90. letech 20. století, kdy **Shuji Nakamura, Isamu Akasaki a Hiroshi Amano** vynalezli vysoce účinnou modrou LED diodu na bázi nitridu gallitého (GaN). Tento objev, oceněný Nobelovou cenou za fyziku, umožnil vznik bílého světla (kombinací modrého světla a žlutého luminoforu) a plnobarevných RGB displejů a pásků. Dnešní moderní LED systémy se vyznačují vysokou účinností (lm/W), dlouhou životností a možností digitálního řízení.
+Zkratka LED označuje diodu emitující světlo (Light Emitting Diode). Princip elektroluminiscence, na kterém tyto polovodičové součástky fungují, byl objeven již na počátku 20. století, avšak první prakticky využitelnou červenou LED diodu vyvinul až v roce 1962 Nick Holonyak. Zásadním zlomem byl vynález modré LED diody v 90. letech, za který získal Shuji Nakamura Nobelovu cenu. Tato inovace umožnila kombinací s luminoforem vznik bílého světla a otevřela cestu k plnobarevnému RGB míchání. Zatímco původní diody sloužily pouze jako indikační prvky, dnešní technologie umožňuje miniaturizaci a integraci řídicích čipů přímo do pouzdra diody, což vedlo ke vzniku tzv. digitálních či adresovatelných LED pásků.
 
 ### 1.2 LED mapping vs. projekce
 
-V oblasti vizuálního umění a scénografie se často setkáváme se dvěma přístupy k osvětlování objektů:
-
-* **Video mapping (Projekce):** Využívá výkonné projektory k promítání obrazu na 3D objekt. Výhodou je vysoké rozlišení a možnost měnit obsah bez zásahu do objektu. Nevýhodou je nutnost tmy (nízký kontrast za dne), stínění diváky a vysoká cena profesionálních projektorů.
-* **LED mapping (Pixel mapping):** Spočívá v osazení samotného objektu světelnými zdroji (LED pásky, pixely). .
-* **Výhody:** Vysoký jas a kontrast (viditelné i za denního světla), diváci nemohou vrhat stín do obrazu, možnost vytvářet 3D volumetrické efekty.
-* **Nevýhody:** Nižší rozlišení (dané hustotou LED) a náročná instalace kabeláže. Tato práce se zaměřuje právě na tuto metodu.
-
----
+V oblasti vizuálního umění se často setkáváme se dvěma přístupy: video mappingem a LED mappingem. Video mapping využívá projektory k promítání obrazu na existující povrchy. Tato metoda je závislá na vnějších světelných podmínkách (vyžaduje tmu) a přímé viditelnosti mezi projektorem a objektem. Naproti tomu LED mapping, neboli volumetrické zobrazování, vytváří obraz přímo na povrchu objektu nebo v jeho objemu pomocí sítě světelných bodů. Výhodou tohoto přístupu je extrémní jas, nezávislost na okolním osvětlení a možnost vytvářet 3D struktury, které lze pozorovat ze všech úhlů bez rizika stínění obrazu divákem.
 
 ## 2. Technologie adresovatelných LED
 
+Adresovatelné LED diody představují specifickou kategorii osvětlení, kde každý světelný bod (pixel) může být ovládán nezávisle na ostatních, ačkoliv jsou všechny zapojeny na společném datovém vodiči.
+
 ### 2.1 Princip fungování (čipy WS281x, SK6812)
 
-Adresovatelné LED diody, často označované jako "NeoPixel" (obchodní název společnosti Adafruit), integrují v pouzdře velikosti 5050 (5x5 mm) nejen samotné čipy pro červenou, zelenou a modrou barvu, ale také **integrovaný obvod (IC)** pro řízení.
-
-Nejrozšířenějším typem je řada **WS2812B** (a její klony jako SK6812). Každá dioda funguje jako posuvný registr. Data jsou posílána sériově do první diody, ta si "odkrojí" prvních 24 bitů (8 bitů pro každý kanál G, R, B) pro nastavení své barvy pomocí PWM (Pulse Width Modulation) a zbytek dat přeposílá tvarovaným výstupem do diody následující. To umožňuje řídit stovky diod pomocí jediného datového pinu mikrokontroléru.
+Nejrozšířenějším standardem v oblasti hobby i poloprofesionálních instalací jsou čipy rodiny WS2812B (často označované jako NeoPixel) nebo jejich klony SK6812. Každá taková LED dioda obsahuje uvnitř svého pouzdra nejen samotné čipy pro červenou, zelenou a modrou barvu, ale také miniaturní integrovaný obvod. Tento řadič přijímá data ze vstupního pinu, odebere prvních 24 bitů (8 bitů pro každou barvu) pro vlastní nastavení, a zbytek dat zesílí a pošle na výstupní pin k další diodě v řetězci. Díky tomu je možné ovládat stovky až tisíce diod pomocí jediného datového pinu mikrokontroléru.
 
 ### 2.2 Komunikační protokoly a časování
 
-Komunikace s čipy WS281x je specifická tím, že nepoužívá hodinový signál (clock), jako je tomu u protokolů SPI nebo I2C. Jedná se o asynchronní sériový protokol, který je extrémně závislý na přesném časování.
-
-Logická nula a jednička jsou kódovány délkou pulzu (NZR – Non-Return-to-Zero):
-
-* **Logická 0:** Krátký pulz v logické 1 (cca ) následovaný delším úsekem v logické 0.
-* **Logická 1:** Dlouhý pulz v logické 1 (cca ) následovaný kratším úsekem v logické 0.
-
-Celková perioda jednoho bitu je přibližně , což odpovídá frekvenci datového toku . Jakákoliv odchylka v řádu stovek nanosekund může způsobit chybu v přenosu, což klade vysoké nároky na řídicí hardware.
+Komunikace s těmito čipy probíhá pomocí asynchronního sériového protokolu typu NRZ (Non-Return-to-Zero). Protokol je velmi citlivý na časování, protože nepoužívá hodinový signál (clock). Logická nula a logická jednička jsou definovány délkou trvání pulzu v rámci pevně daného časového okna, obvykle v řádech stovek nanosekund. [🎨 obrázek časového diagramu protokolu WS2812, ukazující rozdíl v délce pulzu pro 0 a 1] Například u čipu WS2812B trvá přenos jednoho bitu 1,25 µs. Pokud řídicí systém nedokáže dodržet toto striktní časování, dochází k chybám v zobrazení nebo k blikání celé instalace. Signál "Reset", který odděluje jednotlivé snímky, je definován jako stav nízké úrovně napětí po dobu delší než 50 µs.
 
 ### 2.3 Problematika napájení a distribuce signálu
 
-Při návrhu LED instalací je nutné řešit dva fyzikální problémy:
+Při návrhu rozsáhlejších instalací je kritickým faktorem napájení. Každý pixel při plném jasu (bílá barva) odebírá přibližně 60 mA. Pro řetězec 200 LED diod to znamená odběr až 12 A, což běžné vodiče na LED páscích nedokážou přenést bez výrazného úbytku napětí. Tento úbytek se projevuje postupným červenáním a slábnutím jasu směrem ke konci pásku (modrá LED potřebuje nejvyšší napětí, proto zhasíná první). Řešením je injektáž napájení (power injection) na více místech instalace paralelním vedením. Dále je nutné řešit filtraci napěťových špiček pomocí kondenzátorů a přizpůsobení logických úrovní, jelikož LED pásky obvykle pracují s 5V logikou, zatímco moderní mikrokontroléry a Raspberry Pi využívají 3,3V.
 
-1. **Úbytek napětí (Voltage Drop):** Vedení na flexibilních PCB páscích má nezanedbatelný odpor. Dle Ohmova zákona 
+### 2.4 Teorie barev v digitálním světě
 
- dochází při průchodu proudu k poklesu napětí. Pokud napětí na konci pásku klesne pod cca 3.5V, modrá složka LED přestane svítit a barvy se zkreslí do červena. Řešením je paralelní injektáž napájení (power injection) každých několik metrů.
-2. **Logické úrovně:** Čipy WS2812 obvykle vyžadují logickou úroveň datového signálu minimálně  (tedy cca 3.5V při 5V napájení). Raspberry Pi však pracuje s logikou 3.3V. Přímé připojení může fungovat nestabilně, proto je nutné použít převodník logických úrovní (Level Shifter), např. 74AHCT125.
+Pro reprezentaci barev v počítačové grafice a LED technice se využívají různé barevné modely. Hardware LED diod pracuje s aditivním mícháním barev v modelu **RGB** (Red, Green, Blue). Smícháním těchto tří primárních barev v plné intenzitě vzniká bílé světlo, jejich absencí černá (tma).
 
----
+Pro programování efektů je však model RGB často nevhodný, protože je pro člověka neintuitivní definovat barvu poměrem tří složek. Proto se využívá model **HSV** (Hue, Saturation, Value), který definuje barvu pomocí odstínu (úhel na barevném kruhu), sytosti a jasu. Tento model umožňuje snadnou implementaci efektů, jako je "duha", pouhou iterací hodnoty Hue, což by v RGB vyžadovalo složité přepočty.
+
+### 2.5 Lidské vnímání jasu a barev
+
+Lidské oko nevnímá intenzitu světla lineárně, ale logaritmicky (podle Weber-Fechnerova zákona). To znamená, že LED dioda nastavená na 50 % výkonu (hodnota 128 z 255) se lidskému oku jeví mnohem jasnější, spíše jako 80 % maximálního jasu. [🎨 graf porovnání lineární křivky a křivky s gamma korekcí] Aby byly přechody jasu plynulé a barvy věrné, je nutné aplikovat tzv. **gamma korekci**. Tento proces transformuje lineární vstupní hodnoty pomocí mocninné funkce (obvykle s exponentem gamma 2.2 až 2.8), čímž kompenzuje nelinearitu lidského zraku a zajišťuje přirozenější vizuální vjem.
 
 ## 3. Hardwarová platforma
 
-### 3.1 Architektura Raspberry Pi (proč jsem si ho vybral)
+Srdcem celého systému Spectraforge je jednodeskový počítač, který musí zvládat nejen komunikaci s LED diodami, ale také běh webového serveru a výpočty v reálném čase.
 
-Pro řízení systému byl zvolen jednodeskový počítač **Raspberry Pi** (model 4/5). Na rozdíl od mikrokontrolérů (Arduino, ESP32), které spouští kód přímo na "železe" (bare metal), běží na Raspberry Pi plnohodnotný operační systém Linux (Debian/Raspberry Pi OS).
+### 3.1 Architektura Raspberry Pi
 
-**Důvody volby pro tuto práci:**
-
-* **Výkon:** Čtyřjádrový procesor ARM Cortex-A72 umožňuje provádět náročné výpočty (např. FFT analýzu zvuku) v reálném čase, což by u slabších mikrokontrolérů bylo problematické.
-* **Konektivita:** Integrované Wi-Fi a Ethernet pro provoz webového serveru.
-* **Python ekosystém:** Dostupnost knihoven pro zpracování multimédií a vědecké výpočty.
+Pro tento projekt bylo zvoleno Raspberry Pi (konkrétně model Zero 2 W nebo 3/4) namísto běžných mikrokontrolérů jako Arduino nebo ESP32. Hlavním důvodem je potřeba operačního systému Linux, který umožňuje běh pokročilých aplikací v jazyce Python, multitasking a snadnou správu souborů. Raspberry Pi disponuje dostatečným výpočetním výkonem (čtyřjádrový procesor) pro provádění Fast Fourierovy Transformace (FFT) pro audio analýzu v reálném čase, což by bylo na menších mikrokontrolérech obtížně realizovatelné souběžně s obsluhou sítě a webového rozhraní.
 
 ### 3.2 Způsoby nasazení softwaru
 
-Moderní vývoj embedded aplikací se posouvá od manuální instalace k automatizaci.
-
-* **Virtual Environments (venv):** Izolace závislostí Pythonu, aby nedocházelo ke konfliktům se systémovými balíčky.
-* **Systemd služby:** Pro zajištění automatického spuštění aplikace po startu systému a jejího restartování v případě pádu.
-* **Docker (volitelně):** Kontejnerizace celé aplikace, což zajišťuje konzistenci prostředí bez ohledu na verzi OS.
+Software na platformě Linux je obvykle spravován jako služba (daemon). Využití init systému `systemd` zajišťuje, že aplikace se automaticky spustí po startu systému a v případě pádu je restartována. Pro izolaci závislostí a knihoven jazyka Python je využíváno virtuální prostředí (`venv`), které zabraňuje konfliktům mezi systémovými balíčky a balíčky vyžadovanými aplikací.
 
 ### 3.3 Konfigurace bezhlavého (headless) systému a AP
 
-Systém je navržen jako "headless", tedy bez připojeného monitoru, klávesnice a myši. Správa probíhá vzdáleně přes protokol SSH.
-
-Pro zajištění funkčnosti i v místech bez existující infrastruktury (např. venkovní instalace) je Raspberry Pi konfigurováno jako **Wi-Fi Access Point (AP)** pomocí nástroje `hostapd` a `dnsmasq`. Počítač vytvoří vlastní síť, ke které se uživatel připojí telefonem či notebookem a ovládá světla přes prohlížeč.
-
----
+Většina instalací světelné techniky neumožňuje připojení monitoru, klávesnice a myši. Systém je proto konfigurován jako tzv. bezhlavý (headless), ovládaný vzdáleně pomocí protokolu SSH. Pro zajištění použitelnosti v terénu, kde nemusí být dostupná Wi-Fi síť, je Raspberry Pi nakonfigurováno tak, aby vytvářelo vlastní přístupový bod (Access Point). Uživatel se tak může připojit přímo k zařízení pomocí telefonu či notebooku a ovládat instalaci nezávisle na externí infrastruktuře.
 
 ## 4. Softwarové řešení (Backend)
 
+Backendová část aplikace zajišťuje logiku řízení, zpracování dat a komunikaci s hardwarem.
+
 ### 4.1 Jazyk Python v embedded systémech
 
-Python je interpretovaný jazyk na vysoké úrovni. Jeho hlavní výhodou je čitelnost kódu a rychlost vývoje. V kontextu embedded systémů je často kritizován za nižší rychlost a přítomnost GIL (Global Interpreter Lock), který omezuje využití více vláken.
-
-Pro tuto práci je však Python ideální volbou pro rychlý vývoj, obsáhlý ekosystém a JIT architektuře pro načítání efektů za běhu (runtime). Výkonově kritické části (komunikace s hardwarem, matematické operace) jsou napsány v jazyce C a Python je volá jako optimalizované knihovny (NumPy, rpi_ws281x).
+Python byl zvolen pro svou čitelnost, rozsáhlou ekosystém knihoven a rychlost vývoje. V kontextu embedded systémů je však nutné brát v úvahu jeho limity, zejména co se týče výkonu interpretovaného kódu a správy paměti (Garbage Collection), která může způsobovat nepravidelné zpoždění (jitter). Pro časově kritické operace je proto nutné využívat optimalizované knihovny napsané v jazyce C, které jsou z Pythonu pouze volány.
 
 ### 4.2 Knihovna NeoPixel a přímý přístup k DMA
 
-Jak bylo zmíněno v kapitole 2.2, časování WS2812 vyžaduje přesnost na stovky nanosekund. Operační systém Linux (který není v základu Real-Time OS) nemůže zaručit, že procesor nebude přerušen jinou úlohou právě v okamžiku odesílání dat, což by způsobilo blikání LED.
-
-Tento problém řeší knihovna `rpi_ws281x` využitím **DMA (Direct Memory Access)**. DMA řadič umožňuje přenášet data z paměti RAM přímo na periferie (PWM modul nebo PCM) bez účasti procesoru (CPU).
-
-* Signál je generován pomocí PWM (Pulse Width Modulation) modulu Raspberry Pi.
-* Tímto způsobem získáme stabilní signál nezávislý na zátěži operačního systému.
+Protože operační systém Linux není systémem reálného času (RTOS) a může kdykoliv přerušit běh procesu kvůli jiným úlohám, není možné generovat signál pro WS2812B přímo "bit-bangingem" na procesoru. Knihovna `rpi_ws281x` tento problém obchází využitím DMA (Direct Memory Access). DMA řadič umožňuje přenášet data z paměti RAM přímo na GPIO piny pomocí PWM (Pulse Width Modulation) nebo PCM periférie bez intervence procesoru. Tím je zajištěno stabilní časování signálu nezávisle na zátěži CPU.
 
 ### 4.3 Zpracování multimédií (FFmpeg, PyDub)
 
-Pro vizualizaci hudby a videa je nutné dekódovat vstupní soubory.
-
-* **FFmpeg:** Robustní framework pro práci s multimédii. V práci je využit pro extrakci audio stopy z video souborů nebo konverzi formátů.
-* **PyDub / NumPy:** Slouží k načtení audio dat do paměti a jejich matematické analýze. Pro vizualizaci frekvenčního spektra se využívá **Rychlá Fourierova transformace (FFT)**, která převede signál z časové domény 
-
-.
+Pro práci s audio a video soubory systém využívá nástroj FFmpeg, který slouží jako univerzální dekodér. Knihovny jako PyDub nebo ImageIO interně volají FFmpeg pro převod různých formátů (MP3, MP4, WAV) do surových dat (PCM pro audio, RGB matice pro video), se kterými může aplikace dále pracovat. Tento přístup zajišťuje širokou kompatibilitu s formáty souborů dodaných uživatelem.
 
 ### 4.4 3D vizualizace dat pomocí PyVista
 
-Při složitějším mappingu (např. LED pásek omotaný kolem sochy) 2D matice pixelů neodpovídá realitě.
-Knihovna **PyVista** (wrapper nad VTK) umožňuje vytvořit virtuální 3D model instalace. Každému bodu v 3D prostoru (x, y, z) je přiřazen index LED diody. To umožňuje generovat efekty, které jsou prostorově koherentní (např. rovina světla procházející objektem), bez ohledu na to, jak je pásek fyzicky zapojen.
+Pro simulaci LED instalace na obrazovce je využívána knihovna PyVista, která poskytuje vysokoúrovňové rozhraní pro vizualizační toolkit VTK. Umožňuje efektivní vykreslování mračna bodů (point cloud) ve 3D prostoru, kde každý bod reprezentuje jednu LED diodu. To je klíčové pro vývoj a ladění 3D efektů bez nutnosti fyzického přístupu k hardwaru.
 
----
+### 4.5 Dynamické načítání modulů a bezpečnostní rizika
+
+Architektura aplikace využívá dynamické načítání modulů pomocí knihovny `importlib`, což umožňuje přidávat nové efekty za běhu. Tento flexibilní přístup však přináší bezpečnostní rizika. Spuštění kódu třetí strany (například efektu staženého z internetu) uvnitř aplikace dává tomuto kódu plná oprávnění uživatele, pod kterým server běží. V teoretické rovině by bezpečný systém měl využívat tzv. sandboxing, tedy izolaci spouštěného kódu v odděleném procesu s omezenými právy, aby se zabránilo přístupu k citlivým částem systému.
 
 ## 5. Řídicí rozhraní (Frontend)
 
+Frontend představuje vrstvu, se kterou interaguje koncový uživatel. Musí být responzivní a poskytovat okamžitou zpětnou vazbu.
+
 ### 5.1 Architektura klient-server (Flask)
 
-Backend aplikace běží na frameworku **Flask**. Ten poskytuje webový server, který obsluhuje HTTP požadavky. Slouží primárně k:
-
-1. Servírování statických souborů (HTML, CSS, JS) klientovi.
-2. Poskytování REST API pro nastavení konfigurace, která nevyžaduje okamžitou odezvu (např. nahrávání souborů, změna počtu LED).
+Jako webový server slouží framework Flask. Ten funguje na principu zpracování HTTP požadavků, kdy klient (prohlížeč) požádá o stránku nebo data a server odpoví. Tento model Request-Response je vhodný pro načítání statického obsahu a konfiguraci, ale je nedostatečný pro řízení v reálném čase kvůli vysoké režii a latenci každého spojení.
 
 ### 5.2 Real-time komunikace pomocí WebSockets (Socket.IO)
 
-Pro ovládání efektů (změna barvy, jasu, přepínání módů) je standardní HTTP protokol nevhodný kvůli vysoké latenci (nutnost navázat spojení pro každý požadavek - 3-way handshake).
-
-Proto je využita technologie **WebSockets** prostřednictvím knihovny **Socket.IO**.
-
-* WebSockets udržují trvalé, obousměrné spojení (full-duplex) mezi klientem (prohlížečem) a serverem (RPi).
-* To umožňuje odesílat příkazy s minimálním zpožděním (v řádu milisekund), což je klíčové pro pocit plynulého ovládání.
+Pro okamžitou reakci světel na akce uživatele (např. spuštění hudby, změna jasu) je využit protokol WebSocket. Na rozdíl od HTTP vytváří WebSocket trvalé, obousměrné spojení mezi serverem a prohlížečem. Knihovna Socket.IO nad tímto protokolem staví abstrakci založenou na událostech (events). Díky tomu může server poslat zprávu klientovi ("přehrávání začalo") nebo klient serveru ("nastav barvu na červenou") s minimálním zpožděním v řádu milisekund. [🎨 diagram porovnání komunikace HTTP vs WebSocket]
 
 ### 5.3 Uživatelské rozhraní (HTML/CSS/JS)
 
-Frontend je navržen jako *Single Page Application* (SPA).
+Rozhraní je navrženo pomocí standardních webových technologií HTML5, CSS3 a čistého JavaScriptu (Vanilla JS). Vzhledem k povaze projektu není nutné využívat komplexní frontendové frameworky jako React nebo Vue. Důraz je kladen na responzivitu, aby bylo ovládání pohodlné jak na desktopu, tak na mobilních zařízeních, která se často používají pro ovládání instalací v terénu.
 
-* **HTML5:** Definuje strukturu (tlačítka, posuvníky, color pickery).
-* **CSS3 (Flexbox/Grid):** Zajišťuje responzivitu, aby bylo rozhraní použitelné jak na mobilním telefonu, tak na desktopu.
-* **JavaScript:** Zpracovává vstupy uživatele a odesílá data přes Socket.IO na backend, aniž by se musela znovu načítat celá stránka.
+### 5.4 Formáty pro výměnu dat (JSON)
+
+Pro strukturovanou výměnu dat mezi Python backendem a JavaScript frontendem se používá formát JSON (JavaScript Object Notation). Je to textový formát nezávislý na jazyce, který je snadno čitelný pro lidi i stroje. V projektu Spectraforge se do JSONu serializují konfigurace efektů, definice světelných show i seznamy souborů.

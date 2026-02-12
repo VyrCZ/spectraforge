@@ -8,6 +8,8 @@
 ### 2.1 Princip fungování (čipy WS281x, SK6812)
 ### 2.2 Komunikační protokoly a časování
 ### 2.3 Problematika napájení a distribuce signálu
+### 2.4 Teorie barev v digitálním světě (Barevné modely RGB, HSV a aditivní míchání barev)
+### 2.5 Lidské vnímání jasu a barev (Proč lidské oko vnímá jas nelineárně a proč musíme matematicky upravovat výstup pro LED (rozdíl mezi lineárním zvýšením proudu a subjektivním pocitem jasu).)
 
 ## 3. Hardwarová platforma
 ### 3.1 Architektura Raspberry Pi (proč jsem si ho vybral)
@@ -19,11 +21,13 @@
 ### 4.2 Knihovna NeoPixel a přímý přístup k DMA
 ### 4.3 Zpracování multimédií (FFmpeg, PyDub)
 ### 4.4 3D vizualizace dat pomocí PyVista
+### 4.5 Dynamické načítání modulů a bezpečnostní rizika
 
 ## 5. Řídicí rozhraní (Frontend)
 ### 5.1 Architektura klient-server (Flask)
 ### 5.2 Real-time komunikace pomocí WebSockets (Socket.IO)
 ### 5.3 Uživatelské rozhraní (HTML/CSS/JS)
+### 5.4 Formáty pro výměnu dat (Json, atd.)
 
 ---
 
