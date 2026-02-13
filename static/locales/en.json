@@ -58,5 +58,6 @@
     "settings_performance_mode_medium": "Medium",
     "settings_performance_mode_high": "High",
     "settings_language": "Language:",
-    "settings_enhance_colors": "Enhance Colors:"
+    "settings_enhance_colors": "Enhance Colors:",
+    "settings_current_setup": "Current Setup:"
 }

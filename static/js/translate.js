@@ -1,4 +1,4 @@
-var langs = ["en", "cn", "no", "😎"];
+var langs = ["en", "cn", "no", "😎", "cz"];
 
 async function setLanguage(lang) {
     // If the language is English, do nothing, as the page is already in English.
