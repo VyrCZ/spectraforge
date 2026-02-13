@@ -1,9 +1,9 @@
 # Praktická část
 
 ## 0. Úvod
-Spectraforge je software pro řízení adresovatelných LED diod v reálném čase, navržený pro platformu Raspberry Pi. Umožňuje snadné vytváření a přidávání světelných efektů či animací a nabízí sadu dalších způsobů interakce s LED světly – například pomocí zvukových vstupů nebo předem nahraných světelných show. Vše je ovladatelné prostřednictvím webového rozhraní. Světla lze umístit na 3D povrch (například vánoční stromek) nebo do 2D prostoru (například na zeď). Tento software je určen pro umělce, vývojáře a nadšence do světelné techniky, kteří chtějí jednoduše vytvářet a spravovat světelné instalace. Aplikace také obsahuje nástroj pro simulaci LED diod na obrazovce, což usnadňuje vývoj a testování efektů bez nutnosti použití fyzického hardwaru.
+Spectraforge je software pro řízení adresovatelných LED diod v reálném čase, navržený pro platformu Raspberry Pi. Umožňuje snadné vytváření a přidávání světelných efektů či animací a nabízí sadu dalších způsobů interakce s LED světly - například pomocí zvukových vstupů nebo předem nahraných světelných show. Vše je ovladatelné prostřednictvím webového rozhraní. Světla lze umístit na 3D povrch (například vánoční stromek) nebo do 2D prostoru (například na zeď). Tento software je určen pro umělce, vývojáře a nadšence do světelné techniky, kteří chtějí jednoduše vytvářet a spravovat světelné instalace. Aplikace také obsahuje nástroj pro simulaci LED diod na obrazovce, což usnadňuje vývoj a testování efektů bez nutnosti použití fyzického hardwaru.
 
-//  obrázek stromku
+![](imgs/main_screen.png)
 
 ## 1. Návod k použití
 Tato sekce poskytuje kompletní návod k instalaci, základnímu nastavení, používání a vývoji efektů v prostředí Spectraforge.
@@ -11,10 +11,10 @@ Tato sekce poskytuje kompletní návod k instalaci, základnímu nastavení, pou
 ### 1.1. Instalace a spuštění
 Pro běh aplikace je vyžadován nainstalovaný Python. Vývoj probíhal na verzi 3.10, systém byl však testován i na verzi 3.13 a měl by být kompatibilní i s nejnovější verzí (3.15 k datu psaní této práce). Do cílové složky extrahujte obsah repozitáře, vytvořte virtuální prostředí (doporučeno) a nainstalujte vyžadované moduly ze souboru `requirements.txt`. Po spuštění hlavního souboru `server.py` se aktivuje webový server, který je dostupný na IP adrese zařízení na portu 5000 (adresa je zobrazena v konzoli po spuštění). Pro simulaci LED diod na obrazovce současně spusťte `led_simulator.py`.
 
-Pro nasazení do prostředí s hardwarem na Raspberry Pi je nutné nainstalovat knihovny pro NeoPixel (`pip3 install rpi_ws281x adafruit-circuitpython-neopixel`) zajišťující komunikaci s LED diodami. Aplikace automaticky detekuje, zda běží na Raspberry Pi, a podle toho zvolí správnou vrstvu pro komunikaci s hardwarem. Doporučuje se také nastavit automatické spuštění aplikace po startu systému pomocí služby systemd, jak je popsáno v kapitole 3.2 teoretické části. ⚠️⚠️
+Pro nasazení do prostředí s hardwarem na Raspberry Pi je nutné nainstalovat knihovny pro NeoPixel (`pip3 install rpi_ws281x adafruit-circuitpython-neopixel`) zajišťující komunikaci s LED diodami. Aplikace automaticky detekuje, zda běží na Raspberry Pi, a podle toho zvolí správnou vrstvu pro komunikaci s hardwarem. Doporučuje se také nastavit automatické spuštění aplikace po startu systému, například pomocí služby systemd.
 
 ### 1.2. Prvotní nastavení
-Po prvním spuštění se načtou všechny efekty a automaticky se přehraje první z nich. Jeho zobrazení však nebude správné, dokud neproběhne kalibrace pozic LED diod. 2D rozložení lze kalibrovat přímo v uživatelském rozhraní v sekci "Rozložení". Klikněte na tlačítko "Nové rozložení", zadejte název a počet LED diod. ⚠️⚠️ [Doplnit kompletnější instrukce k 2D kalibraci] ⚠️⚠️ [Doplnění 3D kalibrace]
+Po prvním spuštění se načtou všechny efekty a automaticky se přehraje první z nich. Jeho zobrazení však nebude správné, dokud neproběhne kalibrace pozic LED diod. 2D rozložení lze kalibrovat přímo v uživatelském rozhraní v sekci "Rozložení". Klikněte na tlačítko "Nové rozložení", zadejte název a počet LED diod. Poté se vám otevřou instrukce, které vás provedou zbytkem procesu: pevně umístěte kameru co nejvíce kolmo k rovině instalace, stiskněte tlačítko začít a vydržte, než se vyfotí obrázky všech diod. Poté vám aplikace bude postupně prezentovat  ⚠️⚠️ [Doplnění 3D kalibrace]
 
 ### 1.3. Základní ovládání
 Po úspěšném nastavení rozložení LED diod se vraťte na hlavní stránku. Zde můžete upravovat parametry aktuálního efektu, jako je rychlost, barva nebo intenzita (pokud to daný efekt podporuje). Kliknutím na název efektu nebo na tlačítko "Efekty" v navigačním menu přejdete na stránku s výběrem efektů. Zde můžete procházet dostupné efekty seřazené dle vhodnosti pro dané rozložení (2D/3D). Kliknutím efekt zvolíte jako aktuální.
@@ -24,7 +24,7 @@ Nové efekty lze přidávat v sekci "Nahrát", kde můžete procházet soubory n
 ### 1.4. Vývoj vlastních efektů
 Pro vývoj vlastních efektů je nutná základní znalost jazyka Python. Efekty jsou implementovány jako samostatné moduly, které dědí ze třídy `LightEffect`. Pro vytvoření nového efektu stačí založit nový soubor ve složce `effects` a implementovat následující strukturu:
 
-Třída musí obsahovat konstruktor přijímající dva parametry – `renderer` a `coords`. Musí také volat konstruktor nadtřídy, kterému předá `renderer`, `coords`, název efektu pro zobrazení v aplikaci a typ efektu (Pouze 2D/3D, Vhodnější pro 2D/3D nebo Univerzální). Dále musí obsahovat metodu `update()`, jež je volána v cyklu a definuje chování efektu. Barvy jednotlivých LED diod (často nazývaných pixely) jsou dostupné pomocí indexace objektu `self.renderer`. Pro jejich zobrazení je nutné zavolat `self.renderer.show()`. Pozice LED diod v prostoru jsou uloženy v seznamu `self.coords` ve formátu XYZ souřadnic (v režimu 2D je osa Z definovaná pro zajištění kompatibility s 3D efekty hodnotou 0).
+Třída musí obsahovat konstruktor přijímající dva parametry - `renderer` a `coords`. Musí také volat konstruktor nadtřídy, kterému předá `renderer`, `coords`, název efektu pro zobrazení v aplikaci a typ efektu (Pouze 2D/3D, Vhodnější pro 2D/3D nebo Univerzální). Dále musí obsahovat metodu `update()`, jež je volána v cyklu a definuje chování efektu. Barvy jednotlivých LED diod (často nazývaných pixely) jsou dostupné pomocí indexace objektu `self.renderer`. Pro jejich zobrazení je nutné zavolat `self.renderer.show()`. Pozice LED diod v prostoru jsou uloženy v seznamu `self.coords` ve formátu XYZ souřadnic (v režimu 2D je osa Z definovaná pro zajištění kompatibility s 3D efekty hodnotou 0).
 
 #### 1.4.1. Parametry
 Chcete-li přidat parametry měnitelné z aplikace, použijte metodu `add_parameter()`. Ta vrací objekt parametru, jehož aktuální hodnotu získáte metodou `get()`. Hodnoty parametrů jsou perzistentní a ukládají se do konfiguračního souboru. Při inicializaci je nutné zadat název, typ parametru (číselný posuvník, výběr barvy, přepínač ano/ne, tlačítko) pomocí enumeračního typu `ParameterType` a výchozí hodnotu. Posuvník navíc vyžaduje hodnoty `min`, `max` a `step` (float nebo int). Tlačítka mohou přijímat argument `onClick` (funkce volaná při kliknutí), případně argumenty `onDown` a `onUp` pro funkce volané samostatně při stisknutí a uvolnění.
@@ -36,7 +36,7 @@ Je třeba zmínit několik omezení a okolností pro správný vývoj:
 
 - Funkce `update()` je volána tak často, jak to dovolí výkon zařízení, namísto pevné snímkovací frekvence (FPS). Ačkoliv je omezení frekvence a zavedení "časovače" standardním postupem, většina efektů těží z maximální plynulosti. Chování by mělo být škálováno parametrem rychlosti.
 
-- Osy jsou definovány následovně: X – šířka, Y – výška, Z – hloubka. Ačkoliv bývá zvykem používat pro výšku osu Z, v tomto systému je výškou vždy osa Y kvůli kompatibilitě mezi 2D a 3D režimem, což bývá standardní praxí v herních enginech.
+- Osy jsou definovány následovně: X - šířka, Y - výška, Z - hloubka. Ačkoliv bývá zvykem používat pro výšku osu Z, v tomto systému je výškou vždy osa Y kvůli kompatibilitě mezi 2D a 3D režimem, což bývá standardní praxí v herních enginech.
 
 - Efekty mohou blokovat svůj chod (např. pomocí `time.sleep()`), jelikož běží v samostatném vlákně. Náročné výpočty by však měly být optimalizovány, aby nedocházelo ke snížení celkové snímkovací frekvence.
 
@@ -80,11 +80,11 @@ Jedná se o lehký obal (wrapper) nad knihovnou neopixel, který zachovává pod
 ### 3.1. Simulace LED diod na obrazovce
 Pro usnadnění vývoje a testování bez fyzického hardwaru obsahuje aplikace simulátor. Ten zobrazuje LED diody jako barevné body na černém pozadí, jejichž pozice odpovídají kalibrovaným souřadnicím. Simulátor je implementován v `led_simulator.py`. Při detekci OS Windows se automaticky spustí server, na který se klient připojí a začne odesílat data o barvách. Toto řešení umožňuje nezávisle ukončovat simulátor a server.
 
-[🎨🎨 Obrázek simulátoru]
+![](imgs/simulator.png)
 
 
 #### 3.1.1. DebugDraw
-Většina efektů využívá složité matematické výpočty. Pro usnadnění ladění (debuggingu) nabízí simulátor nástroj `DebugDraw` pro kreslení základních geometrických tvarů (body, čáry, kruhy) přímo do simulátoru. Funkce se volají přes `renderer.debug_draw.point / line / circle`. Ty vyžadují souřadnice (n-tice/tuple), barvu v RGB a volitelný parametr určující, zda má tvar zůstat vykreslen i po dalším volání `show()` (hodnota `persistent`).
+Většina efektů využívá složité matematické výpočty. Pro usnadnění ladění (debugging) nabízí simulátor nástroj `DebugDraw` pro kreslení základních geometrických tvarů (body, čáry, kruhy) přímo do simulátoru. Funkce se volají přes `renderer.debug_draw.point / line / circle`. Ty vyžadují souřadnice (n-tice/tuple), barvu v RGB a volitelný parametr určující, zda má tvar zůstat vykreslen i po dalším volání `show()` (hodnota `persistent`).
 
 ### 3.2. Post-processing a filtry
 Post-processing, tedy úprava obrazu po jeho vygenerování, je velmi důležitá část vykreslovacího cyklu. Umožňuje aplikovat globální úpravy před odesláním na diody. V aplikaci jsou implementovány filtry pro:
@@ -99,8 +99,12 @@ Pro jednoduchou rozšiřitelnost, organizaci kódu a zajištění, že pouze jed
 ### 4.1 `EngineManager`
 Manažer engine modulů, `EngineManager`, je zodpovědný za správu všech modulů, včetně jejich aktivace, deaktivace a přepínání mezi nimi. Udržuje seznam všech dostupných modulů, který je vytvořen při postupném volání funkce `register_engine()` z každého modulu, který následně spouští funkce `on_enable()` a `on_disable()` a kontroluje aktivní stav modulu při volání funkcí dekorovaných `@requires_active`. Tento přístup umožňuje snadné přidávání nových modulů bez nutnosti měnit stávající kód, protože každý modul se stará pouze o svou vlastní funkcionalitu a manažer se stará o jejich správu a koordinaci. [🎨🎨 doplnit diagram engine správy]
 
+![](imgs/engines_renderers_class_diagram.png)
+
 ## 5. Systém efektů
 Jak již bylo zmíněno dříve, efekty jsou vytvářeny jako samostatné Python skripty dědící z třídy `LightEffect`. Celý systém efektů je řízen modulem `EffectsEngine`, který slouží jako most mezi jednotlivými efekty a zbytkem aplikace.
+
+![](imgs/effect_list.png)
 
 ### 5.1 Dynamické načítání scriptů
 Efekty jsou načítány dynamicky při startu serveru pomocí modulu `importlib`. Funkce `load_effects()` prochází složku `effects/`, načítá všechny Python skripty a kontroluje, zda-li obsahují třídu dědící z `LightEffect`.
@@ -122,11 +126,10 @@ def load_effects(self, folder="effects"):
                         self.effects[module_name] = cls
 ```
 
-Důležitou součástí načítání je validace efektů. Každý efekt je před přidáním do seznamu dostupných efektů otestován spuštěním. Používá se `DummyRenderer` třída, která simuluje renderer bez skutečného ovládání LED diod. Tím se zajistí, že chybně napsaný efekt nezpůsobí pád celé aplikace.
+Důležitou součástí je validace. Každý efekt je před registrací otestován spuštěním s využitím `DummyRenderer`, což zrychlí odhalení chyb v kódu a zlepší UX (uživatelský zážitek) odstraněním nefunkčních efektů z nabídky. Pro optimalizaci startu se využívá cachování - pokud se hash souboru shoduje s validním záznamem v cache, validace se přeskočí.
 
-Pro optimalizaci výkonu je implementován cachování systém. Každý efekt je hashován a pokud se jeho hash nachází v cache jako validní, přeskočí se jeho validace. To výrazně zrychluje start aplikace, protože validace může být časově náročná.
+![](imgs/loading_effects_chart.png)
 
-Důležitou součástí je validace. Každý efekt je před registrací otestován spuštěním s využitím `DummyRenderer`, což zrychlí odhalení chyb v kódu a zlepší UX (uživatelský zážitek) odstraněním nefunkčních efektů z nabídky. Pro optimalizaci startu se využívá cachování – pokud se hash souboru shoduje s validním záznamem v cache, validace se přeskočí.
 
 ### 5.2. Nevýhody (bezpečnostní rizika)
 Dynamické spouštění Python kódu přináší bezpečnostní rizika. Soubory ve složce `effects/` jsou spouštěny s právy aplikace a škodlivý kód by mohl číst soubory, spouštět příkazy či manipulovat se sítí. Tento přístup je akceptovatelný pouze v důvěryhodném prostředí. Pro produkční nasazení by bylo nutné implementovat sandboxing (např. `RestrictedPython` nebo Docker).
@@ -170,7 +173,7 @@ Endpoint `/api/upload` přijímá POST request s přiloženými soubory a vrací
 Audio funkcionalitu zajišťuje třída `AudioEngine`, která rozšiřuje základní `Engine` o metody pro synchronizaci a přehrávání.
 
 ### 7.1. Zpracování zvukového souboru AudioEngine
-Třída `AudioEngine` poskytuje kostru pro moduly pracující se zvukem. Obsahuje vlákno s cyklem (`runner`) spouštějící hlavní funkci pro vykreslení efektu `on_frame` a hlavně definuje metody pro zpracování událostí životního cyklu přehrávání:
+Třída `AudioEngine` poskytuje rámec pro moduly pracující se zvukem. Obsahuje vlákno s cyklem (`runner`) spouštějící hlavní funkci pro vykreslení efektu `on_frame` a hlavně definuje metody pro zpracování událostí životního cyklu přehrávání:
 
 - `on_audio_load(audio_path)` - Voláno při požadavku načtení audio souboru. Přijimá referenci na soubor ve formě cesty a zde dává prostor pro načtení a zpracování souboru. Po úspěšném zpracování musí modul ohlásit připravenost voláním callback funkce poskytnuté jako argument při inicializaci.
 - `on_audio_play()` - Voláno při spuštění přehrávání. Spustí interní runner thread.
@@ -228,16 +231,6 @@ Lightshow je uložena jako JSON soubor s následující strukturou:
   "song_path": "cesta\\k\\audio\\souboru.mp3",
   "bpm": 182,
   "timeline": [
-    {
-      "effect": "fade",
-      "parameters": {
-        "color_from": "#FFFFFF00",
-        "color_to": "#FFFFFF77"
-      },
-      "start": 0,
-      "end": 4,
-      "layer": 0
-    },
     {
       "effect": "sauce:sparkle",
       "parameters": {
@@ -298,10 +291,17 @@ self.audio_length = len(self.frames) / self.FPS if self.frames else 0
 
 Tento přístup umožňuje přehrávat i velmi složité lightshow s desítkami vrstev a efektů bez záseků, protože veškerá výpočetní náročnost je přesunuta do fáze načítání.
 
+### 8.3 Výroba lightshow
+Ruční zápis efektů do JSON souboru není reálně proveditelný pro synchronizaci s hudbou, proto už od začátku vývoje byl využit vizuální editor. První způsob používal populární software pro úpravů audio souborů - Audacity, specificky jeho funkci pro přidávání značek (labels) do časové osy a export těchto značek jako CSV souboru. Tento CSV soubor byl následně zpracován Python skriptem, který na základě značek a jejich časů generoval lightshow soubor. Tento přístup byl funkční, ale ne příliš uživatelsky přívětivý, protože vyžadoval manuální zápis jmen a parametrů efektů bez výběrů ze seznamů či nápověd v editoru. Proto byl vytvořen vlastní vizuální editor pro lightshow, který umožňuje načíst audio soubor, nastavit tempo (BPM) a přidávat efekty přímo na časovou osu pomocí grafického rozhraní podobající se video editorům. Editor je naprogramovaný v jazyce C# pomocí .NET a frameworku Avalonia pro rozhraní. Díky knihovně Python.NET editor komunikuje s instalací Spectraforge, aby mohl načítat dostupné efekty a jejich parametry. Editor si z konfigurace načítá i rozložení LED diod, aby mohl zobrazovat náhled efektů přímo na modelu instalace. Po každém uložení se lightshow přepočítá a aktualizuje náhled v editoru, což umožňuje okamžitou ukázku výsledku. (Editor není součástí této maturitní práce)
+
+![](imgs/editor.png)
+
 ## 9. Další příklady engine modulů
 
 ### 9.1. CanvasEngine
 Transformuje instalaci na interaktivní plátno. Uživatel ve webovém rozhraní kliká na body reprezentující LED diody a mění jejich barvu. Engine pouze udržuje stav pole barev a poskytuje metody pro čtení a zápis.
+
+![](imgs/canvas.png)
 
 ```python
 def get_pixels(self):
@@ -327,15 +327,19 @@ Nevýhodou je vysoká spotřeba paměti při delších videích, protože každ�
 
 ## 10. Config, logování, cache
 ### 10.1 Config
-Konfigurace celého projektu leží v souboru config/server_config.json, který obsahuje nastavení pro různé části aplikace, jako je poslední zapnutý efekt, všechny hodnoty z nastavení, aktuální rozložení LED diod a zvolené hodnoty pro všechny parametry efektů. Tento soubor je načítán při startu serveru a spravován modulem `config_manager.py`, který poskytuje funkce pro získání a aktualizaci jednotlivých nastavení. Data ze souboru jsou uchovány v instanci třídě Config, která je implementována jako singleton, což zajišťuje, že všechny části aplikace pracují se stejnou jedinou instancí konfigurace. Modul je velmi jednoduchý, umožňuje interakci s daty přímo ve slovníku `Config().config[]` a vyžaduje explicitní volání `Config().save()` pro uložení změn do souboru. Na ukládání a načítání používá modul vestavěnou knihovnu `json` pro práci s JSON formátem. 
+Konfigurace celého projektu je uložena v souboru config/server_config.json, který obsahuje nastavení pro různé části aplikace, jako je poslední zapnutý efekt, všechny hodnoty z nastavení, aktuální rozložení LED diod a zvolené hodnoty pro všechny parametry efektů. Tento soubor je načítán při startu serveru a spravován modulem `config_manager.py`, který poskytuje funkce pro získání a aktualizaci jednotlivých nastavení. Data ze souboru jsou uchovány v instanci třídě Config, která je implementována jako singleton, což zajišťuje, že všechny části aplikace pracují se stejnou jedinou instancí konfigurace. Modul je velmi jednoduchý, umožňuje interakci s daty přímo ve slovníku `Config().config[]` a vyžaduje explicitní volání `Config().save()` pro uložení změn do souboru. Na ukládání a načítání používá modul vestavěnou knihovnu `json` pro práci s JSON formátem. 
 
 ### 10.2 Logování
 Pro sledování chodu aplikace a usnadnění ladění je implementován vlastní systém logování v modulu `log_manager.py`. Modul je staticky implementován, proto umožňuje volat funkce pro logování z libovolné části kódu bez nutnosti předávání instance loggeru. Logovací funkce (info, warn - varování, error - chyba, debug - zpráva pro ladění) přijímají název zdroje (například název modulu nebo funkce) a zprávu, kterou chtějí zalogovat. Logy jsou ukládány do složky logs s názvem souboru odpovídajícím datu a času spuštění serveru. Každý log obsahuje časovou značku, úroveň logu, název zdroje a samotnou zprávu. Frontend také poskytuje zobrazení logů, barevně označené a filtrovatelné podle zdroje. Vše je samozdřejmě viditelné v konzoli pro snadný přístup během vývoje.
+
+![](imgs/logs.png)
 
 ### 10.3 Cache
 Jeden z nejdůležitějších optimalizačních mechanismů je bez pochyby cache. Vzhledem k tomu, že některé operace, jako je validace efektů nebo načítání lightshow, mohou být velmi náročné na výkon, implementoval jsem systém cache pro ukládání výsledků těchto operací. Modul `caching.py` umožňuje ukládání a čtení souborů podle jména, které jsou modulem ukládány do složky `.cache/`. Soubory mají stanovenou příponu .cache, ale jsou to jednoduché textové soubory a data jsou do nich ukládána ve formátu JSON pro snadnou manipulaci. Nejvýznamnější využití cache je při načítání efektů, kde se ukládá seznam hashů ověřených efektů.
 
 ## 11. Závěr a budoucí rozvoj
+
+![Tree](imgs/tree.png)
 
 ### 11.1 Shrnutí dosažených cílů
 Projekt Spectraforge úspěšně implementuje komplexní systém pro řízení adresovatelných LED diod s následujícími klíčovými funkcemi:
