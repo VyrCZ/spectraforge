@@ -14,6 +14,7 @@ class LEDRenderer:
         self.leds = [(0, 0, 0)] * led_count
         self.debug_draw = self.DebugDraw()
         self.brightness = Config().config.get("brightness", 1.0)
+        self._gamma_table = self.build_gamma_table()
         Log.info("LEDRenderer", f"Initializing LEDRenderer with {led_count} LEDs.")
 
         # Setup a led simulator server if running on Windows
@@ -94,9 +95,16 @@ class LEDRenderer:
     def clear(self):
         self.fill((0, 0, 0))
 
-    def _gamma_correct(self, led: tuple[int, int, int], gamma: float = 2.8) -> tuple[int, int, int]:
-        corrected = tuple(int((c / 255) ** gamma * 255) for c in led)
-        return corrected
+    def build_gamma_table(self, gamma: float = 2.8):
+        inv_gamma = 1.0 / gamma
+        return [int((i / 255) ** inv_gamma * 255 + 0.5) for i in range(256)]
+
+    def _gamma_correct(self, led: tuple[int, int, int]) -> tuple[int, int, int]:
+        return (
+            self._gamma_table[led[0]],
+            self._gamma_table[led[1]],
+            self._gamma_table[led[2]],
+        )
     
     def _apply_filters(self, leds_ref: list[tuple[int, int, int]]) -> list[tuple[int, int, int]]:
         leds = copy.deepcopy(leds_ref)
