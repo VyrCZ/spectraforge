@@ -1,7 +1,3 @@
-Zde je návrh teoretické části. Text je psán odborným, akademickým stylem, který odpovídá úrovni maturitní práce, a plynule navazuje na praktickou část.
-
----
-
 # Teoretická část
 
 ## 1. Moderní světelné systémy
@@ -26,11 +22,11 @@ Nejrozšířenějším standardem v oblasti hobby i poloprofesionálních instal
 
 ### 2.2 Komunikační protokoly a časování
 
-Komunikace s těmito čipy probíhá pomocí asynchronního sériového protokolu typu NRZ (Non-Return-to-Zero). Protokol je velmi citlivý na časování, protože nepoužívá hodinový signál (clock). Logická nula a logická jednička jsou definovány délkou trvání pulzu v rámci pevně daného časového okna, obvykle v řádech stovek nanosekund. [🎨 obrázek časového diagramu protokolu WS2812, ukazující rozdíl v délce pulzu pro 0 a 1] Například u čipu WS2812B trvá přenos jednoho bitu 1,25 µs. Pokud řídicí systém nedokáže dodržet toto striktní časování, dochází k chybám v zobrazení nebo k blikání celé instalace. Signál "Reset", který odděluje jednotlivé snímky, je definován jako stav nízké úrovně napětí po dobu delší než 50 µs.
+Komunikace s těmito čipy probíhá pomocí asynchronního sériového protokolu typu NRZ (Non-Return-to-Zero). Protokol je velmi citlivý na časování, protože nepoužívá hodinový signál (clock). Logická nula a logická jednička jsou definovány délkou trvání pulzu v rámci pevně daného časového okna, obvykle v řádech stovek nanosekund. ![](imgs/timing_ws2812.png) Například u čipu WS2812B trvá přenos jednoho bitu 1,25 µs. Pokud řídicí systém nedokáže dodržet toto striktní časování, dochází k chybám v zobrazení nebo k blikání celé instalace. Signál "Reset", který odděluje jednotlivé snímky, je definován jako stav nízké úrovně napětí po dobu delší než 50 µs.
 
 ### 2.3 Problematika napájení a distribuce signálu
 
-Při návrhu rozsáhlejších instalací je kritickým faktorem napájení. Každý pixel při plném jasu (bílá barva) odebírá přibližně 60 mA. Pro řetězec 200 LED diod to znamená odběr až 12 A, což běžné vodiče na LED páscích nedokážou přenést bez výrazného úbytku napětí. Tento úbytek se projevuje postupným červenáním a slábnutím jasu směrem ke konci pásku (modrá LED potřebuje nejvyšší napětí, proto zhasíná první). Řešením je injektáž napájení (power injection) na více místech instalace paralelním vedením. Dále je nutné řešit filtraci napěťových špiček pomocí kondenzátorů a přizpůsobení logických úrovní, jelikož LED pásky obvykle pracují s 5V logikou, zatímco moderní mikrokontroléry a Raspberry Pi využívají 3,3V.
+Při návrhu rozsáhlejších instalací je kritickým faktorem napájení. Každý pixel při plném jasu (bílá barva) odebírá přibližně 60 mA. Pro řetězec 200 LED diod to znamená odběr až 12 A, což běžné vodiče na LED páscích nedokážou přenést bez výrazného úbytku napětí. Tento úbytek se projevuje postupným červenáním a slábnutím jasu směrem ke konci pásku (modrá LED potřebuje nejvyšší napětí, proto zhasíná první). Řešením je injektáž napájení (power injection) na více místech instalace paralelním vedením. Dále je u většího počtu LED nutné řešit přizpůsobení logických úrovní, jelikož LED diody obvykle pracují s 5V logikou, zatímco moderní mikrokontroléry a Raspberry Pi využívají 3,3V. V mém připadě LED diody fungují spolehlivě i na 3,3V, ale pro větší instalace je vhodné použít level shifter pro stabilní komunikaci.
 
 ### 2.4 Teorie barev v digitálním světě
 
@@ -38,9 +34,13 @@ Pro reprezentaci barev v počítačové grafice a LED technice se využívají r
 
 Pro programování efektů je však model RGB často nevhodný, protože je pro člověka neintuitivní definovat barvu poměrem tří složek. Proto se využívá model **HSV** (Hue, Saturation, Value), který definuje barvu pomocí odstínu (úhel na barevném kruhu), sytosti a jasu. Tento model umožňuje snadnou implementaci efektů, jako je "duha", pouhou iterací hodnoty Hue, což by v RGB vyžadovalo složité přepočty.
 
+![](imgs/rgb_vs_hsv.png)
+
 ### 2.5 Lidské vnímání jasu a barev
 
-Lidské oko nevnímá intenzitu světla lineárně, ale logaritmicky (podle Weber-Fechnerova zákona). To znamená, že LED dioda nastavená na 50 % výkonu (hodnota 128 z 255) se lidskému oku jeví mnohem jasnější, spíše jako 80 % maximálního jasu. [🎨 graf porovnání lineární křivky a křivky s gamma korekcí] Aby byly přechody jasu plynulé a barvy věrné, je nutné aplikovat tzv. **gamma korekci**. Tento proces transformuje lineární vstupní hodnoty pomocí mocninné funkce (obvykle s exponentem gamma 2.2 až 2.8), čímž kompenzuje nelinearitu lidského zraku a zajišťuje přirozenější vizuální vjem.
+Lidské oko nevnímá intenzitu světla lineárně, ale logaritmicky (podle Weber-Fechnerova zákona). To znamená, že LED dioda nastavená na 50 % výkonu (hodnota 128 z 255) se lidskému oku jeví mnohem jasnější, spíše jako 80 % maximálního jasu. Aby byly přechody jasu plynulé a barvy věrné, je nutné aplikovat tzv. **gamma korekci**. Tento proces transformuje lineární vstupní hodnoty pomocí mocninné funkce (obvykle s exponentem gamma 2.2 až 2.8), čímž kompenzuje nelinearitu lidského zraku a zajišťuje přirozenější vizuální vjem.
+
+![](imgs/gamma_correction.png)
 
 ## 3. Hardwarová platforma
 
@@ -48,15 +48,15 @@ Srdcem celého systému Spectraforge je jednodeskový počítač, který musí z
 
 ### 3.1 Architektura Raspberry Pi
 
-Pro tento projekt bylo zvoleno Raspberry Pi (konkrétně model Zero 2 W nebo 3/4) namísto běžných mikrokontrolérů jako Arduino nebo ESP32. Hlavním důvodem je potřeba operačního systému Linux, který umožňuje běh pokročilých aplikací v jazyce Python, multitasking a snadnou správu souborů. Raspberry Pi disponuje dostatečným výpočetním výkonem (čtyřjádrový procesor) pro provádění Fast Fourierovy Transformace (FFT) pro audio analýzu v reálném čase, což by bylo na menších mikrokontrolérech obtížně realizovatelné souběžně s obsluhou sítě a webového rozhraní.
+Pro tento projekt bylo zvoleno Raspberry Pi (konkrétně model Zero 2 W) namísto běžných mikrokontrolérů jako Arduino nebo ESP32. Hlavním důvodem je potřeba operačního systému Linux, který umožňuje běh pokročilých aplikací v jazyce Python, multitasking a snadnou správu souborů. Raspberry Pi disponuje dostatečným výpočetním výkonem (čtyřjádrový procesor), což by bylo na menších mikrokontrolérech obtížně realizovatelné souběžně s obsluhou sítě a webového rozhraní.
 
 ### 3.2 Způsoby nasazení softwaru
 
-Software na platformě Linux je obvykle spravován jako služba (daemon). Využití init systému `systemd` zajišťuje, že aplikace se automaticky spustí po startu systému a v případě pádu je restartována. Pro izolaci závislostí a knihoven jazyka Python je využíváno virtuální prostředí (`venv`), které zabraňuje konfliktům mezi systémovými balíčky a balíčky vyžadovanými aplikací.
+Software na platformě Linux je obvykle spravován jako služba (daemon). Využití inicializačního systému `systemd` zajišťuje, že aplikace se automaticky spustí po startu systému a v případě pádu je restartována. Pro izolaci závislostí a knihoven jazyka Python je využíváno virtuální prostředí (`venv`), které zabraňuje konfliktům mezi systémovými balíčky a balíčky vyžadovanými aplikací.
 
 ### 3.3 Konfigurace bezhlavého (headless) systému a AP
 
-Většina instalací světelné techniky neumožňuje připojení monitoru, klávesnice a myši. Systém je proto konfigurován jako tzv. bezhlavý (headless), ovládaný vzdáleně pomocí protokolu SSH. Pro zajištění použitelnosti v terénu, kde nemusí být dostupná Wi-Fi síť, je Raspberry Pi nakonfigurováno tak, aby vytvářelo vlastní přístupový bod (Access Point). Uživatel se tak může připojit přímo k zařízení pomocí telefonu či notebooku a ovládat instalaci nezávisle na externí infrastruktuře.
+Z důvodu výkonu, nedostatku portů a jednoduchosti je systém konfigurován jako tzv. bezhlavý (headless), bez uživatelského rozhraní, ovládaný pouze pomocí příkazového řádku vzdáleně pomocí protokolu SSH. Pro zajištění použitelnosti v terénu, kde nemusí být dostupná Wi-Fi síť, je Raspberry Pi nakonfigurováno tak, aby vytvářelo vlastní přístupový bod (Access Point). Uživatel se tak může připojit přímo k zařízení pomocí telefonu či notebooku a ovládat instalaci nezávisle na externí infrastruktuře. 
 
 ## 4. Softwarové řešení (Backend)
 
@@ -64,11 +64,11 @@ Backendová část aplikace zajišťuje logiku řízení, zpracování dat a kom
 
 ### 4.1 Jazyk Python v embedded systémech
 
-Python byl zvolen pro svou čitelnost, rozsáhlou ekosystém knihoven a rychlost vývoje. V kontextu embedded systémů je však nutné brát v úvahu jeho limity, zejména co se týče výkonu interpretovaného kódu a správy paměti (Garbage Collection), která může způsobovat nepravidelné zpoždění (jitter). Pro časově kritické operace je proto nutné využívat optimalizované knihovny napsané v jazyce C, které jsou z Pythonu pouze volány.
+Python byl zvolen pro svou čitelnost, rozsáhlou ekosystém knihoven a rychlost vývoje. V kontextu embedded systémů je však nutné brát v úvahu jeho limity, zejména co se týče výkonu interpretovaného kódu a správy paměti (Garbage Collection), která může způsobovat nepravidelné zpoždění (jitter). Pro minimalizaci těchto problémů je klíčové optimalizovat náročné operace a využitím knihoven napsaných v C.
 
 ### 4.2 Knihovna NeoPixel a přímý přístup k DMA
 
-Protože operační systém Linux není systémem reálného času (RTOS) a může kdykoliv přerušit běh procesu kvůli jiným úlohám, není možné generovat signál pro WS2812B přímo "bit-bangingem" na procesoru. Knihovna `rpi_ws281x` tento problém obchází využitím DMA (Direct Memory Access). DMA řadič umožňuje přenášet data z paměti RAM přímo na GPIO piny pomocí PWM (Pulse Width Modulation) nebo PCM periférie bez intervence procesoru. Tím je zajištěno stabilní časování signálu nezávisle na zátěži CPU.
+Protože operační systém Linux není systémem reálného času (RTOS) a může kdykoliv přerušit běh procesu kvůli jiným úlohám, není možné generovat signál pro WS2812B přímo "bit-bangingem" na procesoru. Knihovna `rpi_ws281x` tento problém obchází využitím DMA (Direct Memory Access). DMA řadič umožňuje přenášet data z paměti RAM přímo na GPIO piny pomocí PWM (Pulse Width Modulation) Tím je zajištěno stabilní časování signálu nezávisle na zátěži CPU.
 
 ### 4.3 Zpracování multimédií (FFmpeg, PyDub)
 
@@ -92,7 +92,7 @@ Jako webový server slouží framework Flask. Ten funguje na principu zpracován
 
 ### 5.2 Real-time komunikace pomocí WebSockets (Socket.IO)
 
-Pro okamžitou reakci světel na akce uživatele (např. spuštění hudby, změna jasu) je využit protokol WebSocket. Na rozdíl od HTTP vytváří WebSocket trvalé, obousměrné spojení mezi serverem a prohlížečem. Knihovna Socket.IO nad tímto protokolem staví abstrakci založenou na událostech (events). Díky tomu může server poslat zprávu klientovi ("přehrávání začalo") nebo klient serveru ("nastav barvu na červenou") s minimálním zpožděním v řádu milisekund. [🎨 diagram porovnání komunikace HTTP vs WebSocket]
+Pro okamžitou reakci světel na akce uživatele (např. spuštění hudby, změna jasu) je využit protokol WebSocket. Na rozdíl od HTTP vytváří WebSocket trvalé, obousměrné spojení mezi serverem a prohlížečem. Knihovna Socket.IO nad tímto protokolem staví abstrakci založenou na událostech (events). Díky tomu může server poslat zprávu klientovi ("přehrávání začalo") nebo klient serveru ("nastav barvu na červenou") s minimálním zpožděním v řádu milisekund.
 
 ### 5.3 Uživatelské rozhraní (HTML/CSS/JS)
 

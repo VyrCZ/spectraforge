@@ -85,4 +85,28 @@
 ### 11.2 Možnosti rozšíření (nové hardwarové platformy, ESP32)
 
 
-#
+# Zdroje
+https://learn.adafruit.com/neopixels-on-raspberry-pi/python-usage
+https://learn.adafruit.com/adafruit-neopixel-uberguide
+https://www.raspberrypi.com/documentation/computers/getting-started.html
+
+https://electricfiredesign.com/2022/11/14/gamma-correction-for-led-lighting/
+https://learn.adafruit.com/led-tricks-gamma-correction/the-issue
+
+https://cdn-shop.adafruit.com/datasheets/WS2812B.pdf
+
+https://en.wikipedia.org/wiki/Circle_Hough_Transform
+
+https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API
+https://socket.io/docs/v4/
+https://flask.palletsprojects.com/en/stable/
+https://iro.js.org/
+
+
+
+copilot (inline + gpt 5 mini)
+
+gemini 3 pro, upraveno a doplněno o vlastní znalosti a zkušenosti
+(vytvoř základ pro teoretickou část s touto osnovou)
+(jaké body chybí v této osnově maturitní práce o ovládání adresovatelných led?)
+(vytvoř korekturu pro tento text)

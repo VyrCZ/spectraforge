@@ -3,19 +3,21 @@ import numpy as np
 import os
 # Directory for images and output file
 image_paths = [
-    "imgs_rotated/front/",
-    "imgs_rotated/right/",
-    "imgs_rotated/back/",
-    "imgs_rotated/left/"
+    "calibration/images/little_tree/front/",
+    "calibration/images/little_tree/right/",
+    "calibration/images/little_tree/back/",
+    "calibration/images/little_tree/left/"
 ]
 selected_view = 0
 output_file = "coordinates.txt"
-center = (354, 880)
-led = 0
+center = (400, 880)
+led = 100
+
+LED_AMOUNT = 3
 
 # Initialize global variables
 coordinates = [
-    [0, 0, 0] for i in range(200)
+    [0, 0, 0] for i in range(LED_AMOUNT)
 ]
 if os.path.exists(output_file):
     with open(output_file, "r") as f:
@@ -66,7 +68,7 @@ def edit_pos(old_pos: list[int, int, int], new_pos: list[int, int, int]) -> list
 
 # Load images and process them
 led_setup = True
-while led < 200:
+while led < LED_AMOUNT:
     if led_setup:
         led_setup = False
 

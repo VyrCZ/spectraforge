@@ -21,7 +21,7 @@ def rotate_images_in_folder(input_folder, rotation_angle=-90):
 
 
 if __name__ == "__main__":
-    input_folder = "imgs_rotated"
+    input_folder = "calibration/images/little_tree"
     
     if os.path.isdir(input_folder):
         rotate_images_in_folder(input_folder)

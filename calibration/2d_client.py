@@ -8,9 +8,9 @@ HOST = "192.168.1.69"  # Change to the server's IP if running on a different dev
 PORT = 65432
 
 # Number of LEDs
-NUM_LEDS = 200
+NUM_LEDS = 100
 
-IMG_SAVE_PATH = "images/right/"
+IMG_SAVE_PATH = "calibration/images/little_tree/left"
 
 # Ensure the directory for saving images exists
 os.makedirs(IMG_SAVE_PATH, exist_ok=True)

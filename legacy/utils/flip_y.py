@@ -1,7 +1,7 @@
 # Invert the Y axis, make the highest point the lowest and vice versa
 import json
 
-file = "config/setups/tree_2025.json"
+file = "config/setups/little_tree.json"
 with open(file, "r") as f:
     data = json.load(f)
 
