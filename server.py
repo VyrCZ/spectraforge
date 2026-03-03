@@ -1,3 +1,6 @@
+from gevent import monkey
+monkey.patch_all()
+
 import os
 import traceback
 import json
@@ -30,7 +33,7 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 app = Flask(__name__)
 app.jinja_env.globals.update(zip=zip) # allows using zip in Jinja templates
-socketio = SocketIO(app)
+socketio = SocketIO(app, cors_allowed_origins='*', async_mode='gevent')
 # Globals for effect management
 
 @app.route("/")
@@ -538,32 +541,34 @@ def log_request(response):
             print(f"FAST: {request.path} took {diff:.2f}ms")
     return response"""
 
+
+# SERVER INIT
+Log.info("Server", "Initializing modules...")
+placeholder_check()
+manager = EngineManager()
+renderer = LEDRenderer(manager.active_setup)
+effects_engine = EffectsEngine(renderer, manager.active_setup)
+calibration_engine = CalibrationEngine(renderer, take_photo_callback, send_image_callback, setup_done_callback)
+canvas_engine = CanvasEngine(renderer)
+sandbox_engine = SandboxEngine(renderer, manager.active_setup)
+image_engine = ImageEngine(renderer, manager.active_setup)
+visualiser_engine = VisualiserEngine(renderer, manager.active_setup, audio_engine_ready)
+lightshow_engine = LightshowEngine(renderer, manager.active_setup, audio_engine_ready)
+video_engine = VideoEngine(renderer, manager.active_setup, audio_engine_ready)
+
+# IMPORTANT! Always register the effects engine first, as it is the main engine.
+manager.register_engine(effects_engine)
+manager.register_engine(calibration_engine)
+manager.register_engine(canvas_engine)
+manager.register_engine(sandbox_engine)
+manager.register_engine(image_engine)
+manager.register_audio_engine(visualiser_engine)
+manager.register_audio_engine(lightshow_engine)
+manager.register_audio_engine(video_engine)
+
+
 if __name__ == "__main__":
-    placeholder_check()
-    manager = EngineManager()
-    renderer = LEDRenderer(manager.active_setup)
-    effects_engine = EffectsEngine(renderer, manager.active_setup)
-    calibration_engine = CalibrationEngine(renderer, take_photo_callback, send_image_callback, setup_done_callback)
-    canvas_engine = CanvasEngine(renderer)
-    sandbox_engine = SandboxEngine(renderer, manager.active_setup)
-    image_engine = ImageEngine(renderer, manager.active_setup)
-    visualiser_engine = VisualiserEngine(renderer, manager.active_setup, audio_engine_ready)
-    lightshow_engine = LightshowEngine(renderer, manager.active_setup, audio_engine_ready)
-    video_engine = VideoEngine(renderer, manager.active_setup, audio_engine_ready)
-
-
-    # IMPORTANT! Always register the effects engine first, as it is the main engine.
-    manager.register_engine(effects_engine)
-    manager.register_engine(calibration_engine)
-    manager.register_engine(canvas_engine)
-    manager.register_engine(sandbox_engine)
-    manager.register_engine(image_engine)
-    manager.register_audio_engine(visualiser_engine)
-    manager.register_audio_engine(lightshow_engine)
-    manager.register_audio_engine(video_engine)
-
-
-    Log.info("Server", "Starting Spectraforge server...")
+    Log.info("Server", "Starting Flask Dev Server...")
     try:
         if os.name == "nt":
             app.run(host="0.0.0.0", port=5000, threaded=True)
