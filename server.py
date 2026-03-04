@@ -1,7 +1,8 @@
-from gevent import monkey
-monkey.patch_all()
-
 import os
+if os.name != "nt":
+    import gevent.monkey
+    gevent.monkey.patch_all()
+
 import traceback
 import json
 from flask import Flask, render_template, request, jsonify, send_from_directory
@@ -33,7 +34,7 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 app = Flask(__name__)
 app.jinja_env.globals.update(zip=zip) # allows using zip in Jinja templates
-socketio = SocketIO(app, cors_allowed_origins='*', async_mode='gevent')
+socketio = SocketIO(app)
 # Globals for effect management
 
 @app.route("/")
@@ -571,7 +572,7 @@ if __name__ == "__main__":
     Log.info("Server", "Starting Flask Dev Server...")
     try:
         if os.name == "nt":
-            app.run(host="0.0.0.0", port=5000, threaded=True)
+            app.run(host="0.0.0.0", port=5000)
         else:            
             app.run(host="0.0.0.0", port=5000, ssl_context=('cert.pem', 'key.pem'))
     finally:

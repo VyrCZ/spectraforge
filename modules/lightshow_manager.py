@@ -6,6 +6,9 @@ import sys, os, importlib.util, inspect
 from pathlib import Path
 from modules.lightshow_effects import LightshowEffects
 from modules.config_manager import Config
+import time
+import modules.caching as caching
+from typing import Any
 
 EFFECTS_DIR = Path("lightshow_effects")
 
@@ -57,6 +60,33 @@ def process_lightshow(registry: RegistryInstance, lightshow_data: dict, settings
     4. Returns a standard list of RGB tuples (Alpha is baked in).
     """
 
+    def _canonicalize(obj: Any) -> Any:
+        """
+        Recursively canonicalize the object for consistent hashing.
+        Sorts dictionaries by keys
+        """
+        if isinstance(obj, dict):
+            return {k: _canonicalize(obj[k]) for k in sorted(obj)}
+        if isinstance(obj, (list, tuple)):
+            return [_canonicalize(v) for v in obj]
+        return obj
+    
+    def compute_lightshow_hash(registry: RegistryInstance, lightshow_data: dict, settings: LightshowSettings) -> str:
+        # normalize the lightshow data
+        canon = _canonicalize(lightshow_data)
+        j = json.dumps(canon, separators=(",", ":"), ensure_ascii=False)
+        return caching.hash_data(j + str(settings.FPS) + str(registry.coords))
+
+    process_start_time = time.time()
+    # --- 0. CHECK CACHE FIRST ---
+    file_cache_key = compute_lightshow_hash(registry, lightshow_data, settings)
+    Log.debug("LightshowEngine", f"Cache key: {file_cache_key}")
+    cached_result = caching.get_cache_by_name("lightshow_engine", file_cache_key)
+    if cached_result:
+        j = json.loads(cached_result)
+        Log.info("LightshowEngine", f"Loading lightshow from cache, took {(time.time() - process_start_time) * 1000:.2f} ms.")
+        return j
+    
     # --- 1. SETUP & TIMELINE PARSING ---
     
     # Sort timeline by layers to ensure correct rendering order (Background -> Foreground)
@@ -77,7 +107,13 @@ def process_lightshow(registry: RegistryInstance, lightshow_data: dict, settings
 
     # Initialize the "Canvas" with Black (0, 0, 0)
     # This is our base layer. We will paint on top of this.
-    frames = [[(0, 0, 0) for _ in range(num_leds)] for _ in range(total_frames)]
+    black_pixel = (0, 0, 0)
+    frames = [[black_pixel] * num_leds for _ in range(total_frames)]
+
+    # create a cache of processed effects to avoid redundant calculations for identical effects
+    # effect cache key will be a tuple of (effect_name, frozenset(params.items()), steps) to uniquely identify effect calls
+    effect_cache = {}
+
 
     # --- 2. LAYER PROCESSING ---
     
@@ -87,26 +123,32 @@ def process_lightshow(registry: RegistryInstance, lightshow_data: dict, settings
         effect_name = item.get("effect")
         if not effect_name:
             continue # Skip if no effect name (filters not implemented yet)
+        
 
-        if effect_name not in registry.registry:
+        effect_func = registry.registry.get(effect_name)
+        if effect_func is None:
             Log.warn("LightshowEngine", f"Effect {effect_name} not found.")
             continue
 
         # Prepare Parameters
-        effect_func = registry.registry[effect_name]
         params = item.get("parameters", {})
         
         # Convert Hex params to RGB tuples
         for key, value in params.items():
-            if isinstance(value, str) and value.startswith("#"):
-                # hex to RGBA; if alpha is not provided, default to 255 (fully opaque)
-                hex_value = value.lstrip("#")
-                if len(hex_value) == 6:  # RRGGBB
-                    r, g, b = tuple(int(hex_value[i:i+2], 16) for i in (0, 2, 4))
-                    params[key] = (r, g, b, 255)  # Add full opacity
-                elif len(hex_value) == 8:  # RRGGBBAA
-                    r, g, b, a = tuple(int(hex_value[i:i+2], 16) for i in (0, 2, 4, 6))
-                    params[key] = (r, g, b, a)
+            if type(value) is str and value.startswith("#"):
+                # Fast hex string extraction
+                hex_str = value[1:] 
+                hex_len = len(hex_str)
+                
+                try:
+                    # bytes.fromhex is implemented in C and much faster than int(x, 16)
+                    if hex_len == 6:
+                        r, g, b = bytes.fromhex(hex_str)
+                        params[key] = (r, g, b, 255)
+                    elif hex_len == 8:
+                        params[key] = tuple(bytes.fromhex(hex_str))
+                except ValueError:
+                    Log.warn("LightshowEngine", f"Invalid hex color: {value}")
 
         # Calculate Timing
         start_beats = item.get("start", 0)
@@ -121,75 +163,86 @@ def process_lightshow(registry: RegistryInstance, lightshow_data: dict, settings
         steps = int(duration * settings.FPS)
         start_frame_index = int(start_time * settings.FPS)
 
-        #Log.info("LightshowEngine", f"Blending effect {effect_name} at layer {item.get('layer',0)}")
-
         # --- 3. GENERATE EFFECT FRAMES ---
-        # The effect should now ideally return RGBA: (r, g, b, alpha 0.0-1.0)
-        try:
-            effect_output = effect_func(steps, **params)
-        except Exception as e:
-            Log.error_exc(f"LightshowEngine/{effect_name}", e)
-            continue
+        # The effect should now ideally return RGBA
+        cache_key = (effect_name, frozenset(params.items()), steps)
+        if cache_key in effect_cache:
+            effect_output = effect_cache[cache_key]
+        else:
+            try:
+                effect_output = effect_func(steps, **params)
+                # don't trust the user functions
+                if not effect_output or not isinstance(effect_output, list):
+                    Log.warn("LightshowEngine", f"Effect {effect_name} did not return a valid frame list.")
+                    continue
+            except Exception as e:
+                Log.error_exc(f"LightshowEngine/{effect_name}", e)
+                continue
+            # cache the output
+            effect_cache[cache_key] = effect_output
 
-        # --- 4. THE COMPOSITOR (BLENDING) ---
-        for i, src_frame in enumerate(effect_output):
-            global_frame_idx = start_frame_index + i
+    # --- 4. THE COMPOSITOR (BLENDING) ---
+    for i, src_frame in enumerate(effect_output):
+        global_frame_idx = start_frame_index + i
+        
+        # Boundary check
+        if global_frame_idx >= len(frames):
+            break
+
+        dest_frame = frames[global_frame_idx]
+
+        for led_idx, src_pixel in enumerate(src_frame):
+            # Skip if LED index out of bounds or pixel is strictly None
+            if led_idx >= len(dest_frame) or src_pixel is None:
+                continue
+
+            # --- BLENDING LOGIC ---
             
-            # Boundary check
-            if global_frame_idx >= len(frames):
-                break
+            # Check 1: Is the pixel fully transparent? (0,0,0,0) or equivalent
+            # Optimization: Check length and alpha value to avoid math on empty pixels
+            if len(src_pixel) == 4 and src_pixel[3] == 0:
+                continue
 
-            dest_frame = frames[global_frame_idx]
+            # Get Background Color (Current state of the canvas)
+            bg_r, bg_g, bg_b = dest_frame[led_idx]
 
-            for led_idx, src_pixel in enumerate(src_frame):
-                # Skip if LED index out of bounds or pixel is strictly None
-                if led_idx >= len(dest_frame) or src_pixel is None:
-                    continue
-
-                # --- BLENDING LOGIC ---
+            # Get Foreground Color & Alpha
+            if len(src_pixel) == 4:
+                # RGBA Mode
+                fg_r, fg_g, fg_b, alpha = src_pixel
                 
-                # Check 1: Is the pixel fully transparent? (0,0,0,0) or equivalent
-                # Optimization: Check length and alpha value to avoid math on empty pixels
-                if len(src_pixel) == 4 and src_pixel[3] == 0:
-                    continue
+                # Normalize Alpha: If user sends 0-255, convert to 0.0-1.0
+                if alpha > 1.0:
+                    alpha = alpha / 255.0
+            else:
+                # RGB Mode (Legacy/Fallback) - Assume 100% Opacity
+                fg_r, fg_g, fg_b = src_pixel
+                alpha = 1.0
 
-                # Get Background Color (Current state of the canvas)
-                bg_r, bg_g, bg_b = dest_frame[led_idx]
+            # Optimization: If fully opaque, just overwrite (saves math)
+            if alpha >= 1.0:
+                dest_frame[led_idx] = (int(fg_r), int(fg_g), int(fg_b))
+                continue
 
-                # Get Foreground Color & Alpha
-                if len(src_pixel) == 4:
-                    # RGBA Mode
-                    fg_r, fg_g, fg_b, alpha = src_pixel
-                    
-                    # Normalize Alpha: If user sends 0-255, convert to 0.0-1.0
-                    if alpha > 1.0:
-                        alpha = alpha / 255.0
-                else:
-                    # RGB Mode (Legacy/Fallback) - Assume 100% Opacity
-                    fg_r, fg_g, fg_b = src_pixel
-                    alpha = 1.0
+            # Standard Alpha Blending Formula:
+            # Out = (Foreground * Alpha) + (Background * (1 - Alpha))
+            inv_alpha = 1.0 - alpha
+            
+            out_r = (fg_r * alpha) + (bg_r * inv_alpha)
+            out_g = (fg_g * alpha) + (bg_g * inv_alpha)
+            out_b = (fg_b * alpha) + (bg_b * inv_alpha)
 
-                # Optimization: If fully opaque, just overwrite (saves math)
-                if alpha >= 1.0:
-                    dest_frame[led_idx] = (int(fg_r), int(fg_g), int(fg_b))
-                    continue
+            # Clamp to 255 (just in case of float weirdness) and Cast to Int
+            dest_frame[led_idx] = (
+                min(255, int(out_r)),
+                min(255, int(out_g)),
+                min(255, int(out_b))
+            )
 
-                # Standard Alpha Blending Formula:
-                # Out = (Foreground * Alpha) + (Background * (1 - Alpha))
-                inv_alpha = 1.0 - alpha
-                
-                out_r = (fg_r * alpha) + (bg_r * inv_alpha)
-                out_g = (fg_g * alpha) + (bg_g * inv_alpha)
-                out_b = (fg_b * alpha) + (bg_b * inv_alpha)
+    ms_taken = (time.time() - process_start_time) * 1000
+    Log.info("LightshowEngine", f"Processed lightshow in {ms_taken:.2f} ms.")
+    # --- 5. FINALIZE, CACHE FOR LATER ---
+    # Cache the final frames for this lightshow configuration
+    caching.set_cache_by_name("lightshow_engine", file_cache_key, json.dumps(frames))
 
-                # Clamp to 255 (just in case of float weirdness) and Cast to Int
-                dest_frame[led_idx] = (
-                    min(255, int(out_r)),
-                    min(255, int(out_g)),
-                    min(255, int(out_b))
-                )
-
-    # --- 5. FINALIZE ---
-    # No need to fill None, as we initialized with (0,0,0). 
-    # The frames are already purely RGB integers.
     return frames

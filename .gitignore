@@ -17,3 +17,4 @@ audio/**
 .cache/**
 devlogs/**
 media/**
+docs/**/*.docx

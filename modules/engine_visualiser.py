@@ -9,6 +9,7 @@ import numpy as np
 from scipy.fft import rfft, rfftfreq
 import colorsys
 import modules.caching as cache
+import time
 
 class VisualiserEngine(AudioEngine):
     """
@@ -55,6 +56,8 @@ class VisualiserEngine(AudioEngine):
     def on_audio_load(self, audio_file: str):
         Log.info("EngineVisualiser", f"Loading audio file: {audio_file}")
         self.bar_heights = []
+
+        start_time = time.time()
         
         audio_path = os.path.join("audio", audio_file)
         try:
@@ -160,7 +163,8 @@ class VisualiserEngine(AudioEngine):
             }
             cache.set_cache_by_data("visualiser", cache_key, json.dumps(cache_content))
 
-            Log.info("EngineVisualiser", f"Calculated {len(self.bar_heights)} heights.")
+            time_taken = (time.time() - start_time) * 1000
+            Log.info("EngineVisualiser", f"Calculated {len(self.bar_heights)} heights in {time_taken:.2f} ms.")
 
         except Exception as e:
             Log.error("EngineVisualiser", f"Failed to load or process audio file: {e}")
