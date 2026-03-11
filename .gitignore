@@ -18,3 +18,4 @@ audio/**
 devlogs/**
 media/**
 docs/**/*.docx
+.vscode/
