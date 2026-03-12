@@ -19,3 +19,4 @@ devlogs/**
 media/**
 docs/**/*.docx
 .vscode/
+.coverage

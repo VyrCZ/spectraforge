@@ -1,5 +1,7 @@
 import pytest
 
+import server
+
 def test_socket_connection(socket_client):
     assert socket_client.is_connected() is True
 
@@ -64,3 +66,46 @@ def test_led_position_error(socket_client):
     assert error_event is not None
     assert error_event['args'][0]['status'] == 'error'
     assert 'X and Y coordinates are required' in error_event['args'][0]['message']
+
+def test_photo_data_forwarded(socket_client, monkeypatch):
+    captured = {}
+
+    def fake_receive_photo_data(data):
+        captured["data"] = data
+
+    monkeypatch.setattr(server.calibration_engine, "receive_photo_data", fake_receive_photo_data)
+    socket_client.emit('photo_data', {"image": "abc"})
+    assert captured["data"] == {"image": "abc"}
+
+def test_led_position_success(socket_client, monkeypatch):
+    captured = {}
+
+    def fake_receive_image_position(x, y):
+        captured["data"] = (x, y)
+
+    monkeypatch.setattr(server.calibration_engine, "receive_image_position", fake_receive_image_position)
+    socket_client.emit('led_position', {"x": 1, "y": 2})
+    assert captured["data"] == (1, 2)
+
+def test_client_connected_success_paths(socket_client, monkeypatch):
+    captured = {}
+
+    monkeypatch.setattr(server.visualiser_engine, "on_audio_load", lambda audio_file: captured.setdefault("audio", audio_file))
+    monkeypatch.setattr(server.lightshow_engine, "on_audio_load", lambda lightshow_file: captured.setdefault("lightshow", lightshow_file))
+    monkeypatch.setattr(server.video_engine, "on_audio_load", lambda video_file: captured.setdefault("video", video_file))
+
+    socket_client.emit('audio_client_connected', {"audio_file": "song.mp3"})
+    socket_client.emit('lightshow_client_connected', {"lightshow_file": "show.json"})
+    socket_client.emit('video_client_connected', {"video_file": "clip.mp4"})
+
+    assert captured == {
+        "audio": "song.mp3",
+        "lightshow": "show.json",
+        "video": "clip.mp4",
+    }
+
+def test_audio_engine_ready_emits(monkeypatch):
+    payloads = []
+    monkeypatch.setattr(server.socketio, "emit", lambda event, payload=None: payloads.append((event, payload)))
+    server.audio_engine_ready("song.mp3")
+    assert payloads == [("audio_ready", {"audio_file": "song.mp3"})]

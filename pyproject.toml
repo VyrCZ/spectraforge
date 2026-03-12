@@ -1,0 +1,7 @@
+[tool.coverage.run]
+omit = [
+    "effects/*",
+    "lightshow_effects/*",
+    "venv/*",
+    "legacy/*",
+]
