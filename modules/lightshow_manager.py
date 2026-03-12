@@ -181,63 +181,63 @@ def process_lightshow(registry: RegistryInstance, lightshow_data: dict, settings
             # cache the output
             effect_cache[cache_key] = effect_output
 
-    # --- 4. THE COMPOSITOR (BLENDING) ---
-    for i, src_frame in enumerate(effect_output):
-        global_frame_idx = start_frame_index + i
-        
-        # Boundary check
-        if global_frame_idx >= len(frames):
-            break
-
-        dest_frame = frames[global_frame_idx]
-
-        for led_idx, src_pixel in enumerate(src_frame):
-            # Skip if LED index out of bounds or pixel is strictly None
-            if led_idx >= len(dest_frame) or src_pixel is None:
-                continue
-
-            # --- BLENDING LOGIC ---
+        # --- 4. THE COMPOSITOR (BLENDING) ---
+        for i, src_frame in enumerate(effect_output):
+            global_frame_idx = start_frame_index + i
             
-            # Check 1: Is the pixel fully transparent? (0,0,0,0) or equivalent
-            # Optimization: Check length and alpha value to avoid math on empty pixels
-            if len(src_pixel) == 4 and src_pixel[3] == 0:
-                continue
+            # Boundary check
+            if global_frame_idx >= len(frames):
+                break
 
-            # Get Background Color (Current state of the canvas)
-            bg_r, bg_g, bg_b = dest_frame[led_idx]
+            dest_frame = frames[global_frame_idx]
 
-            # Get Foreground Color & Alpha
-            if len(src_pixel) == 4:
-                # RGBA Mode
-                fg_r, fg_g, fg_b, alpha = src_pixel
+            for led_idx, src_pixel in enumerate(src_frame):
+                # Skip if LED index out of bounds or pixel is strictly None
+                if led_idx >= len(dest_frame) or src_pixel is None:
+                    continue
+
+                # --- BLENDING LOGIC ---
                 
-                # Normalize Alpha: If user sends 0-255, convert to 0.0-1.0
-                if alpha > 1.0:
-                    alpha = alpha / 255.0
-            else:
-                # RGB Mode (Legacy/Fallback) - Assume 100% Opacity
-                fg_r, fg_g, fg_b = src_pixel
-                alpha = 1.0
+                # Check 1: Is the pixel fully transparent? (0,0,0,0) or equivalent
+                # Optimization: Check length and alpha value to avoid math on empty pixels
+                if len(src_pixel) == 4 and src_pixel[3] == 0:
+                    continue
 
-            # Optimization: If fully opaque, just overwrite (saves math)
-            if alpha >= 1.0:
-                dest_frame[led_idx] = (int(fg_r), int(fg_g), int(fg_b))
-                continue
+                # Get Background Color (Current state of the canvas)
+                bg_r, bg_g, bg_b = dest_frame[led_idx]
 
-            # Standard Alpha Blending Formula:
-            # Out = (Foreground * Alpha) + (Background * (1 - Alpha))
-            inv_alpha = 1.0 - alpha
-            
-            out_r = (fg_r * alpha) + (bg_r * inv_alpha)
-            out_g = (fg_g * alpha) + (bg_g * inv_alpha)
-            out_b = (fg_b * alpha) + (bg_b * inv_alpha)
+                # Get Foreground Color & Alpha
+                if len(src_pixel) == 4:
+                    # RGBA Mode
+                    fg_r, fg_g, fg_b, alpha = src_pixel
+                    
+                    # Normalize Alpha: If user sends 0-255, convert to 0.0-1.0
+                    if alpha > 1.0:
+                        alpha = alpha / 255.0
+                else:
+                    # RGB Mode (Legacy/Fallback) - Assume 100% Opacity
+                    fg_r, fg_g, fg_b = src_pixel
+                    alpha = 1.0
 
-            # Clamp to 255 (just in case of float weirdness) and Cast to Int
-            dest_frame[led_idx] = (
-                min(255, int(out_r)),
-                min(255, int(out_g)),
-                min(255, int(out_b))
-            )
+                # Optimization: If fully opaque, just overwrite (saves math)
+                if alpha >= 1.0:
+                    dest_frame[led_idx] = (int(fg_r), int(fg_g), int(fg_b))
+                    continue
+
+                # Standard Alpha Blending Formula:
+                # Out = (Foreground * Alpha) + (Background * (1 - Alpha))
+                inv_alpha = 1.0 - alpha
+                
+                out_r = (fg_r * alpha) + (bg_r * inv_alpha)
+                out_g = (fg_g * alpha) + (bg_g * inv_alpha)
+                out_b = (fg_b * alpha) + (bg_b * inv_alpha)
+
+                # Clamp to 255 (just in case of float weirdness) and Cast to Int
+                dest_frame[led_idx] = (
+                    min(255, int(out_r)),
+                    min(255, int(out_g)),
+                    min(255, int(out_b))
+                )
 
     ms_taken = (time.time() - process_start_time) * 1000
     Log.info("LightshowEngine", f"Processed lightshow in {ms_taken:.2f} ms.")
