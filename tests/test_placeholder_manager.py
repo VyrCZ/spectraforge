@@ -40,6 +40,33 @@ def test_check_config_populates_defaults(tmp_path, monkeypatch):
     assert config["enhance_colors"] is True
 
 
+def test_check_config_updates_empty_string_defaults(tmp_path, monkeypatch):
+    """Config initialised with empty-string values (the _DEFAULT_CONFIG case)
+    must still be updated by _check_config so the app can find actual files."""
+    Config._instance = None
+    config = Config()
+    # Simulate the state produced by Config when no config file exists:
+    # _DEFAULT_CONFIG sets current_setup to "" which is falsy but present.
+    config.config = {"current_setup": "", "current_effect": "", "sandbox_opened_file": ""}
+    monkeypatch.setattr(Config, "save", lambda self: None)
+
+    monkeypatch.setattr(placeholder_manager, "SETUP_DIR", str(tmp_path / "setups"))
+    monkeypatch.setattr(placeholder_manager, "EFFECTS_DIR", str(tmp_path / "effects"))
+    monkeypatch.setattr(placeholder_manager, "SANDBOX_DIR", str(tmp_path / "sandbox"))
+    (tmp_path / "setups").mkdir()
+    (tmp_path / "effects").mkdir()
+    (tmp_path / "sandbox").mkdir()
+    (tmp_path / "setups" / "demo.json").write_text("{}", encoding="utf-8")
+    (tmp_path / "effects" / "glow.py").write_text("pass", encoding="utf-8")
+    (tmp_path / "sandbox" / "test.py").write_text("pass", encoding="utf-8")
+
+    placeholder_manager._check_config()
+    config = Config().config
+    assert config["current_setup"] == "demo"
+    assert config["current_effect"] == "glow"
+    assert config["sandbox_opened_file"] == "test"
+
+
 def test_check_creates_missing_defaults(tmp_path, monkeypatch):
     reset_config(monkeypatch)
     monkeypatch.setattr(placeholder_manager, "SETUP_DIR", str(tmp_path / "setups"))
