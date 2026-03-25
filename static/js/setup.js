@@ -83,9 +83,8 @@ function setupCamera() {
                 const view = data && data.view !== undefined ? data.view : null;
                 if (view !== null) {
                     // 3D mode: show which view to position and wait for manual capture
-                    const viewLabels = ["Front", "Right", "Back", "Left"];
                     document.getElementById('view_instruction_text').textContent =
-                        `Rotate to ${viewLabels[view]} view, then click Capture`;
+                        `Rotate to ${VIEW_LABELS_3D[view]} view, then click Capture`;
                     document.getElementById('view_indicator_3d').style.display = 'block';
                     document.getElementById('capture_button').style.display = 'block';
                 } else {
@@ -287,6 +286,10 @@ function drawImageAndCross() {
 function sendLedPosition(){
     var data;
     if (setupType === '3D') {
+        if (coords3d.x === undefined || coords3d.y === undefined || coords3d.z === undefined) {
+            console.warn("3D coordinates not yet initialized, skipping send.");
+            return;
+        }
         data = { x: coords3d.x, y: coords3d.y, z: coords3d.z };
     } else {
         data = { x: edited_image_x, y: edited_image_y };

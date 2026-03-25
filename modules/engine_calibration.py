@@ -202,7 +202,9 @@ class CalibrationEngine(Engine):
         for view_name in self.VIEWS:
             path = os.path.join(self.image_dir, view_name, f"{led_index}.png")
             img = Image.open(path).convert("L")
-            # Initialise center lazily from the first image
+            # Initialize center lazily from the first image.
+            # The y-coordinate defaults to the bottom of the frame (h), matching the
+            # legacy find_light_positions.py convention where the object base is the origin.
             if self.center_3d == (0, 0):
                 w, h = img.size
                 self.center_3d = (w // 2, h)
@@ -279,7 +281,9 @@ class CalibrationEngine(Engine):
     def receive_image_position(self, x, y, z=None):
         Log.debug("CalibrationEngine", f"Received position data for pixel {self.current_index}: ({x}, {y}, {z})")
         if self.current_setup.type == SetupType.THREE_DIMENSIONAL:
-            self.current_setup.coords.append((x, y, z if z is not None else 0))
+            if z is None:
+                raise ValueError("Z coordinate is required for 3D setups.")
+            self.current_setup.coords.append((x, y, z))
         else:
             self.current_setup.coords.append((x, y))
         if self.current_index < self.pixel_count - 1:
