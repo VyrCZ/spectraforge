@@ -178,13 +178,23 @@ def connect_calibration():
     print("Client connected to calibration engine.")
     calibration_engine.start_shooting()
 
-def take_photo_callback():
+def take_photo_callback(view=None):
     """Call the photo event from the engine to the frontend."""
-    socketio.emit("take_photo")
+    if view is not None:
+        socketio.emit("take_photo", {"view": view})
+    else:
+        socketio.emit("take_photo")
 
-def send_image_callback(image_data, x, y):
+def send_image_callback(image_data, x, y, z=None, extra_images=None, center=None):
     """Send the image data to the frontend."""
-    socketio.emit("edit_photo_data", {"image": image_data, "x": x, "y": y})
+    if extra_images is not None:
+        socketio.emit("edit_photo_data_3d", {
+            "images": extra_images,
+            "x": x, "y": y, "z": z,
+            "center_x": center[0], "center_y": center[1]
+        })
+    else:
+        socketio.emit("edit_photo_data", {"image": image_data, "x": x, "y": y})
 
 @socketio.on("photo_data")
 def receive_photo_data(data):
@@ -209,11 +219,12 @@ def receive_led_position(data):
     """Receive LED position data from the frontend."""
     x = data.get("x")
     y = data.get("y")
+    z = data.get("z")  # None for 2D setups
     if x is None or y is None:
         emit("led_position_error", {"status": "error", "message": "X and Y coordinates are required."})
         return
     try:
-        calibration_engine.receive_image_position(x, y)
+        calibration_engine.receive_image_position(x, y, z)
     except Exception as e:
         Log.error_exc("CalibrationEngine", e)
         emit("led_position_error", {"status": "error", "message": str(e)})

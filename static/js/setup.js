@@ -21,7 +21,7 @@ function updateInstructions() {
 }
 
 currentStep = 1;
-//setupType = null;
+var setupType = '2D';
 function nextStep() {
     if (currentStep === 1) {
         // Validate the first step
@@ -35,7 +35,7 @@ function nextStep() {
             alert('Please enter a valid number of LEDs.');
             return;
         }
-        //setupType = document.querySelector('#setup_type').value;
+        setupType = document.querySelector('#setup_type').value;
         fetch('/api/calibration/new_setup', {
             method: 'POST',
             headers: {
@@ -43,7 +43,7 @@ function nextStep() {
             },
             body: JSON.stringify({
                 name: name,
-                type: "2D",
+                type: setupType,
                 led_count: parseInt(ledCount)
             })
         })
@@ -79,9 +79,20 @@ function setupCamera() {
                 socket.emit("photo_start");
             });
         
-            socket.on("take_photo", async () => {
-                const imageData = await capturePhoto();
-                socket.emit("photo_data", { image: imageData });
+            socket.on("take_photo", async (data) => {
+                const view = data && data.view !== undefined ? data.view : null;
+                if (view !== null) {
+                    // 3D mode: show which view to position and wait for manual capture
+                    const viewLabels = ["Front", "Right", "Back", "Left"];
+                    document.getElementById('view_instruction_text').textContent =
+                        `Rotate to ${viewLabels[view]} view, then click Capture`;
+                    document.getElementById('view_indicator_3d').style.display = 'block';
+                    document.getElementById('capture_button').style.display = 'block';
+                } else {
+                    // 2D mode: auto-capture
+                    const imageData = await capturePhoto();
+                    socket.emit("photo_data", { image: imageData });
+                }
             });
         
             socket.on("edit_photo_data", ({ image, x, y }) => {
@@ -106,6 +117,20 @@ function setupCamera() {
                 img.src = image; // Corrected from `image_data` to `image`
             });
 
+            socket.on("edit_photo_data_3d", ({ images, x, y, z, center_x, center_y }) => {
+                console.log("Received 3D image data for editing from server:", x, y, z);
+                if (!editing) {
+                    editing = true;
+                    nextStep();
+                }
+                images3d = images;
+                coords3d = { x, y, z };
+                center3d = { x: center_x, y: center_y };
+                current3dView = 0;
+                document.getElementById('view_controls_3d').style.display = 'block';
+                drawView3d();
+            });
+
             socket.on("setup_done", () => {
                 setupDone();
             });
@@ -125,10 +150,74 @@ async function capturePhoto() {
     return canvas.toDataURL('image/jpeg');
 }
 
+function takePhoto() {
+    capturePhoto().then(imageData => {
+        document.getElementById('view_indicator_3d').style.display = 'none';
+        socket.emit("photo_data", { image: imageData });
+    });
+}
+
 var edited_image = null;
 var edited_image_x = null;
 var edited_image_y = null;
 var editing = false;
+var images3d = {};
+var coords3d = { x: 0, y: 0, z: 0 };
+var center3d = { x: 0, y: 0 };
+var current3dView = 0;
+
+var VIEW_NAMES_3D = ["front", "right", "back", "left"];
+var VIEW_LABELS_3D = ["FRONT", "RIGHT", "BACK", "LEFT"];
+
+function worldToImage3d(world, view, center) {
+    const { x, y, z } = world;
+    const cx = center.x;
+    const cy = center.y;
+    if (view === 0) return { x: x + cx, y: y + cy };   // front
+    if (view === 1) return { x: z + cx, y: y + cy };   // right
+    if (view === 2) return { x: cx - x, y: y + cy };   // back
+    if (view === 3) return { x: cx - z, y: y + cy };   // left
+    return { x: cx, y: cy };
+}
+
+function imageToWorld3d(px, py, view, center, current) {
+    const cx = center.x;
+    const cy = center.y;
+    if (view === 0) return { x: px - cx, y: py - cy, z: current.z };   // front: update x, y
+    if (view === 1) return { x: current.x, y: py - cy, z: px - cx };   // right: update y, z
+    if (view === 2) return { x: cx - px, y: py - cy, z: current.z };   // back: update x, y
+    if (view === 3) return { x: current.x, y: py - cy, z: cx - px };   // left: update y, z
+    return current;
+}
+
+function drawView3d() {
+    const viewName = VIEW_NAMES_3D[current3dView];
+    document.getElementById('current_view_label').textContent = VIEW_LABELS_3D[current3dView];
+
+    const img = new Image();
+    img.onload = () => {
+        const canvas = document.querySelector('#led_pos_canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        edited_image = img;
+
+        const pixelPos = worldToImage3d(coords3d, current3dView, center3d);
+        edited_image_x = pixelPos.x;
+        edited_image_y = pixelPos.y;
+        drawImageAndCross();
+    };
+    img.src = images3d[viewName];
+}
+
+function prevView3d() {
+    current3dView = (current3dView - 1 + VIEW_NAMES_3D.length) % VIEW_NAMES_3D.length;
+    drawView3d();
+}
+
+function nextView3d() {
+    current3dView = (current3dView + 1) % VIEW_NAMES_3D.length;
+    drawView3d();
+}
 
 function setupEditCanvas() {
     const canvas = document.querySelector('#led_pos_canvas');
@@ -138,18 +227,33 @@ function setupEditCanvas() {
     canvas.addEventListener("click", (e) => {
         console.log("Clicked on canvas at: ", e.clientX, e.clientY);
         const rect = canvas.getBoundingClientRect();
-        edited_image_x = Math.floor(e.clientX - rect.left);
-        edited_image_y = Math.floor(e.clientY - rect.top);
+        const cx = Math.floor(e.clientX - rect.left);
+        const cy = Math.floor(e.clientY - rect.top);
+
+        if (setupType === '3D') {
+            const updated = imageToWorld3d(cx, cy, current3dView, center3d, coords3d);
+            coords3d = updated;
+            const pixelPos = worldToImage3d(coords3d, current3dView, center3d);
+            edited_image_x = pixelPos.x;
+            edited_image_y = pixelPos.y;
+        } else {
+            edited_image_x = cx;
+            edited_image_y = cy;
+        }
 
         drawImageAndCross();
-
-        // Redraw image and draw new cross
-        //socket.emit("pixel_selected", { x, y });
     });
 
     
     document.addEventListener('keydown', function(event) {
         console.log("Key pressed: ", event.key);
+        if (setupType === '3D') {
+            if (event.key === 'ArrowLeft') {
+                prevView3d();
+            } else if (event.key === 'ArrowRight') {
+                nextView3d();
+            }
+        }
         if (event.key === 'Space') {
             // Prevent default spacebar behavior (like scrolling)
             event.preventDefault();
@@ -181,10 +285,12 @@ function drawImageAndCross() {
 }
 
 function sendLedPosition(){
-    const data = {
-        x: edited_image_x,
-        y: edited_image_y
-    };
+    var data;
+    if (setupType === '3D') {
+        data = { x: coords3d.x, y: coords3d.y, z: coords3d.z };
+    } else {
+        data = { x: edited_image_x, y: edited_image_y };
+    }
     console.log("Sending LED position to server:", data);
     socket.emit("led_position", data);
 }

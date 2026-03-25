@@ -26,7 +26,11 @@
                 <input type="text" id="setup_name" name="setup_name" required>
             </div>
             <div class="setup_form_item">
-                <label for="setup_type" lan-key="setup_label_type">Setup Type: 2D</label>
+                <label for="setup_type" lan-key="setup_label_type">Setup Type:</label>
+                <select id="setup_type">
+                    <option value="2D">2D</option>
+                    <option value="3D">3D</option>
+                </select>
             </div>
             <div class="setup_form_item">
                 <label for="led_count" lan-key="setup_label_led_count">Number of LEDs:</label>
@@ -56,11 +60,19 @@
         <div id="webcam_container">
             <video id="webcam_video" autoplay></video>
             <canvas id="webcam_canvas"></canvas>
-            <button type="button" id="capture_button" class="square" onclick="takePhoto()" lan-key="setup_webcam_debug_capture">Debug Capture</button>
+            <div id="view_indicator_3d" style="display: none;">
+                <p id="view_instruction_text"></p>
+            </div>
+            <button type="button" id="capture_button" class="square" onclick="takePhoto()" lan-key="setup_webcam_capture">Capture</button>
         </div>
     </div>
     <div class="setup_step" id="setup_step_4" style="display: none;">
         <canvas id="led_pos_canvas"></canvas>
+        <div id="view_controls_3d" style="display: none;">
+            <button type="button" class="square" onclick="prevView3d()">&#8592;</button>
+            <span id="current_view_label"></span>
+            <button type="button" class="square" onclick="nextView3d()">&#8594;</button>
+        </div>
         <button type="button" id="send_led_position_button" onclick="sendLedPosition()" lan-key="setup_button_confirm">Confirm</button>
     </div>
 </body>

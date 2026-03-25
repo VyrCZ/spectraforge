@@ -80,12 +80,12 @@ def test_photo_data_forwarded(socket_client, monkeypatch):
 def test_led_position_success(socket_client, monkeypatch):
     captured = {}
 
-    def fake_receive_image_position(x, y):
-        captured["data"] = (x, y)
+    def fake_receive_image_position(x, y, z=None):
+        captured["data"] = (x, y, z)
 
     monkeypatch.setattr(server.calibration_engine, "receive_image_position", fake_receive_image_position)
     socket_client.emit('led_position', {"x": 1, "y": 2})
-    assert captured["data"] == (1, 2)
+    assert captured["data"] == (1, 2, None)
 
 def test_client_connected_success_paths(socket_client, monkeypatch):
     captured = {}
