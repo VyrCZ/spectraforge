@@ -77,6 +77,16 @@ def test_photo_data_forwarded(socket_client, monkeypatch):
     socket_client.emit('photo_data', {"image": "abc"})
     assert captured["data"] == {"image": "abc"}
 
+def test_view_ready_forwarded(socket_client, monkeypatch):
+    captured = {}
+
+    def fake_view_ready():
+        captured["called"] = True
+
+    monkeypatch.setattr(server.calibration_engine, "view_ready", fake_view_ready)
+    socket_client.emit('view_ready')
+    assert captured.get("called") is True
+
 def test_led_position_success(socket_client, monkeypatch):
     captured = {}
 

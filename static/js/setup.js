@@ -21,7 +21,7 @@ function updateInstructions() {
 }
 
 currentStep = 1;
-var setupType = '2D';
+let setupType = '2D';
 function nextStep() {
     if (currentStep === 1) {
         // Validate the first step
@@ -79,19 +79,18 @@ function setupCamera() {
                 socket.emit("photo_start");
             });
         
-            socket.on("take_photo", async (data) => {
-                const view = data && data.view !== undefined ? data.view : null;
-                if (view !== null) {
-                    // 3D mode: show which view to position and wait for manual capture
-                    document.getElementById('view_instruction_text').textContent =
-                        `Rotate to ${VIEW_LABELS_3D[view]} view, then click Capture`;
-                    document.getElementById('view_indicator_3d').style.display = 'block';
-                    document.getElementById('capture_button').style.display = 'block';
-                } else {
-                    // 2D mode: auto-capture
-                    const imageData = await capturePhoto();
-                    socket.emit("photo_data", { image: imageData });
-                }
+            socket.on("take_photo", async () => {
+                // Auto-capture for both 2D and 3D (camera is already in position)
+                const imageData = await capturePhoto();
+                socket.emit("photo_data", { image: imageData });
+            });
+
+            socket.on("change_view", ({ view }) => {
+                // 3D: prompt the user to reposition the camera for the next view
+                document.getElementById('view_instruction_text').textContent =
+                    `Move camera to ${VIEW_LABELS_3D[view]} view, then click Ready`;
+                document.getElementById('view_indicator_3d').style.display = 'block';
+                document.getElementById('view_ready_button').style.display = 'block';
             });
         
             socket.on("edit_photo_data", ({ image, x, y }) => {
@@ -149,11 +148,10 @@ async function capturePhoto() {
     return canvas.toDataURL('image/jpeg');
 }
 
-function takePhoto() {
-    capturePhoto().then(imageData => {
-        document.getElementById('view_indicator_3d').style.display = 'none';
-        socket.emit("photo_data", { image: imageData });
-    });
+function viewReady() {
+    document.getElementById('view_indicator_3d').style.display = 'none';
+    document.getElementById('view_ready_button').style.display = 'none';
+    socket.emit("view_ready");
 }
 
 var edited_image = null;

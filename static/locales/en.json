@@ -40,6 +40,7 @@
     "setup_instruction_click_start": "Click \"Start Calibration\" to begin the calibration process.",
     "setup_button_start_calibration": "Start Calibration",
     "setup_webcam_debug_capture": "Debug Capture",
+    "setup_button_view_ready": "Ready",
     "setup_button_confirm": "Confirm",
 
     "page_effects_header": "Effects",

@@ -19,12 +19,13 @@ class CalibrationEngine(Engine):
     SETUP_DIR_ROOT = "config/setups/"
     VIEWS = ["front", "right", "back", "left"]
 
-    def __init__(self, renderer, take_photo_callback, send_image_callback, setup_done_callback):
+    def __init__(self, renderer, take_photo_callback, send_image_callback, setup_done_callback, change_view_callback=None):
         self.renderer = renderer
         self.pixel_count = 200  # Default pixel count, should be set by the setup
         self.take_photo_callback = take_photo_callback
         self.send_image_callback = send_image_callback
         self.setup_done_callback = setup_done_callback
+        self.change_view_callback = change_view_callback or (lambda _: None)
         self.calibration_color = (255, 255, 255)  # Red color for calibration
         self.current_setup = None
         self.image_dir = os.path.join(self.IMAGE_DIR_ROOT, datetime.now().strftime("%Y-%m-%d")) # fallback, just in case
@@ -51,13 +52,27 @@ class CalibrationEngine(Engine):
     def start_shooting(self):
         """
         Start the photo shooting process.
-        Returns True when ready to start.
+        For 3D setups, prompts the user to position the camera for the first view.
+        For 2D setups, starts shooting pixels immediately.
         """
         self.current_index = -1
         self.current_view = 0
         Log.info("CalibrationEngine", "Starting shooting process.")
+        if self.current_setup.type == SetupType.THREE_DIMENSIONAL:
+            self.change_view_callback(self.current_view)
+        else:
+            self.next_pixel()
+
+    @EngineManager.requires_active
+    def view_ready(self):
+        """
+        Called when the user has positioned the camera for the current view (3D only).
+        Resets the pixel index and starts shooting all pixels for this view.
+        """
+        Log.info("CalibrationEngine", f"Camera ready for view {self.VIEWS[self.current_view]}.")
+        self.current_index = -1
         self.next_pixel()
-    
+
     @EngineManager.requires_active
     def next_pixel(self):
         """
@@ -67,17 +82,13 @@ class CalibrationEngine(Engine):
             Log.info("CalibrationEngine", "All renderer have been shown.")
             return
         self.current_index += 1
-        self.current_view = 0
         self.renderer.fill((0, 0, 0))
         self.renderer[self.current_index] = self.calibration_color
         self.renderer.show()
         # give time to the camera to focus
         time.sleep(0.5)
         Log.debug("CalibrationEngine", f"Showing pixel {self.current_index}.")
-        if self.current_setup.type == SetupType.THREE_DIMENSIONAL:
-            self.take_photo_callback(self.current_view)
-        else:
-            self.take_photo_callback()
+        self.take_photo_callback()
 
     @EngineManager.requires_active
     def receive_photo_data(self, data):
@@ -102,14 +113,16 @@ class CalibrationEngine(Engine):
             file_path = os.path.join(view_dir, f"{self.current_index}.png")
             with open(file_path, "wb") as image_file:
                 image_file.write(image_bytes)
-            # Advance to the next view, or to the next pixel when all views are done
-            self.current_view += 1
-            if self.current_view < len(self.VIEWS):
-                self.take_photo_callback(self.current_view)
-            elif self.current_index < self.pixel_count - 1:
+            # Advance to the next pixel, or to the next view when all pixels are done
+            if self.current_index < self.pixel_count - 1:
                 self.next_pixel()
             else:
-                self.start_editing()
+                # All pixels shot for this view; move to the next view
+                self.current_view += 1
+                if self.current_view < len(self.VIEWS):
+                    self.change_view_callback(self.current_view)
+                else:
+                    self.start_editing()
         else:
             # make sure the image directory exists
             if not os.path.exists(self.image_dir):

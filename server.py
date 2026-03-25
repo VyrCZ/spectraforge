@@ -178,12 +178,13 @@ def connect_calibration():
     print("Client connected to calibration engine.")
     calibration_engine.start_shooting()
 
-def take_photo_callback(view=None):
+def take_photo_callback():
     """Call the photo event from the engine to the frontend."""
-    if view is not None:
-        socketio.emit("take_photo", {"view": view})
-    else:
-        socketio.emit("take_photo")
+    socketio.emit("take_photo")
+
+def change_view_callback(view):
+    """Tell the frontend to reposition the camera for the given view."""
+    socketio.emit("change_view", {"view": view})
 
 def send_image_callback(image_data, x, y, z=None, extra_images=None, center=None):
     """Send the image data to the frontend."""
@@ -199,6 +200,11 @@ def send_image_callback(image_data, x, y, z=None, extra_images=None, center=None
 @socketio.on("photo_data")
 def receive_photo_data(data):
     calibration_engine.receive_photo_data(data)
+
+@socketio.on("view_ready")
+def view_ready():
+    """Called by the frontend when the camera has been repositioned for the current view."""
+    calibration_engine.view_ready()
     
 @app.route("/api/calibration/upload_pixel_image", methods=["POST"])
 def upload_pixel_image():
@@ -560,7 +566,7 @@ placeholder_check()
 manager = EngineManager()
 renderer = LEDRenderer(manager.active_setup)
 effects_engine = EffectsEngine(renderer, manager.active_setup)
-calibration_engine = CalibrationEngine(renderer, take_photo_callback, send_image_callback, setup_done_callback)
+calibration_engine = CalibrationEngine(renderer, take_photo_callback, send_image_callback, setup_done_callback, change_view_callback)
 canvas_engine = CanvasEngine(renderer)
 sandbox_engine = SandboxEngine(renderer, manager.active_setup)
 image_engine = ImageEngine(renderer, manager.active_setup)
