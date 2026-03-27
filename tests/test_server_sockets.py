@@ -33,30 +33,38 @@ def test_video_client_connected_no_file(socket_client):
     assert error_event is not None
     assert error_event['args'][0]['status'] == 'error'
 
-def test_audio_controls(socket_client):
+def test_audio_controls(socket_client, monkeypatch):
     from server import manager, visualiser_engine
-    
-    # Needs an audio engine to be active
+
+    calls = []
+    monkeypatch.setattr(visualiser_engine, "on_audio_play", lambda: calls.append("play"))
+    monkeypatch.setattr(visualiser_engine, "on_audio_pause", lambda: calls.append("pause"))
+    monkeypatch.setattr(visualiser_engine, "on_audio_stop", lambda: calls.append("stop"))
+    monkeypatch.setattr(visualiser_engine, "on_audio_seek", lambda t: calls.append(("seek", t)))
+
     manager.active_engine = visualiser_engine
 
     socket_client.emit('audio_play')
     socket_client.emit('audio_pause')
     socket_client.emit('audio_stop')
     socket_client.emit('audio_seek', {"time": 10})
-    # These events trigger methods in the active engine but don't emit back directly unless mocked.
-    # We mainly test that the socket event doesn't crash the server.
-    received = socket_client.get_received()
-    # verify no errors came back (this depends on your engine manager mock/setup state)
-    error_events = [evt for evt in received if 'error' in evt['name']]
-    assert len(error_events) == 0
 
-def test_photo_start(socket_client):
+    assert "play" in calls
+    assert "pause" in calls
+    assert "stop" in calls
+    assert ("seek", 10) in calls
+
+
+def test_photo_start(socket_client, monkeypatch):
+    shooting_started = {}
+
+    def fake_start_shooting():
+        shooting_started["called"] = True
+
+    monkeypatch.setattr(server.calibration_engine, "start_shooting", fake_start_shooting)
     socket_client.emit('photo_start')
-    # Depending on how fast the calibration_engine triggers, take_photo might not be emitted instantly without an ongoing mock.
-    # Mainly checking for no crashes.
-    received = socket_client.get_received()
-    error_events = [evt for evt in received if 'error' in evt['name']]
-    assert len(error_events) == 0
+
+    assert shooting_started.get("called") is True
 
 def test_led_position_error(socket_client):
     socket_client.emit('led_position', {}) # Missing x, y

@@ -110,29 +110,28 @@ def test_mathutils_wrap_value():
 
 
 def test_mathutils_mix_colors_additive():
-    """Test mix_colors performs color blending."""
+    """Test mix_colors performs screen blending and returns the correct result."""
     from modules.mathutils import mix_colors
-    
+
     color1 = (100, 50, 200)
     color2 = (150, 100, 50)
-    
+
     result = mix_colors(color1, color2)
-    
-    assert isinstance(result, tuple)
-    assert len(result) == 3
+
+    # Screen blend: Result = 1 - (1 - A/255) * (1 - B/255), then * 255
+    assert result == (191, 130, 210)
 
 
 def test_mathutils_color_lerp_interpolation():
-    """Test color_lerp interpolates between RGB colors."""
+    """Test color_lerp returns the exact midpoint between two colors."""
     from modules.mathutils import color_lerp
-    
+
     color1 = (0, 0, 0)
     color2 = (255, 255, 255)
-    
+
     result = color_lerp(color1, color2, 0.5)
-    
-    assert isinstance(result, tuple)
-    assert len(result) == 3
+
+    assert result == (127, 127, 127)
 
 
 def test_mathutils_color_lerp_start():
@@ -160,26 +159,29 @@ def test_mathutils_color_lerp_end():
 
 
 def test_mathutils_rotate_direction_90():
-    """Test rotate_direction rotates vector 90 degrees."""
+    """Test rotate_direction rotates [1,0] by 90° to approximately [0,1]."""
     from modules.mathutils import rotate_direction
-    
+
     direction = [1, 0]
     result = rotate_direction(direction, 90)
-    
-    assert isinstance(result, list)
+
     assert len(result) == 2
+    assert abs(result[0]) < 1e-9   # x component should be ~0
+    assert abs(result[1] - 1.0) < 1e-9  # y component should be ~1
 
 
 def test_mathutils_convex_hull_triangle():
-    """Test convex_hull with triangle points."""
+    """Test convex_hull with triangle points returns all three vertices."""
     from modules.mathutils import convex_hull
-    
+
     points = [(0, 0), (1, 0), (0, 1)]
-    
+
     result = convex_hull(points)
-    
-    assert isinstance(result, list)
-    assert len(result) >= 3
+
+    assert len(result) == 3
+    # Every input vertex must appear in the hull (triangle == its own hull)
+    for p in points:
+        assert p in result
 
 
 def test_mathutils_point_in_poly_inside():
@@ -243,16 +245,18 @@ def test_mathutils_bounds_2d_coordinates():
 
 
 def test_mathutils_combine_rgb_colors():
-    """Test combine_rgb_colors gamma-corrected blend."""
+    """Test combine_rgb_colors produces a value strictly between the two input colors."""
     from modules.mathutils import combine_rgb_colors
-    
+
     color1 = (100, 100, 100)
     color2 = (200, 200, 200)
-    
+
     result = combine_rgb_colors(color1, color2, 0.5)
-    
+
     assert isinstance(result, tuple)
     assert len(result) == 3
+    # The blended value must lie strictly between the two input values
+    assert all(color1[i] < result[i] < color2[i] for i in range(3))
 
 
 def test_mathutils_combine_rgb_start():
@@ -280,24 +284,28 @@ def test_mathutils_combine_rgb_end():
 
 
 def test_mathutils_distance_to_closest_edge():
-    """Test distance_to_closest_edge calculation."""
+    """Test distance_to_closest_edge returns the correct distance (5.0 from center of a 10x10 square)."""
     from modules.mathutils import distance_to_closest_edge
-    
+
     point = [5, 5]
     edges = [[0, 0], [10, 0], [10, 10], [0, 10]]
-    
+
     result = distance_to_closest_edge(point, edges)
-    
-    assert result >= 0
+
+    assert abs(result - 5.0) < 1e-9
 
 
 def test_mathutils_find_closest_edge():
-    """Test find_closest_edge returns edge normal."""
+    """Test find_closest_edge returns a unit normal vector."""
+    import math
     from modules.mathutils import find_closest_edge
-    
+
     point = [5, 5]
     edges = [[0, 0], [10, 0], [10, 10], [0, 10]]
-    
+
     result = find_closest_edge(point, edges)
-    
+
     assert result is not None
+    # The returned normal must be a unit vector (length == 1)
+    magnitude = math.sqrt(result[0] ** 2 + result[1] ** 2)
+    assert abs(magnitude - 1.0) < 1e-9

@@ -5,16 +5,6 @@ from unittest.mock import patch, MagicMock, mock_open
 
 from modules.engine_lightshow import LightshowEngine
 from modules.engine_manager import EngineManager
-from modules.led_renderer import DummyRenderer
-from modules.setup import Setup, SetupType
-
-@pytest.fixture
-def mock_setup():
-    return Setup("test_setup", SetupType.TWO_DIMENSIONAL, [(0,0,0)]*10)
-
-@pytest.fixture
-def dummy_renderer(mock_setup):
-    return DummyRenderer(mock_setup)
 
 @pytest.fixture
 def lightshow_engine(dummy_renderer, mock_setup):
@@ -32,18 +22,23 @@ def test_get_lightshow_file_data(mock_open, mock_listdir, mock_exists, lightshow
         ["song1.mp3", "song2.wav"], # audio folder contents
         ["valid_show.json", "missing_audio.json", "invalid.json"] # lightshow folder contents
     ]
-    
-    mock_files = {
-        'lightshows\\valid_show.json': '{"audio_file": "song1.mp3", "timeline": [{"effect": "rainbow"}]}',
-        'lightshows\\missing_audio.json': '{"audio_file": "missing.mp3", "timeline": []}'
-    }
-    
-    # Mocking open for multiple files
+
+    valid_json = '{"audio_file": "song1.mp3", "timeline": [{"effect": "rainbow"}]}'
+    missing_json = '{"audio_file": "missing.mp3", "timeline": []}'
+
+    # Mocking open for multiple files — use os.path.join for cross-platform paths
     def mocked_open(filename, *args, **kwargs):
-        # Normalize paths for mocking
-        norm_path = filename.replace('/', '\\')
-        content = mock_files.get(norm_path, '{}')
-        return MagicMock(read=lambda: content, __enter__=lambda x: MagicMock(read=lambda: content))
+        norm_path = os.path.normpath(filename)
+        if norm_path == os.path.normpath(os.path.join('lightshows', 'valid_show.json')):
+            content = valid_json
+        elif norm_path == os.path.normpath(os.path.join('lightshows', 'missing_audio.json')):
+            content = missing_json
+        else:
+            content = '{}'
+        m = MagicMock()
+        m.__enter__ = lambda x: MagicMock(read=lambda: content, **{"__iter__": lambda s: iter([content])})
+        m.read = lambda: content
+        return m
         
     mock_open.side_effect = mocked_open
     
@@ -73,8 +68,15 @@ def test_compile_lightshow(mock_process, lightshow_engine):
     assert len(lightshow_engine.frames) == 30
 
 def test_engine_callbacks(lightshow_engine):
+    assert lightshow_engine.lightshow_data is None
     lightshow_engine.on_enable()
+    # on_enable logs but should not alter pre-loaded state
+    assert lightshow_engine.lightshow_data is None
+    assert lightshow_engine.audio_length == 0.0
+
     lightshow_engine.on_disable()
+    # on_disable logs but should not alter state when no audio is loaded
+    assert lightshow_engine.audio_length == 0.0
 
 @patch('modules.engine_lightshow.LightshowEngine.compile_lightshow')
 def test_on_audio_load(mock_compile, lightshow_engine):

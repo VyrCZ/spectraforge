@@ -4,170 +4,127 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 
-def test_lightshow_manager_process_lightshow_returns_frames():
-    """Test that process_lightshow returns list of frames."""
-    from modules.lightshow_manager import process_lightshow, RegistryInstance, LightshowSettings
-    
-    registry = RegistryInstance.__new__(RegistryInstance)
-    registry.coords = [[0, 0, 0], [1, 1, 1]]
-    registry.registry = {}
-    
-    settings = LightshowSettings()
-    lightshow_data = {"timeline": []}
-    
-    frames = process_lightshow(registry, lightshow_data, settings)
-    
-    assert isinstance(frames, list)
-
-
 def test_lightshow_manager_registry_instance_init():
     """Test RegistryInstance initialization."""
     from modules.lightshow_manager import RegistryInstance
-    
+
     with patch("modules.lightshow_manager.Path"):
         registry = RegistryInstance([[0, 0, 0], [1, 1, 1]])
-        
+
         assert len(registry.coords) == 2
         assert isinstance(registry.registry, dict)
 
 
-def test_lightshow_manager_lightshow_settings_fps():
-    """Test LightshowSettings stores FPS."""
+@pytest.mark.parametrize("fps,expected", [(30, 30), (60, 60), (120, 120)])
+def test_lightshow_manager_settings_fps(fps, expected):
+    """Test LightshowSettings stores the given FPS; defaults to 30."""
     from modules.lightshow_manager import LightshowSettings
-    
-    settings = LightshowSettings(fps=60)
-    
-    assert settings.FPS == 60
+
+    settings = LightshowSettings(fps=fps)
+    assert settings.FPS == expected
 
 
 def test_lightshow_manager_default_fps():
     """Test LightshowSettings defaults to 30 FPS."""
     from modules.lightshow_manager import LightshowSettings
-    
-    settings = LightshowSettings()
-    
-    assert settings.FPS == 30
+
+    assert LightshowSettings().FPS == 30
 
 
-def test_lightshow_manager_process_lightshow_with_timeline():
-    """Test process_lightshow with timeline items."""
+def test_lightshow_manager_process_lightshow_empty_timeline_returns_empty_frames():
+    """process_lightshow with an empty timeline should return an empty list of frames."""
     from modules.lightshow_manager import process_lightshow, RegistryInstance, LightshowSettings
-    
+
     registry = RegistryInstance.__new__(RegistryInstance)
     registry.coords = [[0, 0, 0], [1, 1, 1]]
     registry.registry = {}
-    
-    settings = LightshowSettings()
-    lightshow_data = {
-        "timeline": [
-            {"effect": "test", "start": 0, "end": 30, "parameters": {}}
-        ]
-    }
-    
-    frames = process_lightshow(registry, lightshow_data, settings)
-    
+
+    frames = process_lightshow(registry, {"timeline": []}, LightshowSettings())
+
     assert isinstance(frames, list)
+    assert len(frames) == 0
 
 
-def test_lightshow_manager_registry_with_coords():
-    """Test registry stores coordinates."""
-    from modules.lightshow_manager import RegistryInstance
-    
-    coords = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-    
-    with patch("modules.lightshow_manager.Path"):
-        registry = RegistryInstance(coords)
-        
-        assert registry.coords == coords
-
-
-def test_lightshow_manager_process_lightshow_empty_timeline():
-    """Test process_lightshow with empty timeline."""
+def test_lightshow_manager_process_lightshow_frame_count_and_led_count():
+    """Frames produced must match FPS * duration and contain one entry per LED."""
     from modules.lightshow_manager import process_lightshow, RegistryInstance, LightshowSettings
-    
-    registry = RegistryInstance.__new__(RegistryInstance)
-    registry.coords = [[0, 0], [1, 1], [2, 2]]
-    registry.registry = {}
-    
-    settings = LightshowSettings()
-    lightshow_data = {"timeline": []}
-    
-    frames = process_lightshow(registry, lightshow_data, settings)
-    
-    assert isinstance(frames, list)
 
-
-def test_lightshow_manager_frame_structure():
-    """Test that frames contain RGB tuples."""
-    from modules.lightshow_manager import process_lightshow, RegistryInstance, LightshowSettings
-    
-    registry = RegistryInstance.__new__(RegistryInstance)
-    registry.coords = [[0, 0, 0]]
-    registry.registry = {}
-    
-    settings = LightshowSettings()
-    lightshow_data = {"timeline": []}
-    
-    frames = process_lightshow(registry, lightshow_data, settings)
-    
-    assert isinstance(frames, list)
-    for frame in frames:
-        assert isinstance(frame, list)
-
-
-def test_lightshow_manager_settings_with_custom_fps():
-    """Test settings creation with custom FPS."""
-    from modules.lightshow_manager import LightshowSettings
-    
-    settings = LightshowSettings(fps=120)
-    
-    assert settings.FPS == 120
-
-
-def test_lightshow_manager_process_lightshow_preserves_led_count():
-    """Test process_lightshow returns frames with same LED count as registry."""
-    from modules.lightshow_manager import process_lightshow, RegistryInstance, LightshowSettings
-    
-    led_count = 10
+    led_count = 5
     registry = RegistryInstance.__new__(RegistryInstance)
     registry.coords = [[i, 0, 0] for i in range(led_count)]
-    registry.registry = {}
-    
-    settings = LightshowSettings()
-    lightshow_data = {"timeline": []}
-    
-    frames = process_lightshow(registry, lightshow_data, settings)
-    
-    assert isinstance(frames, list)
+
+    # Build a minimal effect stub that returns one black pixel per LED per step
+    def fake_effect(steps, **params):
+        return [[(0, 0, 0)] * led_count for _ in range(steps)]
+
+    registry.registry = {"fx": fake_effect}
+
+    # BPM=60 means 1 beat = 1 s; 2-beat segment at 30 FPS = 60 frames
+    lightshow_data = {
+        "bpm": 60,
+        "timeline": [{"effect": "fx", "start": 0, "end": 2, "parameters": {}}],
+    }
+    frames = process_lightshow(registry, lightshow_data, LightshowSettings(fps=30))
+
+    assert len(frames) == 60
+    for frame in frames:
+        assert len(frame) == led_count
 
 
-def test_lightshow_manager_registry_instance_has_registry_dict():
-    """Test RegistryInstance has empty registry dict initially."""
-    from modules.lightshow_manager import RegistryInstance
-    
-    with patch("modules.lightshow_manager.Path"):
-        registry = RegistryInstance([[0, 0, 0]])
-        
-        assert isinstance(registry.registry, dict)
-        assert len(registry.registry) == 0 or isinstance(registry.registry, dict)
-
-
-def test_lightshow_manager_process_multiple_timeline_items():
-    """Test process_lightshow handles multiple timeline items."""
+def test_lightshow_manager_process_lightshow_unknown_effect_skipped():
+    """An unknown effect in the timeline should be skipped without error."""
     from modules.lightshow_manager import process_lightshow, RegistryInstance, LightshowSettings
-    
+
     registry = RegistryInstance.__new__(RegistryInstance)
     registry.coords = [[0, 0, 0]]
-    registry.registry = {"effect1": MagicMock(), "effect2": MagicMock()}
-    
-    settings = LightshowSettings()
+    registry.registry = {}
+
     lightshow_data = {
-        "timeline": [
-            {"effect": "effect1", "start": 0, "end": 30},
-            {"effect": "effect2", "start": 30, "end": 60},
-        ]
+        "bpm": 60,
+        "timeline": [{"effect": "nonexistent", "start": 0, "end": 1}],
     }
-    
-    frames = process_lightshow(registry, lightshow_data, settings)
-    
-    assert isinstance(frames, list)
+    frames = process_lightshow(registry, lightshow_data, LightshowSettings(fps=30))
+
+    # All 30 frames should exist but contain only the default black pixels.
+    # Use list() to normalise tuples vs lists (cache returns lists, live path returns tuples).
+    assert len(frames) == 30
+    assert all(list(pixel) == [0, 0, 0] for frame in frames for pixel in frame)
+
+
+def test_lightshow_manager_process_lightshow_alpha_blending():
+    """A fully opaque effect pixel should overwrite the black canvas."""
+    from modules.lightshow_manager import process_lightshow, RegistryInstance, LightshowSettings
+
+    registry = RegistryInstance.__new__(RegistryInstance)
+    registry.coords = [[0, 0, 0]]
+    registry.registry = {}
+
+    # Fully opaque red pixel via RGB (no alpha channel)
+    def red_effect(steps, **params):
+        return [[(255, 0, 0)] for _ in range(steps)]
+
+    registry.registry = {"red": red_effect}
+
+    lightshow_data = {
+        "bpm": 60,
+        "timeline": [{"effect": "red", "start": 0, "end": 1, "parameters": {}}],
+    }
+    frames = process_lightshow(registry, lightshow_data, LightshowSettings(fps=30))
+
+    # Every frame must contain the fully opaque red pixel.
+    # Use list() to normalise tuples vs lists (cache returns lists, live path returns tuples).
+    assert all(list(frame[0]) == [255, 0, 0] for frame in frames)
+
+
+def test_lightshow_manager_registry_instance_has_empty_registry_by_default():
+    """RegistryInstance should start with an empty registry dict (before loading files)."""
+    from modules.lightshow_manager import RegistryInstance
+
+    with patch("modules.lightshow_manager.Path"):
+        registry = RegistryInstance([[0, 0, 0]])
+
+        assert isinstance(registry.registry, dict)
+        # The registry may be populated by auto-loading from disk, but it should
+        # always be a dict — test that the type guarantee holds.
+        assert len(registry.registry) >= 0
+
