@@ -1,27 +1,28 @@
 import json
+import threading
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 
-def test_led_simulator_last_conf_change_attribute():
-    """Test that LedSimulator has last_conf_change attribute."""
+def test_led_simulator_setup_coords_attribute():
+    """Test that LedSimulator has _setup_coords attribute."""
     from led_simulator import LedSimulator
-    
+
     sim = LedSimulator.__new__(LedSimulator)
-    sim.last_conf_change = 100
-    
-    assert sim.last_conf_change == 100
+    sim._setup_coords = [[0, 0, 0], [1, 1, 0]]
+
+    assert sim._setup_coords == [[0, 0, 0], [1, 1, 0]]
 
 
-def test_led_simulator_current_setup_name_attribute():
-    """Test that LedSimulator has current_setup_name attribute."""
+def test_led_simulator_pending_setup_attribute():
+    """Test that LedSimulator has _pending_setup attribute."""
     from led_simulator import LedSimulator
-    
+
     sim = LedSimulator.__new__(LedSimulator)
-    sim.current_setup_name = "test_setup"
-    
-    assert sim.current_setup_name == "test_setup"
+    sim._pending_setup = [[5, 5, 0]]
+
+    assert sim._pending_setup == [[5, 5, 0]]
 
 
 def test_led_simulator_update_colors_clamps_values():
@@ -264,3 +265,26 @@ def test_led_simulator_receive_loop_handles_malformed_json():
     
     # Either it updated or it didn't - both are acceptable graceful handling
     assert isinstance(sim.colors, list)
+
+
+def test_led_simulator_receive_loop_handles_setup_key():
+    """Test that _receive_loop stores setup coords and signals the event when 'setup' key is present."""
+    from led_simulator import LedSimulator
+
+    sim = LedSimulator.__new__(LedSimulator)
+    sim.colors = []
+    sim.debug_elements = []
+    sim._pending_setup = None
+    sim._initial_setup_event = threading.Event()
+
+    coords = [[0, 0, 0], [1, 1, 0], [2, 2, 0]]
+    payload = json.dumps({"setup": coords, "leds": [[10, 20, 30]] * 3, "debug_elements": []})
+
+    sim.sock = MagicMock()
+    sim.sock.recv.side_effect = [payload.encode(), b""]
+
+    sim._receive_loop()
+
+    assert sim._pending_setup == coords
+    assert sim._initial_setup_event.is_set()
+    assert sim.colors == [[10, 20, 30]] * 3

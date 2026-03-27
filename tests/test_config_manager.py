@@ -33,8 +33,7 @@ def test_config_load_invalid_json_keeps_previous_value(tmp_path, monkeypatch):
     config = Config()
     config.config = {"current_setup": "tree"}
     (tmp_path / "server_config.json").write_text("{bad json", encoding="utf-8")
-    monkeypatch.setattr("modules.config_manager.time.sleep", lambda seconds: None)
-    config.load(retries=2, delay_s=0)
+    config.load()
     assert config.config == {"current_setup": "tree"}
 
 

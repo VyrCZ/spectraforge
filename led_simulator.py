@@ -5,11 +5,9 @@ import time
 import math
 from scipy.spatial import distance
 import os
-from modules.setup import Setup
 import threading
 import json
 import traceback
-from modules.config_manager import Config
 import sys
 
 # set working directory to the directory of this file
@@ -22,60 +20,56 @@ class LedSimulator:
     """
     A LED simulator that connects to the server and visualizes the LEDs, without the need for a hardware setup.
     To start, run this script and the server. The simulator will hook and display data sent to the hardware.
+    The server sends the setup coordinates when the client connects and whenever the setup changes.
     """
     def __init__(self):
-        Config().load() # this config doesn't change when the instance running in server.py does, reload here
-        self.current_setup_name = Config().config["current_setup"]
-        self.setup_path = "config/setups/" + self.current_setup_name + ".json"
-        self.current_setup = Setup.from_json(self.current_setup_name, json.load(open(self.setup_path)))
-        self.last_conf_change = os.path.getmtime(Config.CONFIG_PATH)
-        self.coords = self.current_setup.coords
-        self.num_points = len(self.coords)
+        self._setup_coords = None
+        self._pending_setup = None  # Set by receiver thread when a new setup arrives
+        self._initial_setup_event = threading.Event()
 
-        # Initialize colors as white (RGB: [255, 255, 255])
-        self.colors = [[0, 0, 0] for _ in self.coords]
+        self.colors = []
         self.debug_elements = []
         self.debug_actors = []
+
         self.sock = self._connect_to_server()  # wait until connected
-        
+
         self._receiver_thread = threading.Thread(target=self._receive_loop, daemon=True)
         self._receiver_thread.start()
-        
-        # Create plotter and point cloud after connection succeeded
-        self.cloud = pv.PolyData(self.coords, force_float=False)
+
+        # Wait for the server to send the initial setup before creating the plotter
+        print("Waiting for setup data from server...")
+        self._initial_setup_event.wait()
+
+        self._setup_coords = self._pending_setup
+        self._pending_setup = None
+        self.num_points = len(self._setup_coords)
+        self.colors = [[0, 0, 0] for _ in self._setup_coords]
+
+        self._init_plotter()
+
+    def _init_plotter(self):
+        self.cloud = pv.PolyData(self._setup_coords, force_float=False)
         self.cloud["colors"] = np.array(self.colors, dtype=np.uint8)
         self.plotter = pv.Plotter()
-        #self.plotter.background_color = "#242424"
         self.plotter.background_color = "#141414"
         self.plotter.view_xy()
-        #self.plotter.add_axes(interactive=False)
-        #self.actor = self.plotter.add_points(self.cloud, scalars="colors", rgb=True, point_size=10, style="points_gaussian", emissive=True, render_points_as_spheres=True)
         self.actor = self.plotter.add_points(self.cloud, scalars="colors", rgb=True, point_size=10)
         self.plotter.reset_camera()
         self.plotter.show(interactive_update=True)
 
-    def check_setup(self):
-        """
-        A function that checks if the setup has changed.
-        """
-        mod_time = os.path.getmtime(Config.CONFIG_PATH)
-        if(mod_time != self.last_conf_change):
-            # setup changed, reload config
-            Config().load()
-            setup_name = Config().config["current_setup"]
-            print(f"{setup_name} | {self.current_setup_name}")
-            sys.stdout.flush()
-            if(setup_name != self.current_setup_name):
-                self.plotter.close()
-                self.__init__()
-
-    #def close_plot(self):
-        
-
     def start(self):
         while True:
             try:
-                self.check_setup()
+                # Check if the setup changed while running
+                if self._pending_setup is not None:
+                    new_coords = self._pending_setup
+                    self._pending_setup = None
+                    self.plotter.close()
+                    self._setup_coords = new_coords
+                    self.num_points = len(self._setup_coords)
+                    self.colors = [[0, 0, 0] for _ in self._setup_coords]
+                    self.debug_actors = []
+                    self._init_plotter()
                 self.update_colors()
                 time.sleep(1/60) # 60 fps
             except Exception as e:
@@ -154,6 +148,10 @@ class LedSimulator:
                 while buffer:
                     try:
                         received, idx = decoder.raw_decode(buffer)
+                        # If the message contains a setup, store it for the main thread to apply
+                        if "setup" in received:
+                            self._pending_setup = received["setup"]
+                            self._initial_setup_event.set()
                         # Extract LED colors from the received data
                         self.colors = received.get("leds", self.colors)  # Use .get() to provide a default value in case "leds" key is missing
                         self.debug_elements = received.get("debug_elements", [])

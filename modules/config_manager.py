@@ -1,6 +1,5 @@
 import json
 import os
-import time
 from json import JSONDecodeError
 from modules.log_manager import Log
 
@@ -19,7 +18,7 @@ class Config:
         self.config = {}
         self.load()
 
-    def load(self, retries=5, delay_s=0.05):
+    def load(self):
         os.makedirs(os.path.dirname(self.CONFIG_PATH), exist_ok=True)
 
         if not os.path.exists(self.CONFIG_PATH):
@@ -27,30 +26,20 @@ class Config:
             self.save()
             return
 
-        last_err = None
-        for _ in range(retries):
-            try:
-                with open(self.CONFIG_PATH, "r", encoding="utf-8") as file:
-                    text = file.read()
+        try:
+            with open(self.CONFIG_PATH, "r", encoding="utf-8") as file:
+                text = file.read()
 
-                if not text.strip():
-                    raise JSONDecodeError("Empty config file", text, 0)
+            if not text.strip():
+                raise JSONDecodeError("Empty config file", text, 0)
 
-                self.config = json.loads(text)
-                Log.info("Config", "Configuration loaded successfully.")
-                return
-            except JSONDecodeError as e:
-                last_err = e
-                time.sleep(delay_s)
-
-        Log.warn("Config", f"Config load failed (keeping previous): {last_err}")
+            self.config = json.loads(text)
+            Log.info("Config", "Configuration loaded successfully.")
+        except JSONDecodeError as e:
+            Log.warn("Config", f"Config load failed (keeping previous): {e}")
 
     def save(self):
         Log.info("Config", "Saving configuration...")
         os.makedirs(os.path.dirname(self.CONFIG_PATH), exist_ok=True)
-        tmp_path = self.CONFIG_PATH + ".tmp"
-        with open(tmp_path, "w", encoding="utf-8") as file:
+        with open(self.CONFIG_PATH, "w", encoding="utf-8") as file:
             json.dump(self.config, file, indent=4)
-            file.flush()
-            os.fsync(file.fileno())
-        os.replace(tmp_path, self.CONFIG_PATH)

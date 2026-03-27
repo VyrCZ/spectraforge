@@ -25,6 +25,7 @@ class EngineManager:
             return
         self.engines = []
         self.active_engine = None
+        self._setup_listeners = []
         active_setup_name = Config().config.get("current_setup", None)
         if active_setup_name:
             try:
@@ -103,7 +104,16 @@ class EngineManager:
                     coord.append(0)
         for engine in self.engines:
             engine.on_setup_changed(setup)
+        for listener in self._setup_listeners:
+            listener(setup)
         self.active_setup = setup
+
+    def add_setup_listener(self, callback):
+        """
+        Register a callback to be called when the setup changes.
+        The callback receives the new Setup object as its only argument.
+        """
+        self._setup_listeners.append(callback)
 
     def change_setup_by_name(self, setup_name: str):
         """

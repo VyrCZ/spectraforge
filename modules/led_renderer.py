@@ -12,6 +12,7 @@ class LEDRenderer:
         led_count = len(setup.coords)
         self.led_count = led_count
         self.leds = [(0, 0, 0)] * led_count
+        self._setup = setup
         self.debug_draw = self.DebugDraw()
         self.brightness = Config().config.get("brightness", 1.0)
         self._gamma_table = self.build_gamma_table()
@@ -48,6 +49,17 @@ class LEDRenderer:
                 client_socket, addr = self._server_socket.accept()
                 Log.info("LEDRenderer", f"New connection from {addr}")
                 self._clients.append(client_socket)
+                # Send the current setup and LED state to the newly connected client
+                absolute_leds = self._apply_filters(self.leds)
+                init_message = json.dumps({
+                    "setup": self._setup.coords,
+                    "leds": absolute_leds,
+                    "debug_elements": []
+                }).encode('utf-8')
+                try:
+                    client_socket.sendall(init_message)
+                except Exception as e:
+                    Log.error("LEDRenderer", f"Failed to send initial setup to {addr}: {e}")
             except Exception as e:
                 Log.error("LEDRenderer", f"Error accepting connections: {e}")
                 break
@@ -86,6 +98,30 @@ class LEDRenderer:
         Config().config["brightness"] = self.brightness
         Config().save()
         Log.info("LEDRenderer", f"Brightness set to {self.brightness * 100}%")
+
+    def change_setup(self, setup: Setup):
+        """
+        Update the current setup and broadcast it to all connected simulator clients.
+        """
+        self._setup = setup
+        self.led_count = len(setup.coords)
+        self.leds = [(0, 0, 0)] * self.led_count
+        if hasattr(self, '_clients') and self._clients:
+            absolute_leds = self._apply_filters(self.leds)
+            message = json.dumps({
+                "setup": setup.coords,
+                "leds": absolute_leds,
+                "debug_elements": []
+            }).encode('utf-8')
+            disconnected_clients = []
+            for client in self._clients:
+                try:
+                    client.sendall(message)
+                except Exception:
+                    disconnected_clients.append(client)
+            for client in disconnected_clients:
+                Log.info("LEDRenderer", f"Client disconnected during setup change.")
+                self._clients.remove(client)
 
 
     def fill(self, color: tuple[int, int, int]):
