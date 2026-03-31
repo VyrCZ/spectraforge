@@ -69,5 +69,5 @@ def test_enable_disable(effects_engine):
     effects_engine.on_disable()
     assert effects_engine.running is False
     # allow thread to stop
-    time.sleep(0.1)
+    effects_engine.runner_thread.join(timeout=2.0)
     assert not effects_engine.runner_thread.is_alive()

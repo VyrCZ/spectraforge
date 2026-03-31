@@ -28,7 +28,7 @@ def test_dummy_renderer_rejects_invalid_values():
 
 
 def test_led_renderer_apply_filters_and_debug_draw(monkeypatch):
-    Config().config["enhance_colors"] = False
+    monkeypatch.setitem(Config().config, "enhance_colors", False)
     renderer = LEDRenderer.__new__(LEDRenderer)
     renderer.led_count = 2
     renderer.leds = [(100, 50, 0), (20, 40, 60)]

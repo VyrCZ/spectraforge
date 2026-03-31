@@ -28,7 +28,7 @@ def test_led_simulator_pending_setup_attribute():
 def test_led_simulator_update_colors_clamps_values():
     """Test that update_colors properly clamps RGB values to 0-255."""
     from led_simulator import LedSimulator
-    
+
     sim = LedSimulator.__new__(LedSimulator)
     sim.colors = [[256, -10, 128], [0, 255, 512]]
     sim.plotter = MagicMock()
@@ -36,25 +36,25 @@ def test_led_simulator_update_colors_clamps_values():
     sim.plotter_color_actor = MagicMock()
     sim.debug_elements = []
     sim.debug_actors = []
-    
+
     with patch("led_simulator.np") as mock_np:
         mock_np.array = lambda x, dtype=None: x
         mock_np.uint8 = lambda x: x
         sim.update_colors()
-    
+
     assert sim.colors == [[255, 0, 128], [0, 255, 255]]
 
 
 def test_led_simulator_draw_debug_elements_with_empty_list():
     """Test that draw_debug_elements handles empty element list."""
     from led_simulator import LedSimulator
-    
+
     sim = LedSimulator.__new__(LedSimulator)
     sim.plotter = MagicMock()
     sim.debug_actors = []
-    
+
     sim.draw_debug_elements([])
-    
+
     sim.plotter.add_lines.assert_not_called()
     sim.plotter.add_points.assert_not_called()
 
@@ -62,199 +62,198 @@ def test_led_simulator_draw_debug_elements_with_empty_list():
 def test_led_simulator_draw_debug_elements_without_plotter():
     """Test that draw_debug_elements returns gracefully without plotter."""
     from led_simulator import LedSimulator
-    
+
     sim = LedSimulator.__new__(LedSimulator)
     sim.debug_actors = []
-    
+
     result = sim.draw_debug_elements([{"type": "line"}])
-    
+
     assert result is None
 
 
 def test_led_simulator_draw_debug_elements_draws_lines():
     """Test that draw_debug_elements can draw line elements."""
     from led_simulator import LedSimulator
-    
+
     sim = LedSimulator.__new__(LedSimulator)
     sim.plotter = MagicMock()
     sim.debug_actors = []
-    
+
     elements = [{"type": "line", "point1": [0, 0, 0], "point2": [1, 1, 1]}]
-    
+
     sim.draw_debug_elements(elements)
-    
-    sim.plotter.add_lines.assert_called()
+
+    sim.plotter.add_lines.assert_called_once()
 
 
 def test_led_simulator_draw_debug_elements_draws_points():
     """Test that draw_debug_elements can draw point elements."""
     from led_simulator import LedSimulator
-    
+
     sim = LedSimulator.__new__(LedSimulator)
     sim.plotter = MagicMock()
     sim.debug_actors = []
-    
+
     elements = [{"type": "point", "point": [1, 2, 3], "color": (0, 255, 0)}]
-    
+
     sim.draw_debug_elements(elements)
-    
-    sim.plotter.add_points.assert_called()
+
+    sim.plotter.add_points.assert_called_once()
 
 
 def test_led_simulator_draw_debug_elements_draws_circles():
-    """Test that draw_debug_elements can draw circle elements."""
+    """Test that draw_debug_elements draws circle elements as line segments."""
     from led_simulator import LedSimulator
-    
+
     sim = LedSimulator.__new__(LedSimulator)
     sim.plotter = MagicMock()
     sim.debug_actors = []
-    
+
     elements = [{"type": "circle", "center": [0, 0, 0], "radius": 5}]
-    
+
     sim.draw_debug_elements(elements)
-    
-    assert sim.plotter.add_lines.call_count >= 0 or sim.plotter.add_points.call_count >= 0
+
+    # Circles are approximated with lines
+    sim.plotter.add_lines.assert_called_once()
 
 
 def test_led_simulator_connect_to_server_succeeds():
     """Test that _connect_to_server successfully connects."""
     from led_simulator import LedSimulator
-    
+
     sim = LedSimulator.__new__(LedSimulator)
-    
+
     with patch("led_simulator.socket.socket") as mock_socket_class:
         mock_sock = MagicMock()
         mock_socket_class.return_value = mock_sock
-        
+
         result = sim._connect_to_server()
-        
+
         mock_sock.connect.assert_called_once_with(("127.0.0.1", 4897))
         assert result is mock_sock
 
 
 def test_led_simulator_connect_to_server_retries_on_failure(monkeypatch):
-    """Test that _connect_to_server retries on connection failure."""
+    """Test that _connect_to_server retries at least once after a connection failure."""
     from led_simulator import LedSimulator
-    
+
     call_count = [0]
-    
+
     def mock_connect(*args):
         call_count[0] += 1
         if call_count[0] == 1:
             raise ConnectionRefusedError()
         return None
-    
+
     sim = LedSimulator.__new__(LedSimulator)
-    
+
     with patch("led_simulator.socket.socket") as mock_socket_class:
         mock_sock = MagicMock()
         mock_sock.connect.side_effect = mock_connect
         mock_socket_class.return_value = mock_sock
-        
+
         monkeypatch.setattr("led_simulator.time.sleep", lambda x: None)
-        
+
         result = sim._connect_to_server()
-        
-        assert call_count[0] >= 1
+
+        # Must have made at least two attempts: one failure and one success
+        assert call_count[0] >= 2
         assert result is mock_sock
 
 
 def test_led_simulator_receive_loop_parses_leds():
     """Test that _receive_loop parses LED colors from JSON."""
     from led_simulator import LedSimulator
-    
+
     sim = LedSimulator.__new__(LedSimulator)
     sim.colors = [[0, 0, 0]]
     sim.debug_elements = []
-    
+
     payload = json.dumps({"leds": [[255, 0, 0], [0, 255, 0]], "debug_elements": []})
-    
+
     sim.sock = MagicMock()
     sim.sock.recv.side_effect = [payload.encode(), b""]
-    
+
     sim._receive_loop()
-    
+
     assert sim.colors == [[255, 0, 0], [0, 255, 0]]
 
 
 def test_led_simulator_receive_loop_parses_debug_elements():
     """Test that _receive_loop parses debug elements from JSON."""
     from led_simulator import LedSimulator
-    
+
     sim = LedSimulator.__new__(LedSimulator)
     sim.colors = [[0, 0, 0]]
     sim.debug_elements = []
-    
+
     payload = json.dumps({"leds": [[0, 0, 0]], "debug_elements": [{"type": "point"}]})
-    
+
     sim.sock = MagicMock()
     sim.sock.recv.side_effect = [payload.encode(), b""]
-    
+
     sim._receive_loop()
-    
+
     assert len(sim.debug_elements) == 1
 
 
 def test_led_simulator_receive_loop_handles_missing_leds_key():
     """Test that _receive_loop handles JSON missing 'leds' key."""
     from led_simulator import LedSimulator
-    
+
     sim = LedSimulator.__new__(LedSimulator)
     sim.colors = [[1, 2, 3]]
     sim.debug_elements = []
-    
+
     payload = json.dumps({"debug_elements": []})
-    
+
     sim.sock = MagicMock()
     sim.sock.recv.side_effect = [payload.encode(), b""]
-    
+
     sim._receive_loop()
-    
+
     assert sim.colors == [[1, 2, 3]]
 
 
 def test_led_simulator_receive_loop_handles_missing_debug_key():
     """Test that _receive_loop handles JSON missing 'debug_elements' key."""
     from led_simulator import LedSimulator
-    
+
     sim = LedSimulator.__new__(LedSimulator)
     sim.colors = [[0, 0, 0]]
     sim.debug_elements = ["old"]
-    
+
     payload = json.dumps({"leds": [[100, 100, 100]]})
-    
+
     sim.sock = MagicMock()
     sim.sock.recv.side_effect = [payload.encode(), b""]
-    
+
     sim._receive_loop()
-    
+
     assert sim.colors == [[100, 100, 100]]
 
 
 def test_led_simulator_receive_loop_handles_empty_recv():
     """Test that _receive_loop exits on empty recv."""
     from led_simulator import LedSimulator
-    
+
     sim = LedSimulator.__new__(LedSimulator)
     sim.sock = MagicMock()
     sim.sock.recv.return_value = b""
-    
+
     result = sim._receive_loop()
-    
+
     assert result is None
 
 
 def test_led_simulator_receive_loop_handles_malformed_json():
-    """Test that _receive_loop skips malformed JSON."""
+    """Test that _receive_loop exits gracefully on malformed JSON without corrupting state."""
     from led_simulator import LedSimulator
-    
+
     sim = LedSimulator.__new__(LedSimulator)
     sim.colors = [[0, 0, 0]]
     sim.debug_elements = []
-    
-    malformed = b"not json"
-    valid = json.dumps({"leds": [[50, 50, 50]], "debug_elements": []}).encode()
-    
+
     sim.sock = MagicMock()
     sim.sock.recv.side_effect = [malformed, valid, b""]
     
