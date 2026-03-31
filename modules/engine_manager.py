@@ -27,12 +27,14 @@ class EngineManager:
         self.active_engine = None
         self._setup_listeners = []
         active_setup_name = Config().config.get("current_setup", None)
+        active_setup_data = None
         if active_setup_name:
             try:
                 with open(f"{self.SETUPS_FOLDER}/{active_setup_name}.json", "r") as f:
                     active_setup_data = json.load(f)
             except FileNotFoundError:
                 Log.warn("EngineManager", f"Setup {active_setup_name} not found, using default setup.")
+                active_setup_name = None
         self.active_setup = Setup.from_json(active_setup_name, active_setup_data) if active_setup_name else None
         Log.info("EngineManager", "EngineManager initialized with active setup: " + str(self.active_setup))
         self.__class__._initialized = True

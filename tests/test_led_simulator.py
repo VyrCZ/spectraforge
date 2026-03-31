@@ -113,7 +113,7 @@ def test_led_simulator_draw_debug_elements_draws_circles():
     
     sim.draw_debug_elements(elements)
     
-    assert sim.plotter.add_lines.call_count >= 0 or sim.plotter.add_points.call_count >= 0
+    sim.plotter.add_lines.assert_called()
 
 
 def test_led_simulator_connect_to_server_succeeds():
