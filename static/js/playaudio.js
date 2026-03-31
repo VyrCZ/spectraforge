@@ -2,22 +2,25 @@ let playing = false;
 let audioDuration = 0;
 const socket = io();
 
+function hideEffectContainers() {
+    document.getElementById('effect_module_container').style.display = 'none';
+    const currentEffectContainer = document.getElementById('current_effect_container');
+    if (currentEffectContainer) currentEffectContainer.style.display = 'none';
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     const audioFileName = sessionStorage.getItem('audioFile');
     const lightshowFileName = sessionStorage.getItem('lightshowFile');
     if (audioFileName) {
-        const effectContainer = document.getElementById('effect_module_container');
-        effectContainer.style.display = 'none';
+        hideEffectContainers();
         socket.emit('audio_client_connected', { audio_file: audioFileName });
     }
     else if (lightshowFileName) {
-        const effectContainer = document.getElementById('effect_module_container');
-        effectContainer.style.display = 'none';
+        hideEffectContainers();
         socket.emit('lightshow_client_connected', { lightshow_file: lightshowFileName });
     }
     else if(sessionStorage.getItem('videoFile')) {
-        const effectContainer = document.getElementById('effect_module_container');
-        effectContainer.style.display = 'none';
+        hideEffectContainers();
         socket.emit('video_client_connected', { video_file: sessionStorage.getItem('videoFile') });
     }
 });
