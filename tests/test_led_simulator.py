@@ -254,6 +254,9 @@ def test_led_simulator_receive_loop_handles_malformed_json():
     sim.colors = [[0, 0, 0]]
     sim.debug_elements = []
 
+    malformed = b"{"
+    valid = json.dumps({"leds": [[100, 100, 100]], "debug_elements": []}).encode()
+
     sim.sock = MagicMock()
     sim.sock.recv.side_effect = [malformed, valid, b""]
     
