@@ -135,8 +135,8 @@ def _check_config():
         "sandbox_opened_file": (SANDBOX_DIR, ".py", "default")
     }
     for key, (directory, extension, default_name) in folder_selections.items():
-        if key not in Config().config:
-            Log.info("PlaceholderManager", f"Config key '{key}' not found, setting it to a default value.")
+        if not Config().config.get(key):
+            Log.info("PlaceholderManager", f"Config key '{key}' not found or empty, setting it to a default value.")
             Config().config[key] = _pick_first_file_or_default(directory, extension, default_name)
     placeholder_values = {
         "brightness": 1.0,
