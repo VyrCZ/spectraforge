@@ -30,8 +30,12 @@ class SandboxEngine(Engine):
         self.running = True
         if self.opened_file is None:
             last_file = Config().config.get("sandbox_opened_file", None)
-            if last_file and os.path.exists(os.path.join(self.SANDBOX_PATH, last_file)):
+            if last_file and os.path.exists(os.path.join(self.SANDBOX_PATH, last_file + ".py")):
                 self.set_file(last_file)
+            else:
+                files = self.list_files()
+                if files:
+                    self.set_file(files[0])
         Log.info("SandboxEngine", "Sandbox Engine enabled.")
 
     def on_disable(self):
