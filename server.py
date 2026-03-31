@@ -1,7 +1,19 @@
+# make changes to the environment first
 import os
 if os.name != "nt":
     import gevent.monkey
     gevent.monkey.patch_all()
+
+from pydub import AudioSegment
+
+# set working directory to the directory of this file
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+# portable ffmpeg install
+if os.name == "nt" and os.path.exists("bin/ffmpeg.exe"):
+    os.environ["PATH"] = os.path.abspath("bin") + ";" + os.environ["PATH"]
+    os.environ["IMAGEIO_FFMPEG_EXE"] = os.path.abspath("bin/ffmpeg.exe")
+    AudioSegment.converter = os.path.abspath("bin/ffmpeg.exe")
 
 import traceback
 import json
@@ -24,13 +36,6 @@ import modules.upload_files as upload
 from modules.placeholder_manager import check as placeholder_check
 import time
 from flask import g
-
-# set working directory to the directory of this file
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
-# portable ffmpeg install
-if os.name == "nt" and os.path.exists("bin/ffmpeg.exe"):
-    os.environ["PATH"] = os.path.abspath("bin") + ";" + os.environ["PATH"]
 
 
 app = Flask(__name__)

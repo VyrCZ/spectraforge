@@ -150,6 +150,18 @@ def process_lightshow(registry: RegistryInstance, lightshow_data: dict, settings
                 except ValueError:
                     Log.warn("LightshowEngine", f"Invalid hex color: {value}")
 
+        # Filter parameters to only include those supported by the effect function
+        sig = inspect.signature(effect_func)
+        supported_params = set(sig.parameters.keys())
+        filtered_params = {k: v for k, v in params.items() if k in supported_params}
+        
+        # Warn about unsupported parameters
+        unsupported = set(params.keys()) - supported_params
+        if unsupported:
+            Log.warn("LightshowEngine", f"Effect {effect_name} does not support parameters: {', '.join(unsupported)}")
+        
+        params = filtered_params
+
         # Calculate Timing
         start_beats = item.get("start", 0)
         end_beats = item.get("end", 0)
