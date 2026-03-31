@@ -28,8 +28,9 @@ from flask import g
 # set working directory to the directory of this file
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-# school ffmpeg fix
-#os.environ["PATH"] = r"C:\Users\vojtech.vyroubal\AppData\Roaming\ffmpeg\bin;" + os.environ["PATH"]
+# portable ffmpeg install
+if os.name == "nt" and os.path.exists("bin/ffmpeg.exe"):
+    os.environ["PATH"] = os.path.abspath("bin") + ";" + os.environ["PATH"]
 
 
 app = Flask(__name__)

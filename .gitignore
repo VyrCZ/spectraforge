@@ -20,3 +20,4 @@ media/**
 docs/**/*.docx
 .vscode/
 .coverage
+bin/**
