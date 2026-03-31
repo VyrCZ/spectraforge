@@ -58,6 +58,30 @@ class Clock(LightEffect):
         hands_c = self.hands_color.get()
         seconds_c = self.seconds_color.get()
 
+        center_x, center_y = self.center_pixel_coords[0], self.center_pixel_coords[1]
+        center_point = [center_x, center_y, 0]
+
+        hour_end = [
+            center_x + math.cos(hour_angle) * hour_len,
+            center_y + math.sin(hour_angle) * hour_len,
+            0,
+        ]
+        minute_end = [
+            center_x + math.cos(minute_angle) * minute_len,
+            center_y + math.sin(minute_angle) * minute_len,
+            0,
+        ]
+        second_end = [
+            center_x + math.cos(second_angle) * second_len,
+            center_y + math.sin(second_angle) * second_len,
+            0,
+        ]
+
+        self.renderer.debug_draw.circle(center_point, self.radius, color=frame_c)
+        self.renderer.debug_draw.line(center_point, hour_end, color=hands_c)
+        self.renderer.debug_draw.line(center_point, minute_end, color=hands_c)
+        self.renderer.debug_draw.line(center_point, second_end, color=seconds_c)
+
         for i, coord in enumerate(self.coords):
             dist_from_center = mu.distance(coord, self.center_pixel_coords)
             

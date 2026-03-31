@@ -85,7 +85,6 @@ class LedSimulator:
                 print(f"Color {color} at index {i} is out of range, converting to 0-255")
                 self.colors[i] = [max(0, min(255, int(c))) for c in color]
         self.cloud["colors"] = np.array(self.colors, dtype=np.uint8)
-        self.plotter.update_scalars(self.cloud["colors"])  # Efficiently update colors
         self.draw_debug_elements(self.debug_elements)
         self.plotter.update()
 
@@ -121,7 +120,8 @@ class LedSimulator:
                 num_points = 100
                 angles = np.linspace(0, 2 * np.pi, num_points)
                 circle_points = np.array([[center[0] + radius * np.cos(angle), center[1] + radius * np.sin(angle), center[2]] for angle in angles])
-                actor = self.plotter.add_lines(np.vstack([circle_points, circle_points[0]]), color=color)
+                closed_circle_points = np.vstack([circle_points, circle_points[0]])
+                actor = self.plotter.add_lines(closed_circle_points, color=color, connected=True)
                 self.debug_actors.append(actor)
 
     def _connect_to_server(self):

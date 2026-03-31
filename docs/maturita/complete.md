@@ -61,6 +61,10 @@ Software na platformě Linux je obvykle spravován jako služba (daemon). Využi
 
 Z důvodu výkonu, nedostatku portů a jednoduchosti je systém konfigurován jako tzv. bezhlavý (headless), bez uživatelského rozhraní, ovládaný pouze pomocí příkazového řádku vzdáleně pomocí protokolu SSH. Pro zajištění použitelnosti v terénu, kde nemusí být dostupná Wi-Fi síť, je Raspberry Pi nakonfigurováno tak, aby vytvářelo vlastní přístupový bod (Access Point). Uživatel se tak může připojit přímo k zařízení pomocí telefonu či notebooku a ovládat instalaci nezávisle na externí infrastruktuře. 
 
+## 3.4 Zabezpečení komunikace (HTTPS/SSL)
+
+Při spuštění na platformě Raspberry Pi (resp. libovolném systému Linux) je webový server automaticky spuštěn s podporou protokolu HTTPS. Flask je konfigurován s parametrem ssl_context, který odkazuje na soubory cert.pem a key.pem umístěné v kořenové složce aplikace. Důvodem pro toto řešení je technické omezení moderních webových prohlížečů: přístup ke kameře prostřednictvím rozhraní getUserMedia, které je používáno v průběhu kalibrace LED diod, je z bezpečnostních důvodů prohlížeči povolen pouze na stránkách servírovaných přes HTTPS nebo na localhostu. Bez funkčního SSL kontextu by tedy proces kalibrace z prohlížeče nešlo spustit vůbec. Na platformě Windows, kde server slouží výhradně pro vývojové účely (lokální simulátor LED), je HTTPS vynecháno a server běží na standardním HTTP pro jednoduchost a snazší ladění.
+
 # 4. Softwarové řešení (Backend)
 
 Backendová část aplikace zajišťuje logiku řízení, zpracování dat a komunikaci s hardwarem.
@@ -111,9 +115,11 @@ Pro strukturovanou výměnu dat mezi Python backendem a JavaScript frontendem se
 Tato sekce poskytuje kompletní návod k instalaci, základnímu nastavení, používání a vývoji efektů v prostředí Spectraforge.
 
 ## 1.1. Instalace a spuštění
-Pro běh aplikace je vyžadován nainstalovaný Python. Vývoj probíhal na verzi 3.10, systém byl však testován i na verzi 3.13 a měl by být kompatibilní i s nejnovější verzí (3.15 k datu psaní této práce). Do cílové složky extrahujte obsah repozitáře, vytvořte virtuální prostředí (doporučeno) a nainstalujte vyžadované moduly ze souboru `requirements.txt`. Po spuštění hlavního souboru `server.py` se aktivuje webový server, který je dostupný na IP adrese zařízení na portu 5000 (adresa je zobrazena v konzoli po spuštění). Pro simulaci LED diod na obrazovce současně spusťte `led_simulator.py`.
+Pro běh aplikace je vyžadován nainstalovaný Python. Vývoj probíhal na verzi 3.10, systém byl však testován i na verzi 3.13 a měl by být kompatibilní i s nejnovější verzí (3.15 k datu psaní této práce). Do cílové složky extrahujte obsah repozitáře, vytvořte virtuální prostředí (doporučeno) a nainstalujte vyžadované moduly ze souboru requirements.txt. Po spuštění hlavního souboru server.py se aktivuje webový server, který je dostupný na IP adrese zařízení na portu 5000 (adresa je zobrazena v konzoli po spuštění). Pro simulaci LED diod na obrazovce současně spusťte led_simulator.py.
 
-Pro nasazení do prostředí s hardwarem na Raspberry Pi je nutné nainstalovat knihovny pro NeoPixel (`pip3 install rpi_ws281x adafruit-circuitpython-neopixel`) zajišťující komunikaci s LED diodami. Aplikace automaticky detekuje, zda běží na Raspberry Pi, a podle toho zvolí správnou vrstvu pro komunikaci s hardwarem. Doporučuje se také nastavit automatické spuštění aplikace po startu systému, například pomocí služby systemd.
+Pro nasazení do prostředí s hardwarem na Raspberry Pi je nutné nainstalovat knihovny pro NeoPixel (pip3 install rpi_ws281x adafruit-circuitpython-neopixel) zajišťující komunikaci s LED diodami. Aplikace automaticky detekuje, zda běží na Raspberry Pi, a podle toho zvolí správnou vrstvu pro komunikaci s hardwarem. Doporučuje se také nastavit automatické spuštění aplikace po startu systému, například pomocí služby systemd.
+
+Pro správné fungování kalibrace LED diod je nutné zajistit, aby kamera měla přístup k webovému rozhraní přes HTTPS, což znamená spuštění serveru s platným SSL certifikátem. Aplikace očekává soubor cert.pem a key.pem v kořenové složce pro konfiguraci SSL kontextu. Pro vývojové účely na platformě Windows stačí přistupovat k serveru přes localhost, kde není HTTPS vyžadováno.
 
 ## 1.2. Prvotní nastavení
 Po prvním spuštění se načtou všechny efekty a automaticky se přehraje první z nich. Jeho zobrazení však nebude správné, dokud neproběhne kalibrace pozic LED diod. 2D rozložení lze kalibrovat přímo v uživatelském rozhraní v sekci "Rozložení". Klikněte na tlačítko "Nové rozložení", zadejte název a počet LED diod. Poté se vám otevřou instrukce, které vás provedou zbytkem procesu: pevně umístěte kameru co nejvíce kolmo k rovině instalace, stiskněte tlačítko začít a vydržte, než se vyfotí obrázky všech diod. Poté vám aplikace bude postupně prezentovat  ⚠️⚠️ [Doplnění 3D kalibrace]
@@ -172,7 +178,7 @@ Většina efektů a funkcí v aplikaci závisí na znalosti přesných pozic LED
 
 2D rozložení lze kalibrovat pomocí chytrého telefonu. Proces využívá modul `CalibrationEngine`, který prostřednictvím kamery snímá jednotlivé rozsvícené LED diody. Před zahájením je nutné zajistit v místnosti dostatečnou tmu pro vysoký kontrast a kameru zafixovat kolmo k povrchu. Program následně analyzuje pořízené snímky a detekuje pozici diody podle nejjasnějšího bodu. Ačkoliv existují i jiné metody (např. detekce barvy nebo Houghova transformace pro detekci kruhů), detekce nejjasnějšího bodu byla zvolena pro svou jednoduchost. Kvůli možným nepřesnostem jsou detekované pozice v aplikaci předloženy uživateli ke kontrole a případné manuální úpravě. Finální souřadnice se uloží do souboru pro pozdější použití.
 
-Získání pozic ve 3D instalaci je složitější, princip však zůstává stejný. Je nutné pořídit fotografie alespoň ze dvou různých úhlů, ideálně navzájem kolmých. Tento program vyžaduje fotografie ze všech čtyř stran (přední, zadní, levá, pravá) pro vyšší přesnost. Vzhledem k nižší spolehlivosti automatické detekce ve 3D není tento režim integrován přímo v aplikaci. ⚠️⚠️
+Získání pozic ve 3D instalaci je složitější, princip však zůstává stejný. Je nutné pořídit fotografie alespoň ze dvou různých úhlů, ideálně navzájem kolmých. Tento program vyžaduje fotografie ze všech čtyř stran (přední, zadní, levá, pravá) pro vyšší přesnost. Tento proces je v aplikaci taktéž implementován, při kalibraci je třeba zvolit režim 3D a následovat instrukce pro pořizování snímků, ale vzhledem k perspektivní povaze našich kamer a zobrazování může být méně přesný. Je nutné kameru umístit opravdu co nejvíce kolmo k povrchu a v odpovídající výšce, abychom minimalizovali zkreslení. 
 
 # 3. Zobrazování barev na LED diodách
 Zobrazování barev zajišťuje samostatná vrstva `LEDRenderer`, která jako jediná komunikuje přímo s hardwarem. Tento přístup umožňuje snadný post-processing (filtry) na jednom místě a jednoduchou rozšířitelnost, například podporu jiných LED architektur bez nutnosti zásahů do zbytku kódu. Třída `LEDRenderer` je instancována v `server.py` a předávána jednotlivým modulům.
@@ -271,6 +277,9 @@ Pro nahrávání souborů je implementován samostatný modul `upload_files.py`,
 
 Endpoint `/api/upload` přijímá POST request s přiloženými soubory a vrací JSON odpověď s výsledkem operace. Pro uživatelské pohodlí je možné přetáhnout soubory přímo do okna prohlížeče (drag & drop) na stránce `/upload`.
 
+### 6.3 Lokalizace uživatelského rozhraní
+Webové rozhraní aplikace podporuje překlad do více jazyků prostřednictvím vlastního klientského lokalizačního systému implementovaného v souboru translate.js. Přeložitelné prvky stránky jsou označeny HTML atributem lan-key, jehož hodnota slouží jako klíč pro vyhledání odpovídajícího překladu. Při každém načtení stránky skript automaticky stáhne příslušný slovník ze souboru ve formátu JSON ze složky static/locales/ a nahradí výchozí anglické texty jejich přeloženými ekvivalenty. Aktuálně zvolený jazyk je persistentně uložen v cookie prohlížeče, takže volba přetrvá i po obnovení stránky nebo jejím opětovném navštívení. V aktuální verzi jsou k dispozici překlady do pěti jazyků: angličtiny (výchozí), čínštiny (tradiční), norštiny, emoji (pro zábavu) a češtiny.
+
 # 7. Efekty založené na zvuku
 Audio funkcionalitu zajišťuje třída `AudioEngine`, která rozšiřuje základní `Engine` o metody pro synchronizaci a přehrávání.
 
@@ -290,7 +299,7 @@ Samotné přehrávání audio probíhá v prohlížeči pomocí HTML5 `<audio>` 
 - Nižší zátěž serveru a latence.
 - Uživatel má možnost jednoduše ovládat hlasitost a přehrávání v uživatelském rozhraní.
 
-Narozdíl od standartního `EffectEngine` je `AudioEngine` navržen pro chod ve specifických snímkových intervalech (30, 60 nebo 120 FPS na základě nastavení výkonu), protože synchronizace s hudbou je důležitější než maximální plynulost, a zároveň je potřeba dát dostatek času pro zpracování dat a odeslání na LED diody.
+Narozdíl od standartního `EffectEngine` je `AudioEngine` navržen pro chod ve specifických snímkových intervalech (20, 30 nebo 60 FPS na základě nastavení výkonu), protože synchronizace s hudbou je důležitější než maximální plynulost, a zároveň je potřeba dát dostatek času pro zpracování dat a odeslání na LED diody.
 
 
 ## 7.2. Synchronizace světel se zvukem
@@ -396,6 +405,9 @@ Tento přístup umožňuje přehrávat i velmi složité lightshow s desítkami 
 ## 8.3 Výroba lightshow
 Ruční zápis efektů do JSON souboru není reálně proveditelný pro synchronizaci s hudbou, proto už od začátku vývoje byl využit vizuální editor. První způsob používal populární software pro úpravů audio souborů - Audacity, specificky jeho funkci pro přidávání značek (labels) do časové osy a export těchto značek jako CSV souboru. Tento CSV soubor byl následně zpracován Python skriptem, který na základě značek a jejich časů generoval lightshow soubor. Tento přístup byl funkční, ale ne příliš uživatelsky přívětivý, protože vyžadoval manuální zápis jmen a parametrů efektů bez výběrů ze seznamů či nápověd v editoru. Proto byl vytvořen vlastní vizuální editor pro lightshow, který umožňuje načíst audio soubor, nastavit tempo (BPM) a přidávat efekty přímo na časovou osu pomocí grafického rozhraní podobající se video editorům. Editor je naprogramovaný v jazyce C# pomocí .NET a frameworku Avalonia pro rozhraní. Díky knihovně Python.NET editor komunikuje s instalací Spectraforge, aby mohl načítat dostupné efekty a jejich parametry. Editor si z konfigurace načítá i rozložení LED diod, aby mohl zobrazovat náhled efektů přímo na modelu instalace. Po každém uložení se lightshow přepočítá a aktualizuje náhled v editoru, což umožňuje okamžitou ukázku výsledku. (Editor není součástí této maturitní práce)
 
+## 8.4 Kontrola integrity lightshow souborů
+Před pokusem o přehrání lightshow je nezbytné ověřit, zda jsou dostupné všechny potřebné prostředky. Metoda get_lightshow_file_data() třídy LightshowEngine proto při sestavování přehledu dostupných lightshow souborů automaticky provádí kontrolu integrity každého z nich. Konkrétně ověřuje, zda audio soubor specifikovaný v poli audio_file příslušného JSON souboru skutečně existuje ve složce audio/, a zda jsou všechny efekty použité v poli timeline načteny a registrovány v aktuálním registru lightshow efektů. Výsledek kontroly je vrácen jako slovník effect_issues, který může obsahovat příznak audio_file_missing nebo seznam missing_namespaces s názvy chybějících jmenných prostorů. Tyto informace jsou předány frontendu, který je může zobrazit jako varování ještě před samotným spuštěním přehrávání, čímž se předchází obtížně diagnostikovatelným chybám za běhu.
+
 ![](imgs/editor.png)
 
 # 9. Další příklady engine modulů
@@ -427,17 +439,23 @@ Nejdříve je třeba implementovat systém pro zobrazení obrázku na LED instal
 
 Nevýhodou je vysoká spotřeba paměti při delších videích, protože každý snímek musí být uložen v paměti. Pro video v délce 3 minuty při 30 FPS a 200 LED to představuje cca 10 MB RAM (3×60×30×200×3 bajtů).
 
-# 10. Config, logování, cache
+# 10. Podpůrné části aplikace
 ## 10.1 Config
 Konfigurace celého projektu je uložena v souboru config/server_config.json, který obsahuje nastavení pro různé části aplikace, jako je poslední zapnutý efekt, všechny hodnoty z nastavení, aktuální rozložení LED diod a zvolené hodnoty pro všechny parametry efektů. Tento soubor je načítán při startu serveru a spravován modulem `config_manager.py`, který poskytuje funkce pro získání a aktualizaci jednotlivých nastavení. Data ze souboru jsou uchovány v instanci třídě Config, která je implementována jako singleton, což zajišťuje, že všechny části aplikace pracují se stejnou jedinou instancí konfigurace. Modul je velmi jednoduchý, umožňuje interakci s daty přímo ve slovníku `Config().config[]` a vyžaduje explicitní volání `Config().save()` pro uložení změn do souboru. Na ukládání a načítání používá modul vestavěnou knihovnu `json` pro práci s JSON formátem. 
 
 ## 10.2 Logování
-Pro sledování chodu aplikace a usnadnění ladění je implementován vlastní systém logování v modulu `log_manager.py`. Modul je staticky implementován, proto umožňuje volat funkce pro logování z libovolné části kódu bez nutnosti předávání instance loggeru. Logovací funkce (info, warn - varování, error - chyba, debug - zpráva pro ladění) přijímají název zdroje (například název modulu nebo funkce) a zprávu, kterou chtějí zalogovat. Logy jsou ukládány do složky logs s názvem souboru odpovídajícím datu a času spuštění serveru. Každý log obsahuje časovou značku, úroveň logu, název zdroje a samotnou zprávu. Frontend také poskytuje zobrazení logů, barevně označené a filtrovatelné podle zdroje. Vše je samozdřejmě viditelné v konzoli pro snadný přístup během vývoje.
+Pro sledování chodu aplikace a usnadnění ladění je implementován vlastní systém logování v modulu `log_manager.py`. Modul je staticky implementován, proto umožňuje volat funkce pro logování z libovolné části kódu bez nutnosti předávání instance loggeru. Logovací funkce (info, warn - varování, error - chyba, debug - zpráva pro ladění) přijímají název zdroje (například název modulu nebo funkce) a zprávu, kterou chtějí zalogovat. Logy jsou ukládány do složky logs s názvem souboru odpovídajícím datu a času spuštění serveru. Každý log obsahuje časovou značku, úroveň logu, název zdroje a samotnou zprávu. Frontend také poskytuje zobrazení logů, barevně označené a filtrovatelné podle zdroje. Vše je samozdřejmě viditelné v konzoli pro snadný přístup během vývoje. Pro uchování místa a organizace je ukládáno pouze 10 nejnovějších logů, přičemž starší jsou automaticky mazány. 
 
 ![](imgs/logs.png)
 
 ## 10.3 Cache
 Jeden z nejdůležitějších optimalizačních mechanismů je bez pochyby cache. Vzhledem k tomu, že některé operace, jako je validace efektů nebo načítání lightshow, mohou být velmi náročné na výkon, implementoval jsem systém cache pro ukládání výsledků těchto operací. Modul `caching.py` umožňuje ukládání a čtení souborů podle jména, které jsou modulem ukládány do složky `.cache/`. Soubory mají stanovenou příponu .cache, ale jsou to jednoduché textové soubory a data jsou do nich ukládána ve formátu JSON pro snadnou manipulaci. Nejvýznamnější využití cache je při načítání efektů, kde se ukládá seznam hashů ověřených efektů.
+
+## 10.4 Testování
+Součástí projektu je sada testů vytvořena za pomocí knihovny pytest, nacházející se ve složce tests/. Cílem bylo smysluplně otestovat důležité části a funkčnost všech python modulů, podle nichž jsou testy rozděleny do souborů. Sada obsahuje hlavně unit testy, kontrolující správnou funkčnost i okrajové případy (edge-cases) testovaných souborů, ale i integrační testy, zkoušející funkčnost komunikační vrstvy Flask a API.
+
+## 10.5 Inicializace výchozích souborů
+Aby byla aplikace provozuschopná i při úplně prvním spuštění bez jakýchkoli připravených dat, obsahuje modul placeholder_manager.py logiku pro automatické vytvoření výchozích souborů a hodnot konfigurace. Při každém startu serveru je volána funkce check(), která postupně ověřuje existenci nezbytných složek a souborů. Pokud složka effects/ neobsahuje žádný efekt, je automaticky vygenerován jednoduchý demonstrační efekt. Obdobně je zkontrolována složka sandbox/ a složka config/setups/ — pokud v ní chybí jakékoli rozložení LED diod, vytvoří se výchozí 2D mřížka 10×10 pixelů. Nakonec jsou ověřeny klíče v konfiguračním souboru a doplněny výchozí hodnoty pro jas, výkonový režim a gamma korekci, pokud v konfiguraci chybí. Díky tomuto mechanismu se uživatel po nainstalování okamžitě setká s funkčním prostředím bez nutnosti ruční konfigurace.
 
 # 11. Závěr a budoucí rozvoj
 
