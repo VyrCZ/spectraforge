@@ -13,6 +13,7 @@
     "log_level_warning": "警告",
     "log_level_error": "錯誤",
     "log_level_debug": "除錯",
+    "log_filter_all": "全部",
     "page_lightshows": "燈光秀",
     "page_sandbox": "沙盒",
     "sandbox_dropdown": "選擇要執行的腳本",
@@ -40,6 +41,7 @@
     "setup_instruction_click_start": "按「開始校準」啟動校準程序。",
     "setup_button_start_calibration": "開始校準",
     "setup_webcam_debug_capture": "偵錯擷取",
+    "setup_button_view_ready": "就緒",
     "setup_button_confirm": "確認",
 
     "page_effects_header": "效果",
@@ -52,11 +54,14 @@
     "upload_header": "拖放或點擊以上傳檔案！",
     "upload_description": "支援的檔案：效果 (.py)、音訊檔案 (.wav、.ogg、.mp3)、燈光秀 (.json)、燈光秀效果 (.py)、圖片 (.png、.jpg、.jpeg)、影片 (.mp4)",
 
+    "error_header": "錯誤",
+
     "settings_brightness": "亮度：",
     "settings_performance_mode": "效能模式：",
     "settings_performance_mode_low": "低",
     "settings_performance_mode_medium": "中",
     "settings_performance_mode_high": "高",
     "settings_language": "語言：",
-    "settings_enhance_colors": "增強色彩："
+    "settings_enhance_colors": "增強色彩：",
+    "settings_current_setup": "目前設定："
 }

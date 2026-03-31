@@ -13,6 +13,7 @@
     "log_level_warning": "Warning",
     "log_level_error": "Error",
     "log_level_debug": "Debug",
+    "log_filter_all": "All",
     "page_lightshows": "Lightshows",
     "page_sandbox": "Sandbox",
     "sandbox_dropdown": "Select a script to run",
@@ -52,6 +53,8 @@
 
     "upload_header": "Drag and drop or click to upload files!",
     "upload_description": "Supported files: Effects (.py), Audio files (.wav, .ogg, .mp3), Lightshows (.json), Lightshow Effects (.py), Images (.png, .jpg, .jpeg), Videos (.mp4)",
+
+    "error_header": "Error",
 
     "settings_brightness": "Brightness:",
     "settings_performance_mode": "Performance Mode:",

@@ -13,6 +13,7 @@
     "log_level_warning": "Upozornění",
     "log_level_error": "Chyba",
     "log_level_debug": "Ladění",
+    "log_filter_all": "Vše",
     "page_lightshows": "Světelné show",
     "page_sandbox": "Pískoviště",
     "sandbox_dropdown": "Vyberte skript ke spuštění",
@@ -40,6 +41,7 @@
     "setup_instruction_click_start": "Klikněte na \"Spustit kalibraci\" pro zahájení kalibrace.",
     "setup_button_start_calibration": "Spustit kalibraci",
     "setup_webcam_debug_capture": "Ladicí záznam",
+    "setup_button_view_ready": "Připraveno",
     "setup_button_confirm": "Potvrdit",
 
     "page_effects_header": "Efekty",
@@ -51,6 +53,8 @@
 
     "upload_header": "Přetáhněte sem soubory nebo klikněte pro nahrání!",
     "upload_description": "Podporované soubory: Efekty (.py), Zvukové soubory (.wav, .ogg, .mp3), Světelné show (.json), Efekty světelných show (.py), Obrázky (.png, .jpg, .jpeg), Videa (.mp4)",
+
+    "error_header": "Chyba",
 
     "settings_brightness": "Jas:",
     "settings_performance_mode": "Režim výkonu:",

@@ -13,6 +13,7 @@
     "log_level_warning": "Advarsel",
     "log_level_error": "Feil",
     "log_level_debug": "Feilsøk",
+    "log_filter_all": "Alle",
     "page_lightshows": "Lysshow",
     "page_sandbox": "Sandkasse",
     "sandbox_dropdown": "Velg et skript som skal kjøres",
@@ -40,6 +41,7 @@
     "setup_instruction_click_start": "Klikk \"Start kalibrering\" for å starte kalibreringsprosessen.",
     "setup_button_start_calibration": "Start kalibrering",
     "setup_webcam_debug_capture": "Feilsøk-opptak",
+    "setup_button_view_ready": "Klar",
     "setup_button_confirm": "Bekreft",
 
     "page_effects_header": "Effekter",
@@ -52,11 +54,14 @@
     "upload_header": "Dra og slipp eller klikk for å laste opp filer!",
     "upload_description": "Støttede filer: Effekter (.py), Lydfiler (.wav, .ogg, .mp3), Lysshow (.json), Lysshow-effekter (.py), Bilder (.png, .jpg, .jpeg), Videoer (.mp4)",
 
+    "error_header": "Feil",
+
     "settings_brightness": "Lysstyrke:",
     "settings_performance_mode": "Ytelsesmodus:",
     "settings_performance_mode_low": "Lav",
     "settings_performance_mode_medium": "Middels",
     "settings_performance_mode_high": "Høy",
     "settings_language": "Språk:",
-    "settings_enhance_colors": "Forbedre farger:"
+    "settings_enhance_colors": "Forbedre farger:",
+    "settings_current_setup": "Gjeldende oppsett:"
 }

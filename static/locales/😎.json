@@ -13,6 +13,7 @@
     "log_level_warning": "⚠️",
     "log_level_error": "❗",
     "log_level_debug": "🔍",
+    "log_filter_all": "🌐",
     "page_lightshows": "🎆🎇",
     "page_sandbox": "🧪",
     "sandbox_dropdown": "🔽🧩",
@@ -40,6 +41,7 @@
     "setup_instruction_click_start": "🖱️▶️",
     "setup_button_start_calibration": "▶️⚙️",
     "setup_webcam_debug_capture": "🐞📷",
+    "setup_button_view_ready": "👁️✔️",
     "setup_button_confirm": "✔️",
 
     "page_effects_header": "✨",
@@ -52,11 +54,14 @@
     "upload_header": "📥🔁",
     "upload_description": "📎🗂️ (Effects .py, Audio .wav/.ogg/.mp3, Lightshows .json, Lightshow Effects .py, Images .png/.jpg/.jpeg, Videos .mp4)",
 
+    "error_header": "❌",
+
     "settings_brightness": "🔆",
     "settings_performance_mode": "🚀",
     "settings_performance_mode_low": "🐢",
     "settings_performance_mode_medium": "🚶",
     "settings_performance_mode_high": "🏎️",
     "settings_language": "🌐",
-    "settings_enhance_colors": "🌈✨"
+    "settings_enhance_colors": "🌈✨",
+    "settings_current_setup": "⚙️📍"
 }
