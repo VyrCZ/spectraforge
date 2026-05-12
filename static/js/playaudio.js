@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
 socket.on('audio_ready', (data) => {
     console.log('🔥 audio_ready received');
     let storedAudioFile = sessionStorage.getItem('audioFile')
-    if (!storedAudioFile) {
+    if (!storedAudioFile || storedAudioFile === "null") {
         storedAudioFile = data.audio_file;
     }
     let audioPath = `/audio/${storedAudioFile}`;

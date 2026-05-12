@@ -11,6 +11,7 @@ One app for all your light show needs! It offers space-aware effect and music dr
 - **Music Visualisation**: Automatic music light shows alternative, shows a classic bar visualisation of the music.
 - **Canvas Mode**: Use the app as a canvas to draw your own expositions.
 - **LED simulation**: View the state of the lights without any hardware connected when testing.
+- **Image and video projection**: Fit images and videos onto the lights of any shape.
 
 ## Features for Developing 💻
 - **Sandbox mode**: Hot reloading of effects on save, making them much easier to create and test.
