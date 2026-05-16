@@ -12,6 +12,7 @@ from modules.log_manager import Log
 from modules.led_renderer import DummyRenderer
 import modules.caching as cache
 import traceback
+import ast
 
 class EffectsEngine(Engine):
     """
@@ -77,15 +78,88 @@ class EffectsEngine(Engine):
                 return name
         return None
     
+    class StaticAnalysis(ast.NodeVisitor):
+        """Performs static analysis on effect scripts before importing them."""
+
+        def __init__(self):
+            self.allowed_modules = ["math", "numpy", "random", "time", "colorsys", "modules.mathutils", "modules.effect", "modules.led_renderer", "modules.log_manager"]
+
+        class DisallowedExecution(Exception):
+            """
+            Exception raised when an effect tries to execute disallowed 
+            """
+            def __init__(self, disallowed_call):
+                super().__init__(f"Using '{disallowed_call}' is not allowed in effect scripts for security reasons, sorry!")
+
+        def perform_analysis(self, code, filename="<effect>"):
+            tree = ast.parse(code, filename=filename)
+            self.visit(tree)
+
+        def is_effect_class(self, node):
+            if not isinstance(node, ast.ClassDef):
+                return False
+
+            for base in node.bases:
+                if isinstance(base, ast.Name) and base.id == "LightEffect":
+                    return True
+                if isinstance(base, ast.Attribute) and base.attr == "LightEffect":
+                    return True
+            return False
+
+        def visit_Import(self, node):
+            # Check every module they are trying to import (e.g., import math, os)
+            for alias in node.names:
+                if alias.name not in self.allowed_modules:
+                    raise self.DisallowedExecution(alias.name)
+            self.generic_visit(node)
+
+        def visit_ImportFrom(self, node):
+            # Check 'from X import Y' style imports
+            if node.module not in self.allowed_modules:
+                raise self.DisallowedExecution(node.module)
+            self.generic_visit(node)
+
+        def visit_Call(self, node):
+            # Still block the really dangerous built-in functions
+            if isinstance(node.func, ast.Name) and node.func.id in ["exec", "eval", "open", "__import__"]:
+                raise self.DisallowedExecution(node.func.id)
+            self.generic_visit(node)
+
+        def visit_Attribute(self, node):
+            # Block access to any "dunder" (double underscore) attributes.
+            # This prevents attackers from crawling the inheritance tree 
+            # (e.g., ().__class__.__bases__[0].__subclasses__())
+            if node.attr.startswith('__') and node.attr != "__init__":
+                raise self.DisallowedExecution(f"hidden attribute '{node.attr}'")
+            self.generic_visit(node)
+
+        def visit_Name(self, node):
+            # Block direct access to the built-ins dictionary.
+            # e.g. __builtins__['eval']('print("This is malicious code execution!")')
+            if node.id == "__builtins__":
+                raise self.DisallowedExecution("__builtins__")
+            self.generic_visit(node)
+
+    def validate_effect_source(self, code, filename="<effect>") -> None:
+        """Validate source code before it is imported."""
+        analyzer = self.StaticAnalysis()
+        analyzer.perform_analysis(code, filename)
+
+    def get_effect_class_names(self, code):
+        """Return the names of classes that appear to inherit from `LightEffect`."""
+        analyzer = self.StaticAnalysis()
+        tree = ast.parse(code)
+        return [node.name for node in tree.body if analyzer.is_effect_class(node)]
+    
     def validate_effect(self, cls) -> Exception | None:
         """Validate if the class doesn't throw any immediate exceptions.
-        
         Returns None if valid, otherwise returns the exception."""
-        dummy_renderer = DummyRenderer(self.setup)
+        # check for mandatory attributes
         if not hasattr(cls, "update") or not callable(cls.update):
             return TypeError(f"Effect class {cls.__name__} must implement an 'update' method.")
         if not hasattr(cls, "__init__") or not callable(cls.__init__):
             return TypeError(f"Effect class {cls.__name__} must have an '__init__' method.")
+        dummy_renderer = DummyRenderer(self.setup)
         try:
             effect_instance = cls(dummy_renderer, self.coords)
             effect_instance.update()  # Call update to check for runtime errors
@@ -100,19 +174,35 @@ class EffectsEngine(Engine):
         Log.info("EffectsEngine", "Loading and validating effects...")
         self.effects = {}
         cached_hashes = []
+        cached_hashes_set = set()
         # get hashed of previously cached validated effects
         cache_data = cache.get_cache_by_name("effects_engine", "valid_effects")
         if cache_data:
             cached_hashes = list(json.loads(cache_data))
+            cached_hashes_set = set(cached_hashes)
         for filename in os.listdir(folder):
             if filename.endswith(".py") and not filename.startswith("__"):
+                file_path = os.path.join(folder, filename)
                 module_name = filename[:-3]
-                module = importlib.import_module(f"{folder}.{module_name}")
-                for attr in dir(module):
-                    cls = getattr(module, attr)
-                    if hasattr(module, "LightEffect") and isinstance(cls, type) and issubclass(cls, module.LightEffect) and cls is not module.LightEffect:
+                try:
+                    with open(file_path, "r", encoding="utf-8") as file_handle:
+                        source = file_handle.read()
+
+                    self.validate_effect_source(source, file_path)
+                    effect_class_names = self.get_effect_class_names(source)
+                    if not effect_class_names:
+                        continue
+
+                    module = importlib.import_module(f"{folder}.{module_name}")
+                    for class_name in effect_class_names:
+                        cls = getattr(module, class_name, None)
+                        if not isinstance(cls, type):
+                            continue
+                        if not hasattr(module, "LightEffect") or not issubclass(cls, module.LightEffect) or cls is module.LightEffect:
+                            continue
+
                         module_hash = cache.hash_module(cls)
-                        if module_hash in cached_hashes:
+                        if module_hash in cached_hashes_set:
                             self.effects[module_name] = cls
                         else:
                             Log.debug("EffectsEngine", f"Effect {module_name} isn't cached, validating...")
@@ -120,8 +210,11 @@ class EffectsEngine(Engine):
                             if thrown_exception is None:
                                 self.effects[module_name] = cls
                                 cached_hashes.append(module_hash)
+                                cached_hashes_set.add(module_hash)
                             else:
                                 Log.warn("EffectsEngine", f"Effect {module_name} is invalid. (Traceback above ^)")
+                except Exception as e:
+                    Log.warn("EffectsEngine", f"Skipping effect {module_name}: {e}")
         # save the cache
         cache.set_cache_by_name("effects_engine", "valid_effects", json.dumps(cached_hashes))
             

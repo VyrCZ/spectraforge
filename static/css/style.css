@@ -82,6 +82,8 @@ div h1{
     background-color: #1d1d1d;
     display: none; /* Initially hidden */
     z-index: 10; /* Ensure it is above other content */
+    max-height: 100dvh; /* Caps the height at 100% of the dynamic viewport */
+    overflow-y: auto;   /* Adds a scrollbar ONLY if the content goes offscreen */
 }
 
 #menu_header {
